@@ -1,0 +1,198 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\NTAssassin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTConst.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTStruct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTACon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTACtl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTADlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAFile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAGDI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAI18N.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAImage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAIO.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAKNS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAMath.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAMem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTANT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAPE.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAProc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTARProc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAStr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTATime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTASys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTADbg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAHijack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NTA_NAC_Output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTADlg_ValueEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTADlg_RectEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTADPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="NTABitmap.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTACon.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTACtl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADlg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAFile.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAGDI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAI18N.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAImage.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAIO.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAKNS.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAList.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAMath.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAMem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTANT.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAPE.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAProc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTARProc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAStr.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTATime.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAUI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTASys.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAHijack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTA_NAC_Output.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADlg_ValueEditor.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAData.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADlg_RectEditor.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADPI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

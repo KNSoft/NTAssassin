@@ -1,0 +1,47 @@
+{
+    "Input": {
+        "NTAHeader": "include\\NTAssassin.h"
+    },
+    "Loaders": {
+        "SymExtract": [
+            {
+                "File": "..\\NativeASM\\Hijack_x86\\Release\\HijackC.obj",
+                "Symbols": [
+                    {
+                        "Name": "Hijack_LoadProcAddr_InjectThread",
+                        "Export": "Hijack_LoadProcAddr_InjectThread_x86"
+                    }
+                ]
+            },
+            {
+                "File": "..\\NativeASM\\Hijack_x64\\Release\\HijackC.obj",
+                "Symbols": [
+                    {
+                        "Name": "Hijack_LoadProcAddr_InjectThread",
+                        "Export": "Hijack_LoadProcAddr_InjectThread_x64"
+                    }
+                ]
+            },
+            {
+                "File": "..\\NativeASM\\Hijack_x86\\Release\\HijackASM_x86.obj",
+                "Symbols": [
+                    {
+                        "Name": "Hijack_CallProc_InjectThread_x86"
+                    }
+                ]
+            },
+            {
+                "File": "..\\NativeASM\\Hijack_x64\\Release\\HijackASM_x64.obj",
+                "Symbols": [
+                    {
+                        "Name": "Hijack_CallProc_InjectThread_x64"
+                    }
+                ]
+            }
+        ]
+    },
+    "Output": {
+        "HeaderFile": "NTA_NAC_Output.h",
+        "SourceFile": "NTA_NAC_Output.c"
+    }
+}

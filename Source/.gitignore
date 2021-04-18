@@ -1,0 +1,17 @@
+.vs
+/Win32
+/x64
+/Example/Win32
+/Example/x64
+/NativeASM/Hijack_x64/Debug
+/NativeASM/Hijack_x64/Release
+/NativeASM/Hijack_x86/Debug
+/NativeASM/Hijack_x86/Release
+/NTAssassin/Win32
+/NTAssassin/x64
+/UnitTest/Win32
+/UnitTest/x64
+/NAC/bin
+/NAC/obj
+*.user
+*.aps

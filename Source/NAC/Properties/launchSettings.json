@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "NAC": {
+      "commandName": "Project",
+      "commandLineArgs": "E:\\KNSoft\\NTAssassin\\NTAssassin E:\\KNSoft\\NTAssassin\\NTAssassin\\Win32\\Release",
+      "nativeDebugging": false
+    }
+  }
+}
