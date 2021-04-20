@@ -120,3 +120,32 @@ VOID NTAPI Ctl_InitComboBoxEx(HWND ComboBox, PCTL_COMBOBOXCTL_ITEM Items, UINT I
             SendMessage(ComboBox, CB_SETITEMDATA, i, Items[u].Param);
     }
 }
+
+HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param) {
+    UINT        uDepth = 0;
+    HTREEITEM   hItem, hItemTemp;
+    hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_ROOT, 0);
+    do {
+        if (!TreeItemEnumProc(TreeView, hItem, uDepth, Param))
+            return hItem;
+        hItemTemp = hItem;
+        hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_CHILD, (LPARAM)hItemTemp);
+        if (hItem) {
+            uDepth++;
+            continue;
+        }
+        hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_NEXT, (LPARAM)hItemTemp);
+        if (hItem)
+            continue;
+        while (--uDepth) {
+            hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_PARENT, (LPARAM)hItemTemp);
+            hItemTemp = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_NEXT, (LPARAM)hItem);
+            if (hItemTemp) {
+                hItem = hItemTemp;
+                break;
+            } else
+                hItemTemp = hItem;
+        }
+    } while (uDepth);
+    return NULL;
+}
