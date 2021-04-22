@@ -66,11 +66,14 @@ LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM 
         pstRef->dwNewDPIY = HIWORD(wParam);
         UI_SetWindowRect(hDlg, (PRECT)lParam);
         // Adjust font
+        HFONT   hFont;
         DPI_Scale(&pstRef->stFont.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
-        if (pstRef->hFont)
-            DeleteObject(pstRef->hFont);
-        pstRef->hFont = CreateFontIndirectExW(&pstRef->stFont);
-        SendMessage(hDlg, WM_SETFONT, (WPARAM)pstRef->hFont, FALSE);
+        hFont = CreateFontIndirectExW(&pstRef->stFont);
+        if (hFont) {
+            if (pstRef->hFont)
+                DeleteObject(pstRef->hFont);
+            pstRef->hFont = hFont;
+        }
         // Apply to child windows
         UI_EnumChildWindows(hDlg, DPI_Subclass_DlgProc_ApplyToChild, dwRefData);
         UI_Redraw(hDlg);
