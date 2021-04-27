@@ -125,7 +125,7 @@ Label_0:
     return lStatus;
 }
 
-NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR ProcName, PVOID *ProcAddr) {
+NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR ProcName, PVOID *ProcAddr, DWORD Timeout) {
     NTSTATUS                lStatus;
     BYTE                    Buffer[HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE];
     LPVOID                  lpParam, *lpProc;
@@ -143,7 +143,7 @@ NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR Pro
     stThread.ProcSize64 = sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x64);
     stThread.Param = lpParam;
     stThread.ParamSize = *(LPUINT)lpParam;
-    lStatus = Hijack_CreateThread(ProcessHandle, &stThread, INFINITE);
+    lStatus = Hijack_CreateThread(ProcessHandle, &stThread, Timeout);
     if (NT_SUCCESS(lStatus)) {
         lStatus = stThread.ExitCode;
         if (NT_SUCCESS(lStatus))
