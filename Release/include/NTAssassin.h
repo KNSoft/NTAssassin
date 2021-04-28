@@ -9,7 +9,11 @@
 #define NTA_API DECLSPEC_IMPORT
 #endif
 #else
+#if __cplusplus
+#define NTA_API EXTERN_C
+#else
 #define NTA_API
+#endif
 #endif
 
 // NTAssassin Options
@@ -87,7 +91,6 @@
 #include <CommCtrl.h>
 #include <Dbghelp.h>
 #include <Shlwapi.h>
-#include <XmlLite.h>
 #include <Shlobj.h>
 #include <dwmapi.h>
 
@@ -97,7 +100,6 @@
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(lib, "DbgHelp.Lib")
 #pragma comment(lib, "ShLwApi.Lib")
-#pragma comment(lib, "XmlLite.lib")
 #pragma comment(lib, "Dwmapi.lib")
 
 // Always use ComCtl32.dll V6.0
@@ -139,6 +141,13 @@
 
 // Current system locale
 #define CURRENT_LOCALE ((LCID)NT_GetTEBMember(CurrentLocale))
+
+// Clear high 32-bit of HWND
+#if _WIN64
+#define PURGE_HWND(hWnd) ((HWND)((DWORD_PTR)(hWnd) & 0xFFFFFFFF))
+#else
+#define PURGE_HWND(hWnd) (hWnd)
+#endif
 
 // Gets equality of two value after masked
 #define IS_EQUAL_MASKED(val1, val2, mask) (!(((val1) ^ (val2)) & (mask)))
