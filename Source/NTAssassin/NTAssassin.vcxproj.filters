@@ -111,6 +111,9 @@
     <ClInclude Include="include\NTADPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NTACtl_ColorPicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NTABitmap.c">
@@ -192,6 +195,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTADPI.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTACtl_ColorPicker.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -206,6 +206,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\NTACtl_ColorPicker.h" />
     <ClInclude Include="include\NTAData.h" />
     <ClInclude Include="include\NTADbg.h" />
     <ClInclude Include="include\NTADlg_RectEditor.h" />
@@ -240,6 +241,7 @@
     <ClInclude Include="NTA_NAC_Output.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="NTACtl_ColorPicker.c" />
     <ClCompile Include="NTADPI.c" />
     <ClCompile Include="NTABitmap.c" />
     <ClCompile Include="NTACon.c" />

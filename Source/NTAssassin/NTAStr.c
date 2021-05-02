@@ -233,6 +233,25 @@ BOOL NTAPI Str_16ToUDecExW(USHORT uNum, LPWSTR lpszOutput, UINT cchMax) {
     return TRUE;
 }
 
+BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR HexRGB, UINT MaxCh) {
+    PWSTR   psz;
+    WCHAR   ch;
+    UINT    uCh = 6;
+    DWORD   dwColor = Color;
+    if (MaxCh < HEXRGB_CCH)
+        return FALSE;
+    psz = HexRGB;
+    *psz++ = '#';
+    psz[uCh] = '\0';
+    do {
+        ch = (WCHAR)(dwColor & 0xF);
+        ch += ch <= 9 ? '0' : ('A' - 0xA);
+        psz[--uCh] = ch;
+        dwColor >>= 4;
+    } while (uCh);
+    return TRUE;
+}
+
 /*
     Unicode             | UTF-8
     ---------------------------------------------------------
