@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // NTAssassin Exports, both of static and dynamic library targets are supported
 // Static library target is recommended
 #ifdef _WINDLL
@@ -92,7 +96,6 @@
 #include <Dbghelp.h>
 #include <Shlwapi.h>
 #include <Shlobj.h>
-#include <dwmapi.h>
 
 // NTAssassin dependencies
 #pragma comment(lib, "ntdll.lib")
@@ -100,7 +103,6 @@
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(lib, "DbgHelp.Lib")
 #pragma comment(lib, "ShLwApi.Lib")
-#pragma comment(lib, "Dwmapi.lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -229,3 +231,7 @@
 #include "NTASys.h"
 #include "NTAHijack.h"
 #include "NTADPI.h"
+
+#ifdef __cplusplus
+}
+#endif

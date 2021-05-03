@@ -79,14 +79,14 @@ NTSTATUS NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer, SIZE_T Buff
     if (Buffer) {
         // Write BITMAPFILEHEADER and BITMAPINFOHEADER
         pBuff = Buffer;
-        RtlCopyMemory(pBuff, &bmfh, sizeof(BITMAPFILEHEADER));
+        RtlMoveMemory(pBuff, &bmfh, sizeof(BITMAPFILEHEADER));
         pBuff = ADD_OFFSET(pBuff, sizeof(BITMAPFILEHEADER), BYTE);
         lpbmi = (LPBITMAPINFO)pBuff;
-        RtlCopyMemory(pBuff, &bmih, sizeof(BITMAPINFOHEADER));
+        RtlMoveMemory(pBuff, &bmih, sizeof(BITMAPINFOHEADER));
         pBuff = ADD_OFFSET(pBuff, sizeof(BITMAPINFOHEADER), BYTE);
         // Write RGBQUADs
         if (dwClrItem) {
-            RtlCopyMemory(pBuff, lpColor, dwClrSize);
+            RtlMoveMemory(pBuff, lpColor, dwClrSize);
             pBuff = ADD_OFFSET(pBuff, dwClrSize, BYTE);
             Mem_HeapFree(lpColor);
         }

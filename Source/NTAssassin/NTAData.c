@@ -20,7 +20,7 @@ PVOID WINAPIV Data_StructCombineEx(UINT uGroupCount, UINT uSize, ...) {
             lpSrc = va_arg(args, PVOID);
             uStructCount = va_arg(args, UINT);
             if (lpSrc) {
-                RtlCopyMemory(lpDst, lpSrc, uStructCount * (SIZE_T)uSize);
+                RtlMoveMemory(lpDst, lpSrc, uStructCount * (SIZE_T)uSize);
                 lpDst = ADD_OFFSET(lpDst, uStructCount * (SIZE_T)uSize, VOID);
             }
         }
