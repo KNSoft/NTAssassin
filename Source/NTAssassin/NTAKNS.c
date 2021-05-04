@@ -219,10 +219,10 @@ INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam, LPAR
         UI_EndPaint(hDlg, &pt);
     } else if (uMsg == WM_MOUSEMOVE) {
         POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        SetCursor(PtInRect(&rcHomePage, pt) ? hCurPointer : hCurArrow);
+        SetCursor(UI_PtInRect(&rcHomePage, pt) ? hCurPointer : hCurArrow);
     } else if (uMsg == WM_LBUTTONUP) {
         POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-        if (PtInRect(&rcHomePage, pt))
+        if (UI_PtInRect(&rcHomePage, pt))
             KNS_OpenHomePage();
         else {
             EndDialog(hDlg, FALSE);

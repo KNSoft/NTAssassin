@@ -68,21 +68,54 @@ typedef struct _RPROC_TRANSLATEADDRESS {
     UINT    CchOutput;
 } RPROC_TRANSLATEADDRESS, * PRPROC_TRANSLATEADDRESS;
 
-BOOL CALLBACK RProc_TranslateAddress_EnumloadedModulesCallback(PCWSTR ModuleName, DWORD64 ModuleBase, ULONG ModuleSize, PVOID UserContext) {
-    PRPROC_TRANSLATEADDRESS lpst = (PRPROC_TRANSLATEADDRESS)UserContext;
-    if ((DWORD_PTR)lpst->Address >= ModuleBase && (DWORD_PTR)lpst->Address < ModuleBase + ModuleSize) {
-        PCWSTR  lpStr = ModuleName;
-        while (*lpStr++ != '\0');
-        while (*--lpStr != '\\' && lpStr >= ModuleName);
-        lpst->CchOutput = wnsprintfW(lpst->String, lpst->Cch, L"%s!%p", lpStr + 1, lpst->Address);
+NTSTATUS NTAPI RProc_EnumDlls(HANDLE ProcessHandle, RPROC_DLLENUMPROC DllEnumProc, LPARAM Param) {
+    NTSTATUS                    lStatus;
+    PROCESS_BASIC_INFORMATION   stProcInfo;
+    PPEB_LDR_DATA               pLdr;
+    LDR_DATA_TABLE_ENTRY        *pHead, *pNode, stCurrentEntry;
+    stProcInfo.PebBaseAddress = NULL;
+    lStatus = NtQueryInformationProcess(ProcessHandle, ProcessBasicInformation, &stProcInfo, sizeof(stProcInfo), NULL);
+    if (!NT_SUCCESS(lStatus) || !stProcInfo.PebBaseAddress)
+        return lStatus;
+    lStatus = NtReadVirtualMemory(ProcessHandle, &stProcInfo.PebBaseAddress->Ldr, &pLdr, sizeof(pLdr), NULL);
+    if (!NT_SUCCESS(lStatus))
+        return lStatus;
+    lStatus = NtReadVirtualMemory(ProcessHandle, &pLdr->InLoadOrderModuleList.Flink, &pHead, sizeof(pHead), NULL);
+    if (!NT_SUCCESS(lStatus))
+        return lStatus;
+    pNode = pHead;
+    do {
+        lStatus = NtReadVirtualMemory(ProcessHandle, pNode, &stCurrentEntry, sizeof(stCurrentEntry), NULL);
+        if (!NT_SUCCESS(lStatus))
+            return lStatus;
+        if (!DllEnumProc(ProcessHandle, &stCurrentEntry, Param))
+            break;
+        pNode = CONTAINING_RECORD(stCurrentEntry.InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
+    } while (pNode != pHead);
+    return STATUS_SUCCESS;
+}
+
+BOOL CALLBACK RProc_TranslateAddress_EnumDllProc(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPARAM Param) {
+    PRPROC_TRANSLATEADDRESS lpst = (PRPROC_TRANSLATEADDRESS)Param;
+    WCHAR                   szDllName[MAX_PATH];
+    SIZE_T                  sNameBytes, sReadBytes;
+    if ((DWORD_PTR)lpst->Address >= (DWORD_PTR)DllLdrEntry->DllBase &&
+        (DWORD_PTR)lpst->Address < (DWORD_PTR)DllLdrEntry->DllBase + (DWORD_PTR)DllLdrEntry->SizeOfImage) {
+        sNameBytes = DllLdrEntry->BaseDllName.Length;
+        if (sNameBytes >= sizeof(szDllName))
+            sNameBytes = sizeof(szDllName) - sizeof(WCHAR);
+        if (NT_SUCCESS(NtReadVirtualMemory(ProcessHandle, DllLdrEntry->BaseDllName.Buffer, szDllName, sNameBytes, &sReadBytes))) {
+            szDllName[sReadBytes / sizeof(WCHAR)] = '\0';
+            lpst->CchOutput = wnsprintfW(lpst->String, lpst->Cch, L"%s!%p", szDllName, lpst->Address);
+        }
         return FALSE;
     } else
         return TRUE;
 }
 
 UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, PVOID Address, PWSTR OutputString, UINT OutputStringCch) {
-    RPROC_TRANSLATEADDRESS  st = { Address, OutputString, OutputStringCch, 0 };
-    return EnumerateLoadedModulesExW(ProcessHandle, RProc_TranslateAddress_EnumloadedModulesCallback, &st) ?
+    RPROC_TRANSLATEADDRESS      st = { Address, OutputString, OutputStringCch, 0 };
+    return NT_SUCCESS(RProc_EnumDlls(ProcessHandle, RProc_TranslateAddress_EnumDllProc, (LPARAM)&st)) ?
         (st.CchOutput ? st.CchOutput : wnsprintfW(OutputString, OutputStringCch, L"%p", Address)) :
         0;
 }

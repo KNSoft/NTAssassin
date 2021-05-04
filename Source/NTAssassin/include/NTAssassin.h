@@ -52,7 +52,6 @@ extern "C" {
 
 #define OEMRESOURCE
 #define STRICT_TYPED_ITEMIDS
-#define DBGHELP_TRANSLATE_TCHAR
 
 // Replaces definations to redefine them
 
@@ -93,7 +92,6 @@ extern "C" {
 #include <WindowsX.h>
 #include <Uxtheme.h>
 #include <CommCtrl.h>
-#include <Dbghelp.h>
 #include <Shlwapi.h>
 #include <Shlobj.h>
 
@@ -101,7 +99,6 @@ extern "C" {
 #pragma comment(lib, "ntdll.lib")
 #pragma comment(lib, "UxTheme.lib")
 #pragma comment(lib, "ComCtl32.Lib")
-#pragma comment(lib, "DbgHelp.Lib")
 #pragma comment(lib, "ShLwApi.Lib")
 
 // Always use ComCtl32.dll V6.0

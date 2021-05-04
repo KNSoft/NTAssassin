@@ -1,15 +1,15 @@
 #include "NTAssassin.h"
 
 PLDR_DATA_TABLE_ENTRY NTAPI Proc_EnumDlls(PROC_DLLENUMPROC DllEnumProc, LPARAM Param) {
-    PLDR_DATA_TABLE_ENTRY head, node;
-    head = CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
-    node = head;
-    while (DllEnumProc(node, Param)) {
-        node = CONTAINING_RECORD(node->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
-        if (node == head)
+    PLDR_DATA_TABLE_ENTRY pHead, pNode;
+    pHead = CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
+    pNode = pHead;
+    while (DllEnumProc(pNode, Param)) {
+        pNode = CONTAINING_RECORD(pNode->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
+        if (pNode == pHead)
             return NULL;
     }
-    return node;
+    return pNode;
 }
 
 BOOL CALLBACK Proc_GetDllByName_EnumDllProc(PLDR_DATA_TABLE_ENTRY lpstDll, LPARAM lParam) {
