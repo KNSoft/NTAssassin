@@ -1,8 +1,4 @@
-#include "NTAssassin.h"
-
-HMODULE hUser32Dll = NULL;
-HMODULE hDwmapiDll = NULL;
-HMODULE hUxThemeDll = NULL;
+#include "NTAssassin\NTAssassin.h"
 
 HDC NTAPI UI_BeginPaint(HWND Window, PUI_WINDBPAINT Paint) {
     Paint->DC = CreateCompatibleDC(BeginPaint(Window, &Paint->Paint));
@@ -19,12 +15,24 @@ VOID NTAPI UI_EndPaint(HWND Window, PUI_WINDBPAINT Paint) {
     EndPaint(Window, &Paint->Paint);
 }
 
+PFNDwmGetWindowAttribute pfnDwmGetWindowAttribute = NULL;
+
+BOOL NTAPI UI_GetWindowRect(HWND Window, PRECT Rect) {
+    if (NT_GetKUSD()->NtMajorVersion >= 6 ) {
+        if (!pfnDwmGetWindowAttribute)
+            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
+        if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, Rect, sizeof(*Rect)) == S_OK)
+            return TRUE;
+    }
+    return GetWindowRect(Window, Rect);
+}
+
 BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, PRECT Rect) {
     POINT   pt;
     HANDLE  hParent;
     RECT    rcWnd;
     BOOL    bSucc;
-    bSucc = GetWindowRect(Window, &rcWnd);
+    bSucc = UI_GetWindowRect(Window, &rcWnd);
     if (bSucc) {
         pt.x = rcWnd.left;
         pt.y = rcWnd.top;
@@ -51,13 +59,23 @@ PFNDwmIsCompositionEnabled pfnDwmIsCompositionEnabled = NULL;
 BOOL NTAPI UI_IsDWMComposited() {
     BOOL    bEnabled;
     if (!pfnDwmIsCompositionEnabled) {
-        if (!hDwmapiDll)
-            hDwmapiDll = Proc_LoadDll(L"Dwmapi.dll", FALSE);
-        pfnDwmIsCompositionEnabled = (PFNDwmIsCompositionEnabled)Proc_GetProcAddr(hDwmapiDll, "DwmIsCompositionEnabled");
+        pfnDwmIsCompositionEnabled = (PFNDwmIsCompositionEnabled)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmIsCompositionEnabled");
     }
     return pfnDwmIsCompositionEnabled ?
         (SUCCEEDED(pfnDwmIsCompositionEnabled(&bEnabled)) ? bEnabled : FALSE) :
         FALSE;
+}
+
+DWORD NTAPI UI_GetWindowCloackedState(HWND Window) {
+    DWORD   dwCloackedState;
+    if (NT_GetKUSD()->NtMajorVersion > 6 ||
+        (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 1) {
+        if (!pfnDwmGetWindowAttribute)
+            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
+        if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_CLOAKED, &dwCloackedState, sizeof(dwCloackedState)) == S_OK)
+            return dwCloackedState;
+    }
+    return 0;
 }
 
 PFNGetWindowDisplayAffinity pfnGetWindowDisplayAffinity = NULL;
@@ -66,9 +84,7 @@ BOOL NTAPI UI_GetWindowDisplayAffinity(HWND Window, PDWORD Affinity) {
     if (NT_GetKUSD()->NtMajorVersion > 6 ||
         (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 0) {
         if (!pfnGetWindowDisplayAffinity) {
-            if (!hUser32Dll)
-                hUser32Dll = Proc_LoadDll(L"User32.dll", FALSE);
-            pfnGetWindowDisplayAffinity = (PFNGetWindowDisplayAffinity)Proc_GetProcAddr(hUser32Dll, "GetWindowDisplayAffinity");
+            pfnGetWindowDisplayAffinity = (PFNGetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUser32), "GetWindowDisplayAffinity");
             if (!pfnGetWindowDisplayAffinity)
                 return FALSE;
         }
@@ -82,11 +98,8 @@ PFNSetWindowDisplayAffinity pfnSetWindowDisplayAffinity = NULL;
 BOOL NTAPI UI_SetWindowDisplayAffinity(HWND Window, DWORD Affinity) {
     if (NT_GetKUSD()->NtMajorVersion > 6 ||
         (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 0) {
-        if (!pfnSetWindowDisplayAffinity) {
-            if (!hUser32Dll)
-                hUser32Dll = Proc_LoadDll(L"User32.dll", FALSE);
-            pfnSetWindowDisplayAffinity = (PFNSetWindowDisplayAffinity)Proc_GetProcAddr(hUser32Dll, "SetWindowDisplayAffinity");
-        }
+        if (!pfnSetWindowDisplayAffinity)
+            pfnSetWindowDisplayAffinity = (PFNSetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUser32), "SetWindowDisplayAffinity");
         return pfnSetWindowDisplayAffinity ? pfnSetWindowDisplayAffinity(Window, Affinity) : FALSE;
     }
     return FALSE;
@@ -96,11 +109,8 @@ PFNSetWindowTheme pfnSetWindowTheme = NULL;
 
 BOOL NTAPI UI_SetTheme(HWND Window) {
     if (NT_GetKUSD()->NtMajorVersion >= 6) {
-        if (!pfnSetWindowTheme) {
-            if (!hUxThemeDll)
-                hUxThemeDll = Proc_LoadDll(L"UxTheme.dll", FALSE);
-            pfnSetWindowTheme = (PFNSetWindowTheme)Proc_GetProcAddr(hUxThemeDll, "SetWindowTheme");
-        }
+        if (!pfnSetWindowTheme)
+            pfnSetWindowTheme = (PFNSetWindowTheme)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUxTheme), "SetWindowTheme");
         return pfnSetWindowTheme ? pfnSetWindowTheme(Window, L"Explorer", NULL) == S_OK : FALSE;
     }
     return FALSE;
@@ -231,7 +241,7 @@ DWORD NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR R
     DWORD       dwError;
     __try {
         NT_ClearLastError();
-        lResult = ClassLong ? (LONG_PTR)GetClassLongPtrW(Window, Index) : GetWindowLongPtrW(Window, Index);
+        lResult = ClassLong ? (LONG_PTR)GetClassLongPtr(Window, Index) : GetWindowLongPtr(Window, Index);
         dwError = lResult ? ERROR_SUCCESS : NT_GetLastError();
     } __except (NT_SEH_NopHandler(NULL)) {
         lResult = 0;
@@ -240,3 +250,28 @@ DWORD NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR R
     *Result = lResult;
     return dwError;
 }
+
+BOOL NTAPI UI_MessageLoop(HWND Window) {
+    BOOL    bRet;
+    MSG     stMsg;
+    while (TRUE) {
+        bRet = GetMessage(&stMsg, Window, 0, 0);
+        if (bRet != 0 && bRet != -1) {
+            TranslateMessage(&stMsg);
+            DispatchMessage(&stMsg);
+        } else
+            return bRet == 0;
+    }
+}
+
+VOID NTAPI UI_GetScreenPos(PPOINT Point, PSIZE Size) {
+    if (Point) {
+        Point->x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        Point->y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    }
+    if (Size) {
+        Size->cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+        Size->cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    }
+}
+

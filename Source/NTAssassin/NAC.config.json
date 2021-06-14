@@ -1,6 +1,6 @@
 {
     "Input": {
-        "NTAHeader": "include\\NTAssassin.h"
+        "NTAHeader": "include\\NTAssassin\\NTAssassin.h"
     },
     "Loaders": {
         "SymExtract": [

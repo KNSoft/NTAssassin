@@ -1,35 +1,4 @@
-#include "NTAssassin.h"
-
-VOID NTAPI DPI_FromWindow(HWND Window, PUINT DPIX, PUINT DPIY) {
-    HDC     hDC = GetDC(Window);
-    if (DPIX)
-        *DPIX = GetDeviceCaps(hDC, LOGPIXELSX);
-    if (DPIY)
-        *DPIY = GetDeviceCaps(hDC, LOGPIXELSY);
-    ReleaseDC(Window, hDC);
-}
-
-PFNIsProcessDPIAware pIsProcessDPIAware = NULL;
-
-BOOL NTAPI DPI_IsAware() {
-    if (NT_GetKUSD()->NtMajorVersion >= 6) {
-        if (!pIsProcessDPIAware)
-            pIsProcessDPIAware = (PFNIsProcessDPIAware)Proc_LoadProcAddr(L"User32.dll", "IsProcessDPIAware");
-        return pIsProcessDPIAware ? pIsProcessDPIAware() : FALSE;
-    } else
-        return FALSE;
-}
-
-VOID NTAPI DPI_Scale(PINT ValuePointer, UINT OldDPI, UINT NewDPI) {
-    *ValuePointer = Math_RoundInt(*ValuePointer * ((FLOAT)NewDPI / OldDPI));
-}
-
-VOID NTAPI DPI_ScaleRect(PRECT Rect, UINT OldDPIX, UINT NewDPIX, UINT OldDPIY, UINT NewDPIY) {
-    DPI_Scale(&Rect->left, OldDPIX, NewDPIX);
-    DPI_Scale(&Rect->right, OldDPIX, NewDPIX);
-    DPI_Scale(&Rect->top, OldDPIY, NewDPIY);
-    DPI_Scale(&Rect->bottom, OldDPIY, NewDPIY);
-}
+#include "NTAssassin\NTAssassin.h"
 
 typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
     DWORD               dwNewDPIX;
@@ -39,6 +8,51 @@ typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
     ENUMLOGFONTEXDVW    stFont;
     HFONT               hFont;
 } DPI_SETAUTOADJUSTSUBCLASS_REF, * PDPI_SETAUTOADJUSTSUBCLASS_REF;
+
+PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
+
+BOOL NTAPI DPI_FromWindow(HWND Window, PUINT DPIX, PUINT DPIY) {
+    PKUSER_SHARED_DATA  pKUSD = NT_GetKUSD();
+    if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3)) {
+        if (!pfnGetDpiForMonitor)
+            pfnGetDpiForMonitor = (PFNGetDpiForMonitor)Proc_LoadProcAddr(L"Shcore.dll", "GetDpiForMonitor");
+        if (pfnGetDpiForMonitor) {
+            HMONITOR hMon = MonitorFromWindow(Window, MONITOR_DEFAULTTONULL);
+            if (hMon && pfnGetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, DPIX, DPIY) == S_OK)
+                return TRUE;
+        }
+    }
+    HDC hDC;
+    hDC = GetDC(Window);
+    if (DPIX)
+        *DPIX = GetDeviceCaps(hDC, LOGPIXELSX);
+    if (DPIY)
+        *DPIY = GetDeviceCaps(hDC, LOGPIXELSY);
+    ReleaseDC(Window, hDC);
+    return FALSE;
+}
+
+PFNIsProcessDPIAware pfnIsProcessDPIAware = NULL;
+
+BOOL NTAPI DPI_IsAware() {
+    if (NT_GetKUSD()->NtMajorVersion >= 6) {
+        if (!pfnIsProcessDPIAware)
+            pfnIsProcessDPIAware = (PFNIsProcessDPIAware)Proc_LoadProcAddr(L"User32.dll", "IsProcessDPIAware");
+        return pfnIsProcessDPIAware ? pfnIsProcessDPIAware() : FALSE;
+    } else
+        return FALSE;
+}
+
+VOID NTAPI DPI_Scale(PINT Value, UINT OldDPI, UINT NewDPI) {
+    *Value = Math_RoundInt(*Value * ((FLOAT)NewDPI / OldDPI));
+}
+
+VOID NTAPI DPI_ScaleRect(PRECT Rect, UINT OldDPIX, UINT NewDPIX, UINT OldDPIY, UINT NewDPIY) {
+    DPI_Scale(&Rect->left, OldDPIX, NewDPIX);
+    DPI_Scale(&Rect->right, OldDPIX, NewDPIX);
+    DPI_Scale(&Rect->top, OldDPIY, NewDPIY);
+    DPI_Scale(&Rect->bottom, OldDPIY, NewDPIY);
+}
 
 BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
     PDPI_SETAUTOADJUSTSUBCLASS_REF  pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)lParam;
@@ -109,7 +123,7 @@ BOOL NTAPI DPI_SetAutoAdjustSubclass(HWND Dialog, HFONT Font) {
         RECT    rcDlg;
         UINT    DPIX, DPIY;
         LONG    lDelta;
-        GetWindowRect(Dialog, &rcDlg);
+        UI_GetWindowRect(Dialog, &rcDlg);
         DPI_FromWindow(Dialog, &DPIX, &DPIY);
         if (DPIX != USER_DEFAULT_SCREEN_DPI) {
             lDelta = Math_RoundInt((rcDlg.right - rcDlg.left) * (((FLOAT)DPIX / USER_DEFAULT_SCREEN_DPI) - 1) / 2);

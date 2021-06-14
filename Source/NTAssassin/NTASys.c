@@ -1,6 +1,23 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
-HMODULE hKernel32Dll = NULL;
+HMODULE hSysDlls[SysLoadDllMax] = { NULL };
+PWSTR   pszSysDllNames[] = {
+    // ntdll.dll always is the first module initialized
+    L"kernel32.dll",
+    L"user32.dll",
+    L"UxTheme.dll",
+    L"Dwmapi.dll",
+    L"Shcore.dll"
+};
+
+HMODULE NTAPI Sys_LoadDll(SYS_LOADDLL_NAME SysDll) {
+    if (SysDll >= 0 && SysDll < SysLoadDllMax) {
+        if (!hSysDlls[SysDll])
+            hSysDlls[SysDll] = SysDll == SysLoadDllNTDll ? Proc_GetNtdllHandle() : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
+        return hSysDlls[SysDll];
+    } else
+        return NULL;
+}
 
 PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId) {
     PMESSAGE_RESOURCE_ENTRY lpstMRE;
@@ -21,9 +38,7 @@ PCWSTR NTAPI Sys_GetErrorInfo(DWORD Error) {
     if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
         HRESULT_FACILITY(dwError) == FACILITY_WIN32)
         dwError = HRESULT_CODE(dwError);
-    if (!hKernel32Dll)
-        hKernel32Dll = Proc_GetDllHandleByName(L"kernel32.dll");
-    return Sys_GetMessage(hKernel32Dll, dwError);
+    return Sys_GetMessage(Sys_LoadDll(SysLoadDllKernel32), dwError);
 }
 
 PCWSTR NTAPI Sys_GetStatusInfo(NTSTATUS Status) {
@@ -34,9 +49,7 @@ PCWSTR NTAPI Sys_GetStatusErrorInfo(NTSTATUS Status) {
     DWORD   dwError = RtlNtStatusToDosError(Status);
     if (dwError == ERROR_MR_MID_NOT_FOUND)
         return Sys_GetStatusInfo(Status);
-    if (!hKernel32Dll)
-        hKernel32Dll = Proc_GetDllHandleByName(L"kernel32.dll");
-    return Sys_GetMessage(hKernel32Dll, dwError);
+    return Sys_GetMessage(Sys_LoadDll(SysLoadDllKernel32), dwError);
 }
 
 VOID NTAPI Sys_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
@@ -44,11 +57,9 @@ VOID NTAPI Sys_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
     if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
         HRESULT_FACILITY(dwError) == FACILITY_WIN32)
         dwError = HRESULT_CODE(dwError);
-    if (!hKernel32Dll)
-        hKernel32Dll = Proc_GetDllHandleByName(L"kernel32.dll");
     Dlg_MsgBox(
         Owner,
-        Sys_GetMessage(hKernel32Dll, dwError),
+        Sys_GetMessage(Sys_LoadDll(SysLoadDllKernel32), dwError),
         Title,
         dwError == ERROR_SUCCESS ? 0 : MB_ICONERROR
     );

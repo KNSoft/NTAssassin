@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 BOOL NTAPI PE_Init(PPE_IMAGE lpImage, LPVOID lpMem, BOOL bFileMap) {
     PIMAGE_NT_HEADERS   lpNtHeader;

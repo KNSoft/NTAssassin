@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
     Template->wMenu = Template->wClass = Template->wTitle = Template->Template.cdit = 0;
@@ -79,48 +79,36 @@ BOOL NTAPI Dlg_ChooseFont(HWND Owner, PLOGFONTW FontPointer, LPCOLORREF ColorPoi
 }
 
 BOOL NTAPI Dlg_ScreenSnapshot(PDLG_SCREENSNAPSHOT ScreenSnapshot) {
-    WNDCLASSEXW stWndClsExCaptureW = { sizeof(WNDCLASSEXW), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, L"NTAssassin.UI.Dlg.ScreenSnapshotClass", NULL };
+    WNDCLASSEXW stWndClsExCaptureW = { sizeof(WNDCLASSEXW), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, L"NTAssassin.Dlg.ScreenSnapshotClass", NULL };
     ATOM        atomClass;
     HWND        hWnd;
-    HDC         hdcScreen;
     BOOL        bRet = FALSE;
     stWndClsExCaptureW.style = ScreenSnapshot->dwClassStyle;
-    stWndClsExCaptureW.lpfnWndProc = ScreenSnapshot->lpfnWndProc;
+    stWndClsExCaptureW.lpfnWndProc = ScreenSnapshot->pfnWndProc;
     stWndClsExCaptureW.hCursor = ScreenSnapshot->hCursor;
     stWndClsExCaptureW.hInstance = ScreenSnapshot->hInstance;
     atomClass = RegisterClassExW(&stWndClsExCaptureW);
     if (atomClass) {
         // Get virtual screen position
-        ScreenSnapshot->iScreenX = GetSystemMetrics(SM_XVIRTUALSCREEN);
-        ScreenSnapshot->iScreenY = GetSystemMetrics(SM_YVIRTUALSCREEN);
-        ScreenSnapshot->iScreenCX = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-        ScreenSnapshot->iScreenCY = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-        // Mirror current screen
-        hdcScreen = GetDC(NULL);
-        ScreenSnapshot->hdcMirror = CreateCompatibleDC(hdcScreen);
-        ScreenSnapshot->hbmMirror = CreateCompatibleBitmap(hdcScreen, ScreenSnapshot->iScreenCX, ScreenSnapshot->iScreenCY);
-        SelectObject(ScreenSnapshot->hdcMirror, ScreenSnapshot->hbmMirror);
-        BitBlt(ScreenSnapshot->hdcMirror, 0, 0, ScreenSnapshot->iScreenCX, ScreenSnapshot->iScreenCY, hdcScreen, ScreenSnapshot->iScreenX, ScreenSnapshot->iScreenY, SRCCOPY);
-        // Create window and enter message loop
-        hWnd = CreateWindowExW(ScreenSnapshot->dwExStyle, MAKEINTRESOURCEW(atomClass), L"NTAssassin.UI.Dlg.ScreenSnapshotClass", ScreenSnapshot->dwStyle, ScreenSnapshot->iScreenX, ScreenSnapshot->iScreenY, ScreenSnapshot->iScreenCX, ScreenSnapshot->iScreenCY, HWND_DESKTOP, NULL, ScreenSnapshot->hInstance, ScreenSnapshot->lParam);
-        if (hWnd) {
-            MSG     stMsg;
-            while (TRUE) {
-                bRet = GetMessageW(&stMsg, hWnd, 0, 0);
-                if (bRet == 0 || bRet == -1) {
-                    break;
-                } else {
-                    TranslateMessage(&stMsg);
-                    DispatchMessageW(&stMsg);
-                }
-            }
+        if (GDI_CreateSnapshot(NULL, &ScreenSnapshot->Snapshot)) {
+            // Create window and enter message loop
+            hWnd = CreateWindowExW(
+                ScreenSnapshot->dwExStyle,
+                MAKEINTRESOURCEW(atomClass),
+                L"NTAssassin.Dlg.ScreenSnapshotClass",
+                ScreenSnapshot->dwStyle,
+                ScreenSnapshot->Snapshot.Position.x,
+                ScreenSnapshot->Snapshot.Position.y,
+                ScreenSnapshot->Snapshot.Size.cx,
+                ScreenSnapshot->Snapshot.Size.cy,
+                HWND_DESKTOP,
+                NULL,
+                ScreenSnapshot->hInstance,
+                ScreenSnapshot->lParam);
+            bRet = hWnd && UI_MessageLoop(hWnd);
+            GDI_DeleteSnapshot(&ScreenSnapshot->Snapshot);
         }
-        // Cleanup
-        DeleteObject(ScreenSnapshot->hbmMirror);
-        DeleteDC(ScreenSnapshot->hdcMirror);
-        ReleaseDC(NULL, hdcScreen);
         UnregisterClassW(MAKEINTRESOURCEW(atomClass), stWndClsExCaptureW.hInstance);
-        bRet = TRUE;
     }
     return bRet;
 }
@@ -132,7 +120,6 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     DWORD           dwNewDPIY;
     DWORD           dwOldDPIX;
     DWORD           dwOldDPIY;
-    LONG            lStyle;
     DLG_RESIZEDPROC pfnResizedProc;
 } DLG_SETRESIZINGSUBCLASS_REF, * PDLG_SETRESIZINGSUBCLASS_REF;
 
@@ -148,14 +135,12 @@ LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wP
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_SIZING) {
         PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
-        if (pstRef->lStyle & WS_THICKFRAME) {
-            PRECT lpRect = (RECT*)lParam;
-            if (pstRef->lMinWidth && lpRect->right < lpRect->left + pstRef->lMinWidth)
-                lpRect->right = lpRect->left + pstRef->lMinWidth;
-            if (pstRef->lMinHeight && lpRect->bottom < lpRect->top + pstRef->lMinHeight)
-                lpRect->bottom = lpRect->top + pstRef->lMinHeight;
-            SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
-        }
+        PRECT lpRect = (RECT*)lParam;
+        if (pstRef->lMinWidth && lpRect->right < lpRect->left + pstRef->lMinWidth)
+            lpRect->right = lpRect->left + pstRef->lMinWidth;
+        if (pstRef->lMinHeight && lpRect->bottom < lpRect->top + pstRef->lMinHeight)
+            lpRect->bottom = lpRect->top + pstRef->lMinHeight;
+        SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
     } else if (uMsg == WM_SIZE) {
         if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED) {
             PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
@@ -170,10 +155,6 @@ LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wP
         pstRef->pfnResizedProc(hDlg, rcClient.right, rcClient.bottom, TRUE);
         UI_Redraw(hDlg);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
-    } else if (uMsg == WM_STYLECHANGED) {
-        PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
-        if (wParam == GWL_STYLE)
-            pstRef->lStyle = ((LPSTYLESTRUCT)lParam)->styleNew;
     } else if (uMsg == WM_DESTROY) {
         Mem_Free((PVOID)dwRefData);
     }
@@ -190,7 +171,6 @@ BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, LONG MinWidth, LONG MinHeight, D
     DPI_FromWindow(Dialog, &pstRef->dwOldDPIX, &pstRef->dwOldDPIY);
     pstRef->dwNewDPIX = pstRef->dwOldDPIX;
     pstRef->dwNewDPIY = pstRef->dwOldDPIY;
-    pstRef->lStyle = (LONG)GetWindowLongPtr(Dialog, GWL_STYLE);
     pstRef->pfnResizedProc = ResizedProc;
     return SetWindowSubclass(Dialog, Dlg_SetResizingSubclass_DlgProc, 0, (DWORD_PTR)pstRef);
 }

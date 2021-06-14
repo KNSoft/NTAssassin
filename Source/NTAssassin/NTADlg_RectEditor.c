@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 #define DRE_MAX_NUM_CCH 16
 #define DRE_ITEM_W 64

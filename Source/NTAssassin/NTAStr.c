@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 UINT NTAPI Str_CchLenExW(LPCWSTR psz, UINT cchMax) {
     UINT i = 0;

@@ -15,3 +15,4 @@
 /NAC/obj
 *.user
 *.aps
+/NTAssassin/Resource/*.fla

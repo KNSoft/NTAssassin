@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 #define KNS_MAX_VER_CCH 48
 #define KNS_DEFAULT_DLGFONTSIZE 20
@@ -64,7 +64,14 @@ LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM wParam,
         rcText.right = pstRef->lWidth - KNS_BANNER_MARGIN;
         rcText.bottom = pstRef->lHeight - KNS_BANNER_MARGIN;
         if (pstRef->hIcon)
-            DrawIconEx(hDC, KNS_BANNER_MARGIN, (pstRef->lHeight - pstRef->lHeight * KNS_BANNER_ICON_SCALE) / 2, pstRef->hIcon, pstRef->lHeight * KNS_BANNER_ICON_SCALE, pstRef->lHeight * KNS_BANNER_ICON_SCALE, 0, NULL, DI_NORMAL);
+            GDI_DrawIcon(
+                hDC,
+                pstRef->hIcon,
+                KNS_BANNER_MARGIN,
+                (pstRef->lHeight - pstRef->lHeight * KNS_BANNER_ICON_SCALE) / 2,
+                pstRef->lHeight * KNS_BANNER_ICON_SCALE,
+                pstRef->lHeight * KNS_BANNER_ICON_SCALE
+            );
         if (pstRef->lpszName) {
             SelectObject(hDC, pstRef->hFontBig);
             DrawTextW(hDC, pstRef->lpszName, -1, &rcText, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
@@ -110,7 +117,7 @@ VOID KNS_SetBannerSubclass(HWND hBanner) {
     pstRef->hIcon = NULL;
     pstRef->lpszComment = szVersion;
     pstRef->lpszName = lpKNSInfo->Name;
-    GetWindowRect(hBanner, &rcBanner);
+    UI_GetWindowRect(hBanner, &rcBanner);
     stWndPos.cx = rcBanner.right - rcBanner.left;
     stWndPos.cy = rcBanner.bottom - rcBanner.top;
     SetWindowSubclass(hBanner, KNS_SetBannerSubclass_Proc, 0, (DWORD_PTR)pstRef);
@@ -141,7 +148,7 @@ VOID NTAPI KNS_SetDialogSubclass(HWND Dialog, DLG_RESIZEDPROC ResizedProc) {
     DPI_SetAutoAdjustSubclass(Dialog, I18N_CreateFont(KNS_DEFAULT_DLGFONTSIZE, FW_NORMAL));
     if (ResizedProc) {
         RECT    rcWnd;
-        GetWindowRect(Dialog, &rcWnd);
+        UI_GetWindowRect(Dialog, &rcWnd);
         Dlg_SetResizingSubclass(Dialog, rcWnd.right - rcWnd.left, rcWnd.bottom - rcWnd.top, ResizedProc);
     }
 }

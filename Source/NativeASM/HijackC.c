@@ -1,25 +1,10 @@
-#include "NTAssassin.h"
-
-typedef NTSTATUS(NTAPI* PLdrLoadDll)(
-    IN PWSTR SearchPath OPTIONAL,
-    IN PULONG DllCharacteristics OPTIONAL,
-    IN PUNICODE_STRING DllName,
-    OUT PVOID* BaseAddress
-    );
-
-
-typedef NTSTATUS(NTAPI* PLdrGetProcedureAddress)(
-    IN PVOID BaseAddress,
-    IN PANSI_STRING Name,
-    IN ULONG Ordinal,
-    OUT PVOID* ProcedureAddress
-    );
+#include "NTAssassin\NTAssassin.h"
 
 NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
-    LPVOID*     lppProc;
-    LPWSTR      lpszLib;
-    LPSTR       lpszProc;
-    LPWORD      lpwOrd;
+    PVOID*      ppProc;
+    PWSTR       pszLib;
+    PSTR        pszProc;
+    PWORD       pwOrd;
     UINT        iCch, iCchLib, iCchProc;
     UINT_PTR    uParamSize, uDelta;
 
@@ -33,9 +18,9 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     uParamSize -= uDelta;
 
     // szLibName
-    lpszLib = ADD_OFFSET(lParam, uDelta, WCHAR);
+    pszLib = ADD_OFFSET(lParam, uDelta, WCHAR);
     for (iCchLib = 0; uParamSize > 0; uParamSize--)
-        if (!lpszLib[iCchLib++])
+        if (!pszLib[iCchLib++])
             break;
     if (!uParamSize)
         return STATUS_INVALID_PARAMETER;
@@ -45,110 +30,110 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     if (uParamSize < uDelta)
         return STATUS_INVALID_PARAMETER;
     uParamSize -= uDelta;
-    lpwOrd = (LPWORD)(lpszLib + iCchLib);
+    pwOrd = (LPWORD)(pszLib + iCchLib);
 
     // szProcName and lpProc
-    lppProc = (LPVOID*)(lpwOrd + 1);
-    if (*lpwOrd) {
-        lpszProc = MAKEINTRESOURCEA(*lpwOrd);
+    ppProc = (PVOID*)(pwOrd + 1);
+    if (*pwOrd) {
+        pszProc = MAKEINTRESOURCEA(*pwOrd);
         uDelta = sizeof(LPVOID);
         if (uParamSize < uDelta)
             return STATUS_INVALID_PARAMETER;
         iCchProc = 0;
     } else {
         // Alignment
-        lpszProc = (LPSTR)BYTE_ALIGN((ULONG_PTR)lppProc, STRING_ALIGNMENT);
-        uDelta = (ULONG_PTR)lpszProc - (ULONG_PTR)lppProc;
+        pszProc = (LPSTR)BYTE_ALIGN((ULONG_PTR)ppProc, STRING_ALIGNMENT);
+        uDelta = (ULONG_PTR)pszProc - (ULONG_PTR)ppProc;
         if (uParamSize < uDelta)
             return STATUS_INVALID_PARAMETER;
         uParamSize -= uDelta;
         // szProcName
-        if (lpszProc[0] == '\0') {
+        if (pszProc[0] == '\0') {
             iCchProc = 0;
-            lpszProc = NULL;
-            lppProc = (LPVOID*)NULL;
+            pszProc = NULL;
+            ppProc = (PVOID*)NULL;
         } else {
             for (iCchProc = 0; uParamSize > 0; uParamSize--)
-                if (!lpszProc[iCchProc++])
+                if (!pszProc[iCchProc++])
                     break;
             if (!uParamSize)
                 return STATUS_INVALID_PARAMETER;
-            lppProc = (LPVOID*)(lpszProc + iCchProc);
+            ppProc = (PVOID*)(pszProc + iCchProc);
         }
     }
 
     // Start to load
     HMODULE hDLL = NULL, hNtDLL = Proc_GetNtdllHandle();
     // Get DLL handle if already loaded
-    PLDR_DATA_TABLE_ENTRY lpLdrNodeHead, lpLdrNode;
-    lpLdrNodeHead = CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
-    lpLdrNode = lpLdrNodeHead;
+    PLDR_DATA_TABLE_ENTRY pLdrNodeHead, pLdrNode;
+    pLdrNodeHead = CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
+    pLdrNode = pLdrNodeHead;
     do {
-        if (lpLdrNode->BaseDllName.MaximumLength == iCchLib * sizeof(WCHAR)) {
+        if (pLdrNode->BaseDllName.MaximumLength == iCchLib * sizeof(WCHAR)) {
             for (iCch = 0; iCch < iCchLib; iCch++) {
                 if (
-                    lpszLib[iCch] != lpLdrNode->BaseDllName.Buffer[iCch] && (
-                        (lpszLib[iCch] >= 'a' && lpszLib[iCch] <= 'z' && lpszLib[iCch] - ('a' - 'A') != lpLdrNode->BaseDllName.Buffer[iCch]) ||
-                        (lpszLib[iCch] >= 'A' && lpszLib[iCch] <= 'Z' && lpszLib[iCch] + ('a' - 'A') != lpLdrNode->BaseDllName.Buffer[iCch])
+                    pszLib[iCch] != pLdrNode->BaseDllName.Buffer[iCch] && (
+                        (pszLib[iCch] >= 'a' && pszLib[iCch] <= 'z' && pszLib[iCch] - ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch]) ||
+                        (pszLib[iCch] >= 'A' && pszLib[iCch] <= 'Z' && pszLib[iCch] + ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch])
                         )
                     )
                     break;
             }
             if (iCch == iCchLib) {
-                hDLL = lpLdrNode->DllBase;
+                hDLL = pLdrNode->DllBase;
                 break;
             }
         }
-        lpLdrNode = CONTAINING_RECORD(lpLdrNode->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
-    } while (lpLdrNode != lpLdrNodeHead);
-    if (hDLL && !lpszProc)
+        pLdrNode = CONTAINING_RECORD(pLdrNode->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
+    } while (pLdrNode != pLdrNodeHead);
+    if (hDLL && !pszProc)
         return STATUS_SUCCESS;
 
     // Get LdrLoadDll and LdrGetProcedureAddress address
-    PLdrLoadDll             lpLdrLoadDll = NULL;
-    PLdrGetProcedureAddress lpLdrGetProcedureAddress = NULL;
-    PVOID*                  lppLdrFunc;
-    PIMAGE_DATA_DIRECTORY   lpExportDir;
-    PIMAGE_EXPORT_DIRECTORY lpExportTable;
-    PDWORD                  lpdwFuncName;
+    PFNLdrLoadDll               pLdrLoadDll = NULL;
+    PFNLdrGetProcedureAddress   pLdrGetProcedureAddress = NULL;
+    PVOID*                  ppLdrFunc;
+    PIMAGE_DATA_DIRECTORY   pExportDir;
+    PIMAGE_EXPORT_DIRECTORY pExportTable;
+    PDWORD                  pdwFuncName;
     UINT                    uIndex;
-    PDWORD                  lpadwNamesRVA;
+    PDWORD                  padwNamesRVA;
     DWORD                   dwProcRVA;
     // Get export directory and table
-    lpExportDir = &ADD_OFFSET(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-    lpExportTable = ADD_OFFSET(hNtDLL, lpExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
+    pExportDir = &ADD_OFFSET(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+    pExportTable = ADD_OFFSET(hNtDLL, pExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
     // Search name
-    lpadwNamesRVA = ADD_OFFSET(hNtDLL, lpExportTable->AddressOfNames, DWORD);
-    for (uIndex = 0; uIndex < lpExportTable->NumberOfNames; uIndex++, lpadwNamesRVA++) {
+    padwNamesRVA = ADD_OFFSET(hNtDLL, pExportTable->AddressOfNames, DWORD);
+    for (uIndex = 0; uIndex < pExportTable->NumberOfNames; uIndex++, padwNamesRVA++) {
         // Match both of LdrLoadDll and LdrGetProcedureAddress
-        if (*lpadwNamesRVA + ARRAYSIZE("LdrGetProcedureAddress") >= (DWORD_PTR)lpExportDir->VirtualAddress + lpExportDir->Size)
+        if (*padwNamesRVA + ARRAYSIZE("LdrGetProcedureAddress") >= (DWORD_PTR)pExportDir->VirtualAddress + pExportDir->Size)
             return STATUS_INTERNAL_ERROR;
-        lpdwFuncName = ADD_OFFSET(hNtDLL, *lpadwNamesRVA, DWORD);
-        lppLdrFunc = NULL;
+        pdwFuncName = ADD_OFFSET(hNtDLL, *padwNamesRVA, DWORD);
+        ppLdrFunc = NULL;
         // Fast comparison and avoid instructions like "xmmword ptr" generated
-        if (!hDLL && !lpLdrLoadDll &&
-            lpdwFuncName[0] == ('LrdL') &&
-            lpdwFuncName[1] == ('Ddao') &&
-            *ADD_OFFSET(lpdwFuncName, 7, DWORD) == ('llD'))
-            lppLdrFunc = (PVOID*)&lpLdrLoadDll;
-        else if (lpszProc && !lpLdrGetProcedureAddress &&
-            lpdwFuncName[0] == ('GrdL') &&
-            lpdwFuncName[1] == ('rPte') &&
-            lpdwFuncName[2] == ('deco') &&
-            *ADD_OFFSET(lpdwFuncName, 11, DWORD) == ('erud') &&
-            *ADD_OFFSET(lpdwFuncName, 15, DWORD) == ('rddA') &&
-            *ADD_OFFSET(lpdwFuncName, 19, DWORD) == ('sse')
+        if (!hDLL && !pLdrLoadDll &&
+            pdwFuncName[0] == ('LrdL') &&
+            pdwFuncName[1] == ('Ddao') &&
+            *ADD_OFFSET(pdwFuncName, 7, DWORD) == ('llD'))
+            ppLdrFunc = (PVOID*)&pLdrLoadDll;
+        else if (pszProc && !pLdrGetProcedureAddress &&
+            pdwFuncName[0] == ('GrdL') &&
+            pdwFuncName[1] == ('rPte') &&
+            pdwFuncName[2] == ('deco') &&
+            *ADD_OFFSET(pdwFuncName, 11, DWORD) == ('erud') &&
+            *ADD_OFFSET(pdwFuncName, 15, DWORD) == ('rddA') &&
+            *ADD_OFFSET(pdwFuncName, 19, DWORD) == ('sse')
             )
-            lppLdrFunc = (PVOID*)&lpLdrGetProcedureAddress;
-        if (lppLdrFunc) {
+            ppLdrFunc = (PVOID*)&pLdrGetProcedureAddress;
+        if (ppLdrFunc) {
             // LdrLoadDll and LdrGetProcedureAddress are not forward thunks
-            dwProcRVA = ADD_OFFSET(hNtDLL, lpExportTable->AddressOfFunctions, DWORD)[ADD_OFFSET(hNtDLL, lpExportTable->AddressOfNameOrdinals, WORD)[uIndex]];
-            if (dwProcRVA < lpExportDir->VirtualAddress || dwProcRVA >= lpExportDir->VirtualAddress + lpExportDir->Size)
-                *lppLdrFunc = ADD_OFFSET(hNtDLL, dwProcRVA, VOID);
+            dwProcRVA = ADD_OFFSET(hNtDLL, pExportTable->AddressOfFunctions, DWORD)[ADD_OFFSET(hNtDLL, pExportTable->AddressOfNameOrdinals, WORD)[uIndex]];
+            if (dwProcRVA < pExportDir->VirtualAddress || dwProcRVA >= pExportDir->VirtualAddress + pExportDir->Size)
+                *ppLdrFunc = ADD_OFFSET(hNtDLL, dwProcRVA, VOID);
             else
                 return STATUS_INTERNAL_ERROR;
         }
-        if ((hDLL || lpLdrLoadDll) && (!lpszProc || lpLdrGetProcedureAddress)) {
+        if ((hDLL || pLdrLoadDll) && (!pszProc || pLdrGetProcedureAddress)) {
             NTSTATUS lStatus = STATUS_SUCCESS;
             // Load DLL if not loaded yet
             if (!hDLL) {
@@ -156,29 +141,29 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
                 ULONG           ulDllCharacteristics;
                 stLibName.MaximumLength = (USHORT)(iCchLib * sizeof(WCHAR));
                 stLibName.Length = stLibName.MaximumLength - sizeof(WCHAR);
-                stLibName.Buffer = lpszLib;
-                lStatus = lpLdrLoadDll(NULL, NULL, &stLibName, &hDLL);
+                stLibName.Buffer = pszLib;
+                lStatus = pLdrLoadDll(NULL, NULL, &stLibName, &hDLL);
                 if (lStatus == STATUS_DLL_INIT_FAILED)
-                    lStatus = lpLdrLoadDll(NULL, (ulDllCharacteristics = IMAGE_FILE_EXECUTABLE_IMAGE, &ulDllCharacteristics), &stLibName, &hDLL);
+                    lStatus = pLdrLoadDll(NULL, (ulDllCharacteristics = IMAGE_FILE_EXECUTABLE_IMAGE, &ulDllCharacteristics), &stLibName, &hDLL);
                 if (!NT_SUCCESS(lStatus))
                     return lStatus;
             }
             // Get procedure address
-            if (lpszProc) {
-                PANSI_STRING    lpstProcName;
+            if (pszProc) {
+                PANSI_STRING    pstProcName;
                 ULONG           ulProcOrd;
-                if ((UINT_PTR)lpszProc > MAXWORD) {
+                if ((UINT_PTR)pszProc > MAXWORD) {
                     ANSI_STRING stProcName;
                     stProcName.MaximumLength = (USHORT)(iCchProc * sizeof(CHAR));
                     stProcName.Length = stProcName.MaximumLength - sizeof(CHAR);
-                    stProcName.Buffer = lpszProc;
-                    lpstProcName = &stProcName;
+                    stProcName.Buffer = pszProc;
+                    pstProcName = &stProcName;
                     ulProcOrd = 0;
                 } else {
-                    lpstProcName = NULL;
-                    ulProcOrd = (ULONG)(ULONG_PTR)lpszProc;
+                    pstProcName = NULL;
+                    ulProcOrd = (ULONG)(ULONG_PTR)pszProc;
                 }
-                lStatus = lpLdrGetProcedureAddress(hDLL, lpstProcName, ulProcOrd, lppProc);
+                lStatus = pLdrGetProcedureAddress(hDLL, pstProcName, ulProcOrd, ppProc);
             }
             return lStatus;
         }

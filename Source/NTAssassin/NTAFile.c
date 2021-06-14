@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 NTSTATUS NTAPI File_Create(PHANDLE FileHandle, PWSTR FileName, HANDLE RootDirectory, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions) {
     UNICODE_STRING      stString;
@@ -38,11 +38,17 @@ NTSTATUS NTAPI File_Delete(PWSTR FileName) {
     return lStatus;
 }
 
+NTSTATUS NTAPI File_Dispose(HANDLE FileHandle, BOOL Disposition) {
+    IO_STATUS_BLOCK                 stIOStatusBlock;
+    FILE_DISPOSITION_INFORMATION    fdi = { Disposition };
+    return NtSetInformationFile(FileHandle, &stIOStatusBlock, &fdi, sizeof(fdi), FileDispositionInformation);
+}
+
 NTSTATUS NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize) {
     IO_STATUS_BLOCK                 stIOStatusBlock;
-    FILE_END_OF_FILE_INFORMATION    stFileInfo;
-    stFileInfo.EndOfFile.QuadPart = NewSize;
-    return NtSetInformationFile(FileHandle, &stIOStatusBlock, &stFileInfo, sizeof(stFileInfo), FileEndOfFileInformation);
+    FILE_END_OF_FILE_INFORMATION    feofi;
+    feofi.EndOfFile.QuadPart = NewSize;
+    return NtSetInformationFile(FileHandle, &stIOStatusBlock, &feofi, sizeof(feofi), FileEndOfFileInformation);
 }
 
 NTSTATUS NTAPI File_Map(PWSTR FileName, HANDLE RootDirectory, PFILE_MAP FileMap, ULONGLONG MaximumSize, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, BOOL NoCache, SECTION_INHERIT InheritDisposition) {
@@ -84,15 +90,8 @@ NTSTATUS NTAPI File_Unmap(PFILE_MAP FileMap) {
     NTSTATUS lStatus;
     lStatus = NtUnmapViewOfSection(CURRENT_PROCESS_HANDLE, FileMap->Mem.VirtualAddress);
     if (NT_SUCCESS(lStatus)) {
-        lStatus = NtClose(FileMap->SectionHandle);
-        if (NT_SUCCESS(lStatus)) {
-            if (FileMap->DesiredAccess & FILE_WRITE_DATA) {
-                lStatus = File_SetSize(FileMap->FileHandle, FileMap->Mem.NumberOfBytes);
-                if (!NT_SUCCESS(lStatus))
-                    return lStatus;
-            }
-            lStatus = NtClose(FileMap->FileHandle);
-        }
+        NtClose(FileMap->SectionHandle);
+        NtClose(FileMap->FileHandle);
     }
     return lStatus;
 }

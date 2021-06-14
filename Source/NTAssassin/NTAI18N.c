@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 LPWSTR      lpI18NFontName = NULL;
 BOOL        bI18NRTLReading = FALSE;

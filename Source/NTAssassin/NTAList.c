@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 VOID NTAPI Data_ListInit(PDATA_LIST DataList) {
     DataList->First = DataList->Last = NULL;

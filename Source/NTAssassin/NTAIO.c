@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 NTSTATUS NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, PVOID Buffer, ULONG Length) {
     IO_STATUS_BLOCK stIOStatusBlock;

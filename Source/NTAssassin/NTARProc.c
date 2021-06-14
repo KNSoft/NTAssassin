@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 HANDLE NTAPI RProc_Open(DWORD DesiredAccess, DWORD ProcessId) {
     HANDLE              hProc;

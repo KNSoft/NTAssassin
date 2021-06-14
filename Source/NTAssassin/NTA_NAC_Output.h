@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "include\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 EXTERN_C BYTE SYM_Hijack_LoadProcAddr_InjectThread_x86[959];
 EXTERN_C BYTE SYM_Hijack_LoadProcAddr_InjectThread_x64[1105];

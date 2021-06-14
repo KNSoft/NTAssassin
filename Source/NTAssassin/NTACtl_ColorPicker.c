@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 #define CTL_COLORPICKER_COLOR TEXT("NTAssassin.Ctl.ColorPicker")
 
@@ -27,6 +27,7 @@ LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg, WPARAM
         COLORREF    cr;
         cr = Ctl_GetColorPickerValue(hWnd);
         if (Dlg_ChooseColor(hWnd, &cr)) {
+            cr &= 0xFFFFFF;
             Ctl_SetColorPickerValue(hWnd, cr);
             SendMessage(GetParent(hWnd), WM_COMMAND, MAKEWPARAM(GetWindowLongPtr(hWnd, GWL_ID), BN_CLICKED), (LPARAM)hWnd);
         }

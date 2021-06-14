@@ -1,4 +1,4 @@
-#include "NTAssassin.h"
+#include "NTAssassin\NTAssassin.h"
 
 BOOL NTAPI GDI_FillSolidRect(HDC DC, PRECT Rect, COLORREF Color) {
     COLORREF    crPrev = SetBkColor(DC, Color);
@@ -25,15 +25,14 @@ BOOL NTAPI GDI_FrameRect(HDC DC, PRECT Rect, INT Width, DWORD ROP) {
 // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmap
 // https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfo
 // https://docs.microsoft.com/en-us/windows/win32/gdi/bitmap-storage
-NTSTATUS NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer, SIZE_T BufferSize, PSIZE_T BytesWritten) {
+UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer) {
     BITMAP              bmp;
     ULONG               cClrBits;
-    BITMAPFILEHEADER    bmfh;
-    BITMAPINFOHEADER    bmih;
-    LPBITMAPINFO        lpbmi;
+    PBITMAPFILEHEADER   pbmfh;
+    PBITMAPINFO         pbmi;
     DWORD               dwClrItem, dwClrSize;
-    LPRGBQUAD           lpColor = NULL;
-    LPBYTE              pBuff;
+    UINT                uHeadersSize, uFileSize, uImageSize;
+    PVOID               pBits;
     // Get BITMAP structure
     if (!GetObject(Bitmap, sizeof(BITMAP), &bmp))
         return STATUS_INVALID_PARAMETER;
@@ -51,52 +50,37 @@ NTSTATUS NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer, SIZE_T Buff
         cClrBits = 24;
     else
         cClrBits = 32;
-    // Allocate color table if needed
     if (cClrBits < 24) {
         dwClrItem = 1 << cClrBits;
         dwClrSize = dwClrItem * sizeof(RGBQUAD);
-        lpColor = Mem_HeapAllocEx(HEAP_ZERO_MEMORY, dwClrSize);
-        if (!lpColor)
-            return STATUS_NO_MEMORY;
     } else
         dwClrItem = dwClrSize = 0;
-    // Construct BITMAPINFOHEADER by BITMAP
-    bmih.biSize = sizeof(BITMAPINFOHEADER);
-    bmih.biWidth = bmp.bmWidth;
-    bmih.biHeight = bmp.bmHeight;
-    bmih.biPlanes = bmp.bmPlanes;
-    bmih.biBitCount = bmp.bmBitsPixel;
-    bmih.biSizeImage = BYTE_ALIGN(bmih.biWidth * cClrBits, 32) / 8 * bmih.biHeight;
-    bmih.biClrUsed = dwClrItem;
-    bmih.biCompression = BI_RGB;
-    bmih.biXPelsPerMeter = bmih.biYPelsPerMeter = bmih.biClrImportant = 0;
-    // Construct BITMAPFILEHEADER by BITMAPINFOHEADER
-    bmfh.bfType = 'MB';
-    bmfh.bfOffBits = sizeof(BITMAPFILEHEADER) + bmih.biSize + dwClrSize;
-    bmfh.bfSize = bmfh.bfOffBits + bmih.biSizeImage;
-    bmfh.bfReserved1 = bmfh.bfReserved2 = 0;
-    // Write file data
+    // Calculate size of image and file
+    uHeadersSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwClrSize;
+    uImageSize = BYTE_ALIGN(bmp.bmWidth * cClrBits, 32) / 8 * bmp.bmHeight;
+    uFileSize = uHeadersSize + uImageSize;
+    // Write bitmap
     if (Buffer) {
-        // Write BITMAPFILEHEADER and BITMAPINFOHEADER
-        pBuff = Buffer;
-        RtlMoveMemory(pBuff, &bmfh, sizeof(BITMAPFILEHEADER));
-        pBuff = ADD_OFFSET(pBuff, sizeof(BITMAPFILEHEADER), BYTE);
-        lpbmi = (LPBITMAPINFO)pBuff;
-        RtlMoveMemory(pBuff, &bmih, sizeof(BITMAPINFOHEADER));
-        pBuff = ADD_OFFSET(pBuff, sizeof(BITMAPINFOHEADER), BYTE);
-        // Write RGBQUADs
-        if (dwClrItem) {
-            RtlMoveMemory(pBuff, lpColor, dwClrSize);
-            pBuff = ADD_OFFSET(pBuff, dwClrSize, BYTE);
-            Mem_HeapFree(lpColor);
-        }
-        // Write DIB
-        if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBuff, lpbmi, DIB_RGB_COLORS))
-            return STATUS_INVALID_PARAMETER;
+        pbmfh = (PBITMAPFILEHEADER)Buffer;
+        pbmfh->bfType = 'MB';
+        pbmfh->bfOffBits = uHeadersSize;
+        pbmfh->bfSize = uFileSize;
+        pbmfh->bfReserved1 = pbmfh->bfReserved2 = 0;
+        pbmi = ADD_OFFSET(pbmfh, sizeof(*pbmfh), BITMAPINFO);
+        pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+        pbmi->bmiHeader.biWidth = bmp.bmWidth;
+        pbmi->bmiHeader.biHeight = bmp.bmHeight;
+        pbmi->bmiHeader.biPlanes = bmp.bmPlanes;
+        pbmi->bmiHeader.biBitCount = bmp.bmBitsPixel;
+        pbmi->bmiHeader.biSizeImage = uImageSize;
+        pbmi->bmiHeader.biClrUsed = dwClrItem;
+        pbmi->bmiHeader.biCompression = BI_RGB;
+        pbmi->bmiHeader.biXPelsPerMeter = pbmi->bmiHeader.biYPelsPerMeter = pbmi->bmiHeader.biClrImportant = 0;
+        pBits = ADD_OFFSET(pbmi, pbmi->bmiHeader.biSize + (DWORD_PTR)dwClrSize, VOID);
+        if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBits, pbmi, DIB_RGB_COLORS))
+            return 0;
     }
-    if (BytesWritten)
-        *BytesWritten = bmfh.bfSize;
-    return STATUS_SUCCESS;
+    return uFileSize;
 }
 
 VOID NTAPI GDI_InitInternalFontInfo(PENUMLOGFONTEXDVW InternalFontInfo) {
@@ -134,4 +118,82 @@ HFONT NTAPI GDI_CreateFont(LONG FontSize, LONG FontWeight, PCWSTR FontName) {
 
 INT NTAPI GDI_GetFont(HFONT Font, PLOGFONTW FontInfo) {
     return GetObjectW(Font, sizeof(*FontInfo), FontInfo);
+}
+
+BOOL NTAPI GDI_DrawIcon(HDC DC, HICON Icon, INT X, INT Y, INT CX, INT CY) {
+    ICONINFO    stIconInfo;
+    BITMAP      stBmp;
+    RECT        rcDst;
+    INT         iCX, iCY, iIconHeight;
+    BOOL        bRet = FALSE;
+
+    if (!GetIconInfo(Icon, &stIconInfo))
+        return FALSE;
+
+    if (GetObject(stIconInfo.hbmMask, sizeof(stBmp), &stBmp)) {
+        iIconHeight = stIconInfo.hbmColor ? stBmp.bmHeight : (stBmp.bmHeight / 2);
+        if (CX && CY) {
+            iCX = CX;
+            iCY = CY;
+        } else {
+            iCX = stBmp.bmWidth;
+            iCY = iIconHeight;
+        }
+
+        HDC     hDC;
+        INT     iPrevMode;
+        hDC = CreateCompatibleDC(DC);
+        SelectBitmap(hDC, stIconInfo.hbmMask);
+        iPrevMode = SetStretchBltMode(DC, HALFTONE);
+        rcDst.left = X;
+        rcDst.top = Y;
+        rcDst.right = X + iCX;
+        rcDst.bottom = Y + iCY;
+        GDI_FillSolidRect(DC, &rcDst, RGB(255, 255, 255));
+
+        if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, 0, stBmp.bmWidth, iIconHeight, SRCAND))
+            if (stIconInfo.hbmColor) {
+                SelectBitmap(hDC, stIconInfo.hbmColor);
+                if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, 0, stBmp.bmWidth, iIconHeight, SRCAND))
+                    bRet = TRUE;
+            } else {
+                if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, iIconHeight, stBmp.bmWidth, iIconHeight, SRCINVERT))
+                    bRet = TRUE;
+            }
+        SetStretchBltMode(DC, iPrevMode);
+        DeleteDC(hDC);
+    }
+
+    DeleteObject(stIconInfo.hbmMask);
+    if (stIconInfo.hbmColor)
+        DeleteObject(stIconInfo.hbmColor);
+    return bRet;
+}
+
+BOOL NTAPI GDI_CreateSnapshot(HWND Window, PGDI_SNAPSHOT Snapshot) {
+    HDC     hDC;
+    BOOL    bRet;
+    if (Window) {
+        RECT rc;
+        GetClientRect(Window, &rc);
+        Snapshot->Position.x = Snapshot->Position.y = 0;
+        Snapshot->Size.cx = rc.right;
+        Snapshot->Size.cy = rc.bottom;
+    } else
+        UI_GetScreenPos(&Snapshot->Position, &Snapshot->Size);
+    hDC = GetDC(Window);
+    Snapshot->DC = CreateCompatibleDC(hDC);
+    Snapshot->Bitmap = CreateCompatibleBitmap(hDC, Snapshot->Size.cx, Snapshot->Size.cy);
+    Snapshot->OriginalBitmap = SelectObject(Snapshot->DC, Snapshot->Bitmap);
+    bRet = BitBlt(Snapshot->DC, 0, 0, Snapshot->Size.cx, Snapshot->Size.cy, hDC, Snapshot->Position.x, Snapshot->Position.y, SRCCOPY);
+    ReleaseDC(Window, hDC);
+    return bRet;
+}
+
+BOOL NTAPI GDI_DeleteSnapshot(PGDI_SNAPSHOT Snapshot) {
+    BOOL bRet;
+    bRet = DeleteDC(Snapshot->DC);
+    bRet &= DeleteObject(Snapshot->Bitmap);
+    bRet &= DeleteObject(Snapshot->OriginalBitmap);
+    return bRet;
 }

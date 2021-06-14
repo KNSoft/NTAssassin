@@ -204,41 +204,6 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\NTACtl_ColorPicker.h" />
-    <ClInclude Include="include\NTAData.h" />
-    <ClInclude Include="include\NTADbg.h" />
-    <ClInclude Include="include\NTADlg_RectEditor.h" />
-    <ClInclude Include="include\NTADlg_ValueEditor.h" />
-    <ClInclude Include="include\NTADPI.h" />
-    <ClInclude Include="include\NTAHijack.h" />
-    <ClInclude Include="include\NTAPI.h" />
-    <ClInclude Include="include\NTACon.h" />
-    <ClInclude Include="include\NTASys.h" />
-    <ClInclude Include="include\NTConst.h" />
-    <ClInclude Include="include\NTACtl.h" />
-    <ClInclude Include="include\NTADlg.h" />
-    <ClInclude Include="include\NTAFile.h" />
-    <ClInclude Include="include\NTAGDI.h" />
-    <ClInclude Include="include\NTAI18N.h" />
-    <ClInclude Include="include\NTAImage.h" />
-    <ClInclude Include="include\NTAIO.h" />
-    <ClInclude Include="include\NTAKNS.h" />
-    <ClInclude Include="include\NTAList.h" />
-    <ClInclude Include="include\NTAMath.h" />
-    <ClInclude Include="include\NTAMem.h" />
-    <ClInclude Include="include\NTANT.h" />
-    <ClInclude Include="include\NTAssassin.h" />
-    <ClInclude Include="include\NTAPE.h" />
-    <ClInclude Include="include\NTAProc.h" />
-    <ClInclude Include="include\NTARProc.h" />
-    <ClInclude Include="include\NTAStr.h" />
-    <ClInclude Include="include\NTStruct.h" />
-    <ClInclude Include="include\NTATime.h" />
-    <ClInclude Include="include\NTTypes.h" />
-    <ClInclude Include="include\NTAUI.h" />
-    <ClInclude Include="NTA_NAC_Output.h" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="NTACtl_ColorPicker.c" />
     <ClCompile Include="NTADPI.c" />
     <ClCompile Include="NTABitmap.c" />
@@ -267,6 +232,40 @@
     <ClCompile Include="NTATime.c" />
     <ClCompile Include="NTAUI.c" />
     <ClCompile Include="NTA_NAC_Output.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\NTAssassin\NTACon.h" />
+    <ClInclude Include="include\NTAssassin\NTACtl.h" />
+    <ClInclude Include="include\NTAssassin\NTACtl_ColorPicker.h" />
+    <ClInclude Include="include\NTAssassin\NTAData.h" />
+    <ClInclude Include="include\NTAssassin\NTADbg.h" />
+    <ClInclude Include="include\NTAssassin\NTADlg.h" />
+    <ClInclude Include="include\NTAssassin\NTADlg_RectEditor.h" />
+    <ClInclude Include="include\NTAssassin\NTADlg_ValueEditor.h" />
+    <ClInclude Include="include\NTAssassin\NTADPI.h" />
+    <ClInclude Include="include\NTAssassin\NTAFile.h" />
+    <ClInclude Include="include\NTAssassin\NTAGDI.h" />
+    <ClInclude Include="include\NTAssassin\NTAHijack.h" />
+    <ClInclude Include="include\NTAssassin\NTAI18N.h" />
+    <ClInclude Include="include\NTAssassin\NTAImage.h" />
+    <ClInclude Include="include\NTAssassin\NTAIO.h" />
+    <ClInclude Include="include\NTAssassin\NTAKNS.h" />
+    <ClInclude Include="include\NTAssassin\NTAList.h" />
+    <ClInclude Include="include\NTAssassin\NTAMath.h" />
+    <ClInclude Include="include\NTAssassin\NTAMem.h" />
+    <ClInclude Include="include\NTAssassin\NTANT.h" />
+    <ClInclude Include="include\NTAssassin\NTAPE.h" />
+    <ClInclude Include="include\NTAssassin\NTAPI.h" />
+    <ClInclude Include="include\NTAssassin\NTAProc.h" />
+    <ClInclude Include="include\NTAssassin\NTARProc.h" />
+    <ClInclude Include="include\NTAssassin\NTAssassin.h" />
+    <ClInclude Include="include\NTAssassin\NTAStr.h" />
+    <ClInclude Include="include\NTAssassin\NTASys.h" />
+    <ClInclude Include="include\NTAssassin\NTATime.h" />
+    <ClInclude Include="include\NTAssassin\NTAUI.h" />
+    <ClInclude Include="include\NTAssassin\NTConst.h" />
+    <ClInclude Include="include\NTAssassin\NTStruct.h" />
+    <ClInclude Include="include\NTAssassin\NTTypes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

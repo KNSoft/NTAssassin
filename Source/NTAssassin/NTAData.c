@@ -1,4 +1,4 @@
-#include "NTAssassin.h" 
+#include "NTAssassin\NTAssassin.h" 
 
 // uGroupCount, uSize, lpst1, u1, lpst2, u2, ...
 PVOID WINAPIV Data_StructCombineEx(UINT uGroupCount, UINT uSize, ...) {
