@@ -149,3 +149,11 @@ HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, CTL_TREEVIEWITEME
     } while (uDepth);
     return NULL;
 }
+
+LRESULT NTAPI Ctl_ComboBoxSetSelect(HWND ComboBox, INT ItemIndex) {
+    LRESULT lResult = SendMessage(ComboBox, CB_SETCURSEL, ItemIndex, 0);
+    INT_PTR iID;
+    if (UI_GetWindowLong(ComboBox, FALSE, GWLP_ID, &iID))
+        SendMessage(GetParent(ComboBox), WM_COMMAND, MAKEWPARAM(iID, CBN_SELCHANGE), (LPARAM)ComboBox);
+    return lResult;
+}

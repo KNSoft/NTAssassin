@@ -1,39 +1,39 @@
 #include "NTAssassin\NTAssassin.h"
 
-LPWSTR      lpI18NFontName = NULL;
+LPWSTR      pI18NFontName = NULL;
 BOOL        bI18NRTLReading = FALSE;
-PI18N_ITEM  lpI18NStringTable = NULL;
-PI18N_ITEM  lpI18NDefaultStringTable = NULL;
+PI18N_ITEM  pI18NStringTable = NULL;
+PI18N_ITEM  pI18NDefaultStringTable = NULL;
 USHORT      usI18NStringCount = 0;
 
-PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT ItemCount, LPCWSTR LangName) {
+PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT ItemCount, PCWSTR LangName) {
     usI18NStringCount = ItemCount;
-    lpI18NDefaultStringTable = Langs[0]->StringTable;
+    pI18NDefaultStringTable = Langs[0]->StringTable;
     PI18N_LANGUAGE lpLang = I18N_FindLangEx(Langs, LangCount, LangName);
     I18N_SetLocale(lpLang);
     return lpLang;
 }
 
 VOID NTAPI I18N_SetLocale(PI18N_LANGUAGE Lang) {
-    lpI18NFontName = Lang->FontName;
+    pI18NFontName = Lang->FontName;
     bI18NRTLReading = Lang->RTLReading;
-    lpI18NStringTable = Lang->StringTable;
+    pI18NStringTable = Lang->StringTable;
 }
 
-PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, LPCWSTR LangName) {
+PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR LangName) {
     WCHAR   wcName[MAX_LOCALENAME_CCH];
-    LPCWSTR lpszLangName;
+    PCWSTR  pszLangName;
     int     iCchName;
 
     // Use user default language instead when lpszName is NULL
     if (LangName) {
-        lpszLangName = LangName;
+        pszLangName = LangName;
         iCchName = MAX_LOCALENAME_CCH;
     } else {
         iCchName = GetLocaleInfoEx(LOCALE_NAME_SYSTEM_DEFAULT, LOCALE_SNAME, wcName, ARRAYSIZE(wcName));
         if (iCchName == 0 || wcName[0] == '\0')
             return Langs[0];
-        lpszLangName = wcName;
+        pszLangName = wcName;
     }
 
     // Match locale
@@ -43,15 +43,15 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, LPCWSTR La
         INT     i = 0, iNameIndex = 0;
         QWORD   qwName = 0;
         do {
-            while (lpszLangName[i] != '\0' && lpszLangName[i] != '-') {
+            while (pszLangName[i] != '\0' && pszLangName[i] != '-') {
                 qwName <<= 8;
-                qwName |= lpszLangName[i];
+                qwName |= pszLangName[i];
                 if (++i >= iCchName)
                     break;
             }
             qwNames[iNameIndex] = qwName;
             qwName = 0;
-        } while (iNameIndex++ < ARRAYSIZE(qwNames) && lpszLangName[i] != '\0' && i++ < iCchName);
+        } while (iNameIndex++ < ARRAYSIZE(qwNames) && pszLangName[i] != '\0' && i++ < iCchName);
         // Find in list
         for (i = 0; i < (INT)LangCount; i++) {
             if (Langs[i]->Name[0] == qwNames[0] &&
@@ -60,23 +60,23 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, LPCWSTR La
                 return Langs[i];
         }
         // Use parent instead
-        iCchName = GetLocaleInfoEx(lpszLangName, LOCALE_SPARENT, wcName, ARRAYSIZE(wcName));
+        iCchName = GetLocaleInfoEx(pszLangName, LOCALE_SPARENT, wcName, ARRAYSIZE(wcName));
     } while (iCchName != 0 && wcName[0] != '\0');
 
     return Langs[0];
 }
 
-LPCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
+PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
     if (IS_INTRESOURCE(StrIndex)) {
-        LPCWSTR lpsz = NULL;
+        PCWSTR  psz = NULL;
         USHORT  usIndex = LOWORD(StrIndex);
         if (usIndex < usI18NStringCount) {
-            lpsz = lpI18NStringTable[usIndex].Value;
-            return lpsz ? lpsz : lpI18NDefaultStringTable[usIndex].Value;
+            psz = pI18NStringTable[usIndex].Value;
+            return psz ? psz : pI18NDefaultStringTable[usIndex].Value;
         }
     } else {
-        DWORD       dwHash = Str_HashExW((LPCWSTR)StrIndex, STRSAFE_MAX_CCH, StrHashAlgorithmX65599);
-        PI18N_ITEM  lpItem = lpI18NStringTable, lpEndItem = lpI18NStringTable + usI18NStringCount;
+        DWORD       dwHash = Str_HashExW((PCWSTR)StrIndex, STRSAFE_MAX_CCH, StrHashAlgorithmX65599);
+        PI18N_ITEM  lpItem = pI18NStringTable, lpEndItem = pI18NStringTable + usI18NStringCount;
         BOOL        bUseDefault = FALSE;
         while (TRUE) {
             while (lpItem < lpEndItem)
@@ -84,10 +84,10 @@ LPCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
                     return lpItem->Value;
                 else
                     lpItem++;
-            if (bUseDefault || lpI18NStringTable == lpI18NDefaultStringTable)
+            if (bUseDefault || pI18NStringTable == pI18NDefaultStringTable)
                 return NULL;
-            lpItem = lpI18NDefaultStringTable;
-            lpEndItem = lpI18NDefaultStringTable + usI18NStringCount;
+            lpItem = pI18NDefaultStringTable;
+            lpEndItem = pI18NDefaultStringTable + usI18NStringCount;
             bUseDefault = TRUE;
         }
     }
@@ -95,7 +95,7 @@ LPCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
 }
 
 HFONT NTAPI I18N_CreateFont(INT FontSize, INT FontWeight) {
-    return GDI_CreateFont(FontSize, FontWeight, lpI18NFontName ? lpI18NFontName : L"MS Shell Dlg");
+    return GDI_CreateFont(FontSize, FontWeight, pI18NFontName ? pI18NFontName : L"MS Shell Dlg");
 }
 
 HWND NTAPI I18N_InitCtlText(HWND Dialog, INT CtlID, UINT_PTR StrIndex) {

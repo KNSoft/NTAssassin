@@ -66,7 +66,7 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer) {
         pbmfh->bfOffBits = uHeadersSize;
         pbmfh->bfSize = uFileSize;
         pbmfh->bfReserved1 = pbmfh->bfReserved2 = 0;
-        pbmi = ADD_OFFSET(pbmfh, sizeof(*pbmfh), BITMAPINFO);
+        pbmi = MOVE_PTR(pbmfh, sizeof(*pbmfh), BITMAPINFO);
         pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
         pbmi->bmiHeader.biWidth = bmp.bmWidth;
         pbmi->bmiHeader.biHeight = bmp.bmHeight;
@@ -76,7 +76,7 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer) {
         pbmi->bmiHeader.biClrUsed = dwClrItem;
         pbmi->bmiHeader.biCompression = BI_RGB;
         pbmi->bmiHeader.biXPelsPerMeter = pbmi->bmiHeader.biYPelsPerMeter = pbmi->bmiHeader.biClrImportant = 0;
-        pBits = ADD_OFFSET(pbmi, pbmi->bmiHeader.biSize + (DWORD_PTR)dwClrSize, VOID);
+        pBits = MOVE_PTR(pbmi, pbmi->bmiHeader.biSize + (DWORD_PTR)dwClrSize, VOID);
         if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBits, pbmi, DIB_RGB_COLORS))
             return 0;
     }

@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\NTDef">
+      <UniqueIdentifier>{3cece7a0-828d-4d20-90b2-daa1fd49a902}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NTABitmap.c">
@@ -164,9 +167,6 @@
     <ClInclude Include="include\NTAssassin\NTAPE.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NTAssassin\NTAPI.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\NTAssassin\NTAProc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -188,14 +188,17 @@
     <ClInclude Include="include\NTAssassin\NTAUI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\NTAssassin\NTConst.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NTAssassin\NTStruct.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="include\NTAssassin\NTAPI.h">
+      <Filter>Header Files\NTDef</Filter>
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTTypes.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\NTDef</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTStruct.h">
+      <Filter>Header Files\NTDef</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTConst.h">
+      <Filter>Header Files\NTDef</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

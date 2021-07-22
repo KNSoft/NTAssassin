@@ -15,7 +15,7 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, UINT BufferSize, PWSTR
     if (uSize < uDelta)
         return NULL;
     lpdwSize = lpTemp;
-    lpTemp = ADD_OFFSET(lpTemp, uDelta, VOID);
+    lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
     uSize -= uDelta;
 
     // szLibName
@@ -23,7 +23,7 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, UINT BufferSize, PWSTR
     uDelta = iCcb + sizeof(WCHAR);
     if (uSize < uDelta)
         return NULL;
-    lpTemp = ADD_OFFSET(lpTemp, uDelta, VOID);
+    lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
     uSize -= uDelta;
 
     // wProcOrdinal
@@ -32,7 +32,7 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, UINT BufferSize, PWSTR
         return NULL;
     wProcOrdinal = (UINT_PTR)ProcName <= MAXWORD ? LOWORD(ProcName) : 0;
     *(LPWORD)lpTemp = wProcOrdinal;
-    lpTemp = ADD_OFFSET(lpTemp, uDelta, VOID);
+    lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
     uSize -= uDelta;
 
     // szProcName
@@ -47,7 +47,7 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, UINT BufferSize, PWSTR
         uDelta = iCcb + sizeof(CHAR);
         if (uSize < uDelta)
             return NULL;
-        lpTemp = ADD_OFFSET(lpTemp, uDelta, VOID);
+        lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
         uSize -= uDelta;
     }
 
@@ -184,8 +184,8 @@ NTSTATUS NTAPI Hijack_CallProc(HANDLE ProcessHandle, PHIJACK_CALLPROCHEADER Hija
     lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteBuffer, HijackCallProc, sizeof(HIJACK_CALLPROCHEADER), NULL);
     if (!NT_SUCCESS(lStatus))
         goto Label_1;
-    pRemoteParam = ADD_OFFSET(pRemoteBuffer, sizeof(HIJACK_CALLPROCHEADER), HIJACK_CALLPROCPARAM);
-    pTemp = pRemoteRandomParam = ADD_OFFSET(pRemoteParam, sizeof(HIJACK_CALLPROCPARAM) * uParamCount, VOID);
+    pRemoteParam = MOVE_PTR(pRemoteBuffer, sizeof(HIJACK_CALLPROCHEADER), HIJACK_CALLPROCPARAM);
+    pTemp = pRemoteRandomParam = MOVE_PTR(pRemoteParam, sizeof(HIJACK_CALLPROCPARAM) * uParamCount, VOID);
     for (i = uParamCount; i > 0; i--) {
         stMemParam.Size = pParam[i - 1].Size;
         if (stMemParam.Size) {
@@ -193,7 +193,7 @@ NTSTATUS NTAPI Hijack_CallProc(HANDLE ProcessHandle, PHIJACK_CALLPROCHEADER Hija
             if (!NT_SUCCESS(lStatus))
                 goto Label_1;
             stMemParam.Address = (DWORD_PTR)pTemp;
-            pTemp = ADD_OFFSET(pTemp, BYTE_ALIGN(stMemParam.Size, STRING_ALIGNMENT), VOID);
+            pTemp = MOVE_PTR(pTemp, BYTE_ALIGN(stMemParam.Size, STRING_ALIGNMENT), VOID);
         } else
             stMemParam.Address = pParam[i - 1].Address;
         lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteParam, &stMemParam, sizeof(stMemParam), NULL);
@@ -238,7 +238,7 @@ NTSTATUS NTAPI Hijack_CallProc(HANDLE ProcessHandle, PHIJACK_CALLPROCHEADER Hija
                 if (!NT_SUCCESS(lStatus))
                     goto Label_3;
             }
-            pRemoteRandomParam = ADD_OFFSET(pRemoteRandomParam, BYTE_ALIGN(pParam[i - 1].Size, STRING_ALIGNMENT), VOID);
+            pRemoteRandomParam = MOVE_PTR(pRemoteRandomParam, BYTE_ALIGN(pParam[i - 1].Size, STRING_ALIGNMENT), VOID);
         }
     }
 

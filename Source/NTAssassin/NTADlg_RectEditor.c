@@ -20,19 +20,9 @@
 #define IDC_RESETBTN    1014
 #define IDC_OKBTN       1015
 
-VOID Dlg_RectEditor_GetValue(HWND hDlg, INT iCtlID, PINT pValue) {
-    WCHAR           szNum[DRE_MAX_NUM_CCH];
-    INT             i;
-    UNICODE_STRING  stStrNum;
-    stStrNum.Buffer = szNum;
-    i = (INT)UI_GetDlgItemText(hDlg, iCtlID, szNum);
-    if (i) {
-        szNum[i++] = '\0';
-        stStrNum.MaximumLength = (USHORT)(i * sizeof(WCHAR));
-        stStrNum.Length = stStrNum.MaximumLength - sizeof(WCHAR);
-        if (!NT_SUCCESS(RtlUnicodeStringToInteger(&stStrNum, 0, pValue)))
-            *pValue = 0;
-    }
+BOOL Dlg_RectEditor_GetValue(HWND hDlg, INT iCtlID, PINT pValue) {
+    WCHAR   szNum[DRE_MAX_NUM_CCH];
+    return UI_GetDlgItemText(hDlg, iCtlID, szNum) && Str_ToIntW(szNum, pValue);
 }
 
 VOID Dlg_RectEditor_SetValue(HWND hCtl, INT iNum) {
@@ -190,12 +180,12 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
         } else if (wParam == MAKEWPARAM(IDC_OKBTN, 0)) {
             PDLG_RECTEDITOR lpstDRE = (PDLG_RECTEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
             RECT            rc;
-            Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_LEFT, &rc.left);
-            Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_TOP, &rc.top);
-            Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_RIGHT, &rc.right);
-            Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_BOTTOM, &rc.bottom);
             // Verify inputs
-            if (rc.left <= rc.right && rc.top <= rc.bottom) {
+            if (Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_LEFT, &rc.left) &&
+                Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_TOP, &rc.top) &&
+                Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_RIGHT, &rc.right) &&
+                Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_BOTTOM, &rc.bottom) &&
+                rc.left <= rc.right && rc.top <= rc.bottom) {
                 lpstDRE->lprc->left = rc.left;
                 lpstDRE->lprc->top = rc.top;
                 lpstDRE->lprc->right = rc.right;

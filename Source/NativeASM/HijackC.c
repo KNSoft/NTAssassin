@@ -18,7 +18,7 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     uParamSize -= uDelta;
 
     // szLibName
-    pszLib = ADD_OFFSET(lParam, uDelta, WCHAR);
+    pszLib = MOVE_PTR(lParam, uDelta, WCHAR);
     for (iCchLib = 0; uParamSize > 0; uParamSize--)
         if (!pszLib[iCchLib++])
             break;
@@ -100,36 +100,36 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     PDWORD                  padwNamesRVA;
     DWORD                   dwProcRVA;
     // Get export directory and table
-    pExportDir = &ADD_OFFSET(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-    pExportTable = ADD_OFFSET(hNtDLL, pExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
+    pExportDir = &MOVE_PTR(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+    pExportTable = MOVE_PTR(hNtDLL, pExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
     // Search name
-    padwNamesRVA = ADD_OFFSET(hNtDLL, pExportTable->AddressOfNames, DWORD);
+    padwNamesRVA = MOVE_PTR(hNtDLL, pExportTable->AddressOfNames, DWORD);
     for (uIndex = 0; uIndex < pExportTable->NumberOfNames; uIndex++, padwNamesRVA++) {
         // Match both of LdrLoadDll and LdrGetProcedureAddress
         if (*padwNamesRVA + ARRAYSIZE("LdrGetProcedureAddress") >= (DWORD_PTR)pExportDir->VirtualAddress + pExportDir->Size)
             return STATUS_INTERNAL_ERROR;
-        pdwFuncName = ADD_OFFSET(hNtDLL, *padwNamesRVA, DWORD);
+        pdwFuncName = MOVE_PTR(hNtDLL, *padwNamesRVA, DWORD);
         ppLdrFunc = NULL;
         // Fast comparison and avoid instructions like "xmmword ptr" generated
         if (!hDLL && !pLdrLoadDll &&
             pdwFuncName[0] == ('LrdL') &&
             pdwFuncName[1] == ('Ddao') &&
-            *ADD_OFFSET(pdwFuncName, 7, DWORD) == ('llD'))
+            *MOVE_PTR(pdwFuncName, 7, DWORD) == ('llD'))
             ppLdrFunc = (PVOID*)&pLdrLoadDll;
         else if (pszProc && !pLdrGetProcedureAddress &&
             pdwFuncName[0] == ('GrdL') &&
             pdwFuncName[1] == ('rPte') &&
             pdwFuncName[2] == ('deco') &&
-            *ADD_OFFSET(pdwFuncName, 11, DWORD) == ('erud') &&
-            *ADD_OFFSET(pdwFuncName, 15, DWORD) == ('rddA') &&
-            *ADD_OFFSET(pdwFuncName, 19, DWORD) == ('sse')
+            *MOVE_PTR(pdwFuncName, 11, DWORD) == ('erud') &&
+            *MOVE_PTR(pdwFuncName, 15, DWORD) == ('rddA') &&
+            *MOVE_PTR(pdwFuncName, 19, DWORD) == ('sse')
             )
             ppLdrFunc = (PVOID*)&pLdrGetProcedureAddress;
         if (ppLdrFunc) {
             // LdrLoadDll and LdrGetProcedureAddress are not forward thunks
-            dwProcRVA = ADD_OFFSET(hNtDLL, pExportTable->AddressOfFunctions, DWORD)[ADD_OFFSET(hNtDLL, pExportTable->AddressOfNameOrdinals, WORD)[uIndex]];
+            dwProcRVA = MOVE_PTR(hNtDLL, pExportTable->AddressOfFunctions, DWORD)[MOVE_PTR(hNtDLL, pExportTable->AddressOfNameOrdinals, WORD)[uIndex]];
             if (dwProcRVA < pExportDir->VirtualAddress || dwProcRVA >= pExportDir->VirtualAddress + pExportDir->Size)
-                *ppLdrFunc = ADD_OFFSET(hNtDLL, dwProcRVA, VOID);
+                *ppLdrFunc = MOVE_PTR(hNtDLL, dwProcRVA, VOID);
             else
                 return STATUS_INTERNAL_ERROR;
         }

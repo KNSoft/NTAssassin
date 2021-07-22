@@ -157,6 +157,268 @@ VOID NTAPI Str_CchInitExA(PSTRING lpstStr, LPSTR lpStr, UINT cchMax) {
     lpstStr->Buffer = lpStr;
 }
 
+BOOL NTAPI Str_ToIntExW(PCWSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, SIZE_T ValueSize) {
+    PCWSTR  psz = StrValue;
+
+    // Minus
+    BOOL    bMinus;
+    if (*psz == '\0')
+        return FALSE;
+    if (*psz == '-') {
+        if (!Unsigned) {
+            psz++;
+            bMinus = TRUE;
+        } else
+            return FALSE;
+    } else if (*psz == '+') {
+        psz++;
+        bMinus = FALSE;
+    } else
+        bMinus = FALSE;
+
+    // Base
+    UINT    uBase;
+    if (Base == 0) {
+        if (*psz == '\0')
+            return FALSE;
+        if (*psz == '0') {
+            psz++;
+            if (*psz == '\0')
+                return FALSE;
+            if (*psz == 'b') {
+                psz++;
+                uBase = 2;
+            } else if (*psz == 'o') {
+                psz++;
+                uBase = 8;
+            } else if (*psz == 'x') {
+                psz++;
+                uBase = 16;
+            } else
+                uBase = 10;
+        } else
+            uBase = 10;
+    } else if (Base == 2 || Base == 8 || Base == 16) {
+        uBase = Base;
+    } else
+        return FALSE;
+
+    // Overflow limitation
+    UINT64  uMax;
+    if (ValueSize == sizeof(UINT8))
+        uMax = Unsigned ? MAXUINT8 : MAXINT8;
+    else if (ValueSize == sizeof(UINT16))
+        uMax = Unsigned ? MAXUINT16 : MAXINT16;
+    else if (ValueSize == sizeof(UINT32))
+        uMax = Unsigned ? MAXUINT32 : MAXINT32;
+    else if (ValueSize == sizeof(UINT64))
+        uMax = Unsigned ? 0 : MAXINT64;
+    else
+        return FALSE;
+
+    // Convert
+    WCHAR   wc;
+    USHORT  uc;
+    UINT64  uTotal = 0, uTemp;
+    if (uBase == 2) {
+        while ((wc = *psz++) != '\0') {
+            if (wc == '0') {
+                uTemp = uTotal << 1;
+            } else if (wc == '1') {
+                uTemp = (uTotal << 1) | 1;
+            } else
+                return FALSE;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    } else if (uBase == 8) {
+        while ((wc = *psz++) != '\0') {
+            if (wc >= '0' && wc <= '7') {
+                uc = wc - '0';
+            } else
+                return FALSE;
+            uTemp = (uTotal << 3) + uc;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    } else if (uBase == 10) {
+        while ((wc = *psz++) != '\0') {
+            if (wc >= '0' && wc <= '9') {
+                uc = wc - '0';
+            } else
+                return FALSE;
+            uTemp = uTotal * 10 + uc;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    } else if (uBase == 16) {
+        while ((wc = *psz++) != '\0') {
+            if (wc >= '0' && wc <= '9') {
+                uc = wc - '0';
+            } else if (wc >= 'A' && wc <= 'F') {
+                uc = wc - 'A' + 10;
+            } else if (wc >= 'a' && wc <= 'f') {
+                uc = wc - 'a' + 10;
+            } else
+                return FALSE;
+            uTemp = (uTotal << 4) + uc;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    }
+
+    // Output
+    if (bMinus)
+        (INT64)uTotal = -(INT64)uTotal;
+    if (ValueSize == sizeof(UINT8))
+        *((PUINT8)Value) = (UINT8)uTotal;
+    else if (ValueSize == sizeof(UINT16))
+        *((PUINT16)Value) = (UINT16)uTotal;
+    else if (ValueSize == sizeof(UINT32))
+        *((PUINT32)Value) = (UINT32)uTotal;
+    else if (ValueSize == sizeof(UINT64))
+        *((PUINT64)Value) = (UINT64)uTotal;
+    else
+        return FALSE;
+
+    return TRUE;
+}
+
+BOOL NTAPI Str_ToIntExA(PCSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, SIZE_T ValueSize) {
+    PCSTR  psz = StrValue;
+
+    // Minus
+    BOOL    bMinus;
+    if (*psz == '\0')
+        return FALSE;
+    if (*psz == '-') {
+        if (!Unsigned) {
+            psz++;
+            bMinus = TRUE;
+        } else
+            return FALSE;
+    } else if (*psz == '+') {
+        psz++;
+        bMinus = FALSE;
+    } else
+        bMinus = FALSE;
+
+    // Base
+    UINT    uBase;
+    if (Base == 0) {
+        if (*psz == '\0')
+            return FALSE;
+        if (*psz == '0') {
+            psz++;
+            if (*psz == '\0')
+                return FALSE;
+            if (*psz == 'b') {
+                psz++;
+                uBase = 2;
+            } else if (*psz == 'o') {
+                psz++;
+                uBase = 8;
+            } else if (*psz == 'x') {
+                psz++;
+                uBase = 16;
+            } else
+                uBase = 10;
+        } else
+            uBase = 10;
+    } else if (Base == 2 || Base == 8 || Base == 16) {
+        uBase = Base;
+    } else
+        return FALSE;
+
+    // Overflow limitation
+    UINT64  uMax;
+    if (ValueSize == sizeof(UINT8))
+        uMax = Unsigned ? MAXUINT8 : MAXINT8;
+    else if (ValueSize == sizeof(UINT16))
+        uMax = Unsigned ? MAXUINT16 : MAXINT16;
+    else if (ValueSize == sizeof(UINT32))
+        uMax = Unsigned ? MAXUINT32 : MAXINT32;
+    else if (ValueSize == sizeof(UINT64))
+        uMax = Unsigned ? 0 : MAXINT64;
+    else
+        return FALSE;
+
+    // Convert
+    CHAR    ch;
+    USHORT  uc;
+    UINT64  uTotal = 0, uTemp;
+    if (uBase == 2) {
+        while ((ch = *psz++) != '\0') {
+            if (ch == '0') {
+                uTemp = uTotal << 1;
+            } else if (ch == '1') {
+                uTemp = (uTotal << 1) | 1;
+            } else
+                return FALSE;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    } else if (uBase == 8) {
+        while ((ch = *psz++) != '\0') {
+            if (ch >= '0' && ch <= '7') {
+                uc = ch - '0';
+            } else
+                return FALSE;
+            uTemp = (uTotal << 3) + uc;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    } else if (uBase == 10) {
+        while ((ch = *psz++) != '\0') {
+            if (ch >= '0' && ch <= '9') {
+                uc = ch - '0';
+            } else
+                return FALSE;
+            uTemp = uTotal * 10 + uc;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    } else if (uBase == 16) {
+        while ((ch = *psz++) != '\0') {
+            if (ch >= '0' && ch <= '9') {
+                uc = ch - '0';
+            } else if (ch >= 'A' && ch <= 'F') {
+                uc = ch - 'A' + 10;
+            } else if (ch >= 'a' && ch <= 'f') {
+                uc = ch - 'a' + 10;
+            } else
+                return FALSE;
+            uTemp = (uTotal << 4) + uc;
+            if (uMax ? uTemp > uMax : uTemp <= uTotal)
+                return FALSE;
+            uTotal = uTemp;
+        }
+    }
+
+    // Output
+    if (bMinus)
+        (INT64)uTotal = -(INT64)uTotal;
+    if (ValueSize == sizeof(UINT8))
+        *((PUINT8)Value) = (UINT8)uTotal;
+    else if (ValueSize == sizeof(UINT16))
+        *((PUINT16)Value) = (UINT16)uTotal;
+    else if (ValueSize == sizeof(UINT32))
+        *((PUINT32)Value) = (UINT32)uTotal;
+    else if (ValueSize == sizeof(UINT64))
+        *((PUINT64)Value) = (UINT64)uTotal;
+    else
+        return FALSE;
+
+    return TRUE;
+}
+
 BOOL NTAPI Str_HexTo32ExW(LPCWSTR lpsz, UINT cchMax, PDWORD lpdwOut) {
     UINT    i = 0;
     DWORD   dwOut = 0;
@@ -412,4 +674,12 @@ DWORD NTAPI Str_HashExA(LPCSTR psz, UINT cchMax, STR_HASH_ALGORITHM HashAlgorith
         }
     }
     return dwHash;
+}
+
+VOID NTAPI Str_UpperW(PWSTR psz) {
+    while (*psz != '\0') {
+        if (*psz >= 'a' && *psz <= 'z')
+            *psz -= 'a' - 'A';
+        psz++;
+    }
 }

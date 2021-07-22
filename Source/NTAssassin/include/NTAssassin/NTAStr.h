@@ -213,3 +213,58 @@ NTA_API DWORD NTAPI Str_HashExA(LPCSTR psz, UINT cchMax, STR_HASH_ALGORITHM Hash
 #define Str_HashEx Str_HashExA
 #define Str_Hash Str_HashA
 #endif
+
+NTA_API VOID NTAPI Str_UpperW(PWSTR psz);
+#ifdef UNICODE
+#define Str_Upper Str_UpperW
+#else
+#define Str_Upper Str_UpperA
+#endif
+
+NTA_API BOOL NTAPI Str_ToIntExW(PCWSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, SIZE_T ValueSize);
+NTA_API BOOL NTAPI Str_ToIntExA(PCSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, SIZE_T ValueSize);
+#ifdef UNICODE
+#define Str_ToIntEx Str_ToIntExW
+#define Str_ToIntW(StrValue, Value) Str_ToIntExW(StrValue, FALSE, 0, Value, sizeof(*Value))
+#define Str_ToInt Str_ToIntW
+#define Str_ToUIntW(StrValue, Value) Str_ToIntExW(StrValue, TRUE, 0, Value, sizeof(*Value))
+#define Str_ToUInt Str_ToUIntW
+#define Str_HexToIntW(StrValue, Value) Str_ToIntExW(StrValue, FALSE, 16, Value, sizeof(*Value))
+#define Str_HexToInt Str_HexToIntW
+#define Str_HexToUIntW(StrValue, Value) Str_ToIntExW(StrValue, TRUE, 16, Value, sizeof(*Value))
+#define Str_HexToUInt Str_HexToUIntW
+#define Str_DecToIntW(StrValue, Value) Str_ToIntExW(StrValue, FALSE, 10, Value, sizeof(*Value))
+#define Str_DecToInt Str_DecToIntW
+#define Str_DecToUIntW(StrValue, Value) Str_ToIntExW(StrValue, TRUE, 10, Value, sizeof(*Value))
+#define Str_DecToUInt Str_DecToUIntW
+#define Str_OctToIntW(StrValue, Value) Str_ToIntExW(StrValue, FALSE, 8, Value, sizeof(*Value))
+#define Str_OctToInt Str_OctToIntW
+#define Str_OctToUIntW(StrValue, Value) Str_ToIntExW(StrValue, TRUE, 8, Value, sizeof(*Value))
+#define Str_OctToUInt Str_OctToUIntW
+#define Str_BinToIntW(StrValue, Value) Str_ToIntExW(StrValue, FALSE, 2, Value, sizeof(*Value))
+#define Str_BinToInt Str_BinToIntW
+#define Str_BinToUIntW(StrValue, Value) Str_ToIntExW(StrValue, TRUE, 2, Value, sizeof(*Value))
+#define Str_BinToUInt Str_BinToUIntW
+#else
+#define Str_ToIntEx Str_ToIntExA
+#define Str_ToIntA(StrValue, Value) Str_ToIntExA(StrValue, FALSE, 0, Value, sizeof(*Value))
+#define Str_ToInt Str_ToIntA
+#define Str_ToUIntA(StrValue, Value) Str_ToIntExA(StrValue, TRUE, 0, Value, sizeof(*Value))
+#define Str_ToUInt Str_ToUIntA
+#define Str_HexToIntA(StrValue, Value) Str_ToIntExA(StrValue, FALSE, 16, Value, sizeof(*Value))
+#define Str_HexToInt Str_HexToIntA
+#define Str_HexToUIntA(StrValue, Value) Str_ToIntExA(StrValue, TRUE, 16, Value, sizeof(*Value))
+#define Str_HexToUInt Str_HexToUIntA
+#define Str_DecToIntA(StrValue, Value) Str_ToIntExA(StrValue, FALSE, 10, Value, sizeof(*Value))
+#define Str_DecToInt Str_DecToIntA
+#define Str_DecToUIntA(StrValue, Value) Str_ToIntExA(StrValue, TRUE, 10, Value, sizeof(*Value))
+#define Str_DecToUInt Str_DecToUIntA
+#define Str_OctToIntA(StrValue, Value) Str_ToIntExA(StrValue, FALSE, 8, Value, sizeof(*Value))
+#define Str_OctToInt Str_OctToIntA
+#define Str_OctToUIntA(StrValue, Value) Str_ToIntExA(StrValue, TRUE, 8, Value, sizeof(*Value))
+#define Str_OctToUInt Str_OctToUIntA
+#define Str_BinToIntA(StrValue, Value) Str_ToIntExA(StrValue, FALSE, 2, Value, sizeof(*Value))
+#define Str_BinToInt Str_BinToIntA
+#define Str_BinToUIntA(StrValue, Value) Str_ToIntExA(StrValue, TRUE, 2, Value, sizeof(*Value))
+#define Str_BinToUInt Str_BinToUIntA
+#endif

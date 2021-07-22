@@ -18,7 +18,7 @@ VOID NTAPI UI_EndPaint(HWND Window, PUI_WINDBPAINT Paint) {
 PFNDwmGetWindowAttribute pfnDwmGetWindowAttribute = NULL;
 
 BOOL NTAPI UI_GetWindowRect(HWND Window, PRECT Rect) {
-    if (NT_GetKUSD()->NtMajorVersion >= 6 ) {
+    if (NT_GetKUSD()->NtMajorVersion >= 6) {
         if (!pfnDwmGetWindowAttribute)
             pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
         if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, Rect, sizeof(*Rect)) == S_OK)
@@ -236,19 +236,20 @@ UINT NTAPI UI_GetWindowTextEx(HWND Window, PWSTR Text, UINT TextCch) {
     return cCh;
 }
 
-DWORD NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR Result) {
+BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR Result) {
     LONG_PTR    lResult;
-    DWORD       dwError;
+    BOOL        bRet;
     __try {
         NT_ClearLastError();
         lResult = ClassLong ? (LONG_PTR)GetClassLongPtr(Window, Index) : GetWindowLongPtr(Window, Index);
-        dwError = lResult ? ERROR_SUCCESS : NT_GetLastError();
+        bRet = lResult ? TRUE : (NT_GetLastError() == ERROR_SUCCESS);
     } __except (NT_SEH_NopHandler(NULL)) {
         lResult = 0;
-        dwError = ERROR_READ_FAULT;
+        NT_SetLastError(ERROR_INVALID_FUNCTION);
+        bRet = FALSE;
     }
     *Result = lResult;
-    return dwError;
+    return bRet;
 }
 
 BOOL NTAPI UI_MessageLoop(HWND Window) {

@@ -217,9 +217,9 @@ NTA_API UINT NTAPI UI_GetWindowTextEx(HWND Window, PWSTR Text, UINT TextCch);
   * @param[in] ClassLong Set to TRUE to invoke "GetClassLongPtrW", or FALSE to invoke "GetWindowLongPtrW"
   * @param[in] Index The zero-based offset to the value to be retrieved
   * @param[out] Result Pointer to the variable receives the result
-  * @return Returns Win32 error code, ERROR_SUCCESS means succeeded
+  * @return Returns TRUE if succeeded, or FALSE if failed
   */
-NTA_API DWORD NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR Result);
+NTA_API BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR Result);
 
 /**
   * @brief Enters message loop for specified window
