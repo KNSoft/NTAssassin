@@ -130,7 +130,7 @@ BOOL NTAPI UI_ShellExec(PCWSTR File, PCWSTR Param, UI_SHELLEXEC_VERB Verb, INT S
         PIDLIST_ABSOLUTE    pidlDir, pidlFile;
         UINT                uIndexSlash;
         HRESULT             hr;
-        uIndexSlash = Str_CchCopyW(szFile, File);
+        uIndexSlash = (UINT)Str_CchCopyW(szFile, File);
         while (uIndexSlash > 0)
             if (szFile[--uIndexSlash] == '\\')
                 break;
@@ -228,8 +228,16 @@ LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, PCWSTR Text) {
     return lResult;
 }
 
-UINT NTAPI UI_GetWindowTextEx(HWND Window, PWSTR Text, UINT TextCch) {
+UINT NTAPI UI_GetWindowTextExW(HWND Window, PWSTR Text, UINT TextCch) {
     UINT    cCh = (UINT)SendMessageW(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
+    if (cCh >= TextCch)
+        cCh = 0;
+    Text[cCh] = '\0';
+    return cCh;
+}
+
+UINT NTAPI UI_GetWindowTextExA(HWND Window, PSTR Text, UINT TextCch) {
+    UINT    cCh = (UINT)SendMessageA(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
     if (cCh >= TextCch)
         cCh = 0;
     Text[cCh] = '\0';

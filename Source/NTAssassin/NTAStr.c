@@ -1,164 +1,280 @@
 #include "NTAssassin\NTAssassin.h"
 
-UINT NTAPI Str_CchLenExW(LPCWSTR psz, UINT cchMax) {
-    UINT i = 0;
-    while (i < cchMax) {
-        if (psz[i] == '\0')
+// String Length
+
+SIZE_T NTAPI Str_CchLenW(PCWSTR String) {
+    PCWSTR psz = String;
+    while (*psz++ != '\0');
+    return psz - String - 1;
+}
+
+SIZE_T NTAPI Str_CchLenA(PCSTR String) {
+    PCSTR psz = String;
+    while (*psz++ != '\0');
+    return psz - String - 1;
+}
+
+SIZE_T NTAPI Str_CcbLenW(PCWSTR String) {
+    PCWSTR psz = String;
+    while (*psz++ != '\0');
+    return (psz - String - 1) << 1;
+}
+
+// String Copy
+
+SIZE_T NTAPI Str_CchCopyExW(PWSTR Dest, SIZE_T DestCchSize, PCWSTR Src) {
+    SIZE_T i = 0;
+    while (i < DestCchSize) {
+        if ((Dest[i] = Src[i]) == '\0')
             return i;
         i++;
     }
     return 0;
 }
 
-UINT NTAPI Str_CchLenExA(LPCSTR psz, UINT cchMax) {
-    UINT i = 0;
-    while (i < cchMax) {
-        if (psz[i] == '\0')
+SIZE_T NTAPI Str_CchCopyExA(PSTR Dest, SIZE_T DestCchSize, PCSTR Src) {
+    SIZE_T i = 0;
+    while (i < DestCchSize) {
+        if ((Dest[i] = Src[i]) == '\0')
             return i;
         i++;
     }
     return 0;
 }
 
-UINT NTAPI Str_CcbLenExW(LPCWSTR psz, UINT ccbMax) {
-    UINT i = 0;
-    while (i < ccbMax / sizeof(WCHAR)) {
-        if (psz[i] == '\0')
+SIZE_T NTAPI Str_CcbCopyExW(PWSTR Dest, SIZE_T DestCcbSize, PCWSTR Src) {
+    SIZE_T i = 0;
+    while (i < DestCcbSize / sizeof(WCHAR)) {
+        if ((Dest[i] = Src[i]) == '\0')
             return i * sizeof(WCHAR);
         i++;
     }
     return 0;
 }
 
-UINT NTAPI Str_CchCopyExW(LPWSTR pszDest, UINT cchDest, LPCWSTR pszSrc) {
-    UINT i = 0;
-    while (i < cchDest) {
-        if ((pszDest[i] = pszSrc[i]) == '\0')
-            return i;
-        i++;
-    }
-    return 0;
-}
+// String Equal
 
-UINT NTAPI Str_CchCopyExA(LPSTR pszDest, UINT cchDest, LPCSTR pszSrc) {
+BOOL NTAPI Str_EqualW(PCWSTR String1, PCWSTR String2) {
     UINT i = 0;
-    while (i < cchDest) {
-        if ((pszDest[i] = pszSrc[i]) == '\0')
-            return i;
-        i++;
-    }
-    return 0;
-}
-
-UINT NTAPI Str_CcbCopyExW(LPWSTR pszDest, UINT ccbDest, LPCWSTR pszSrc) {
-    UINT i = 0;
-    while (i < ccbDest / sizeof(WCHAR)) {
-        if ((pszDest[i] = pszSrc[i]) == '\0')
-            return i * sizeof(WCHAR);
-        i++;
-    }
-    return 0;
-}
-
-BOOL NTAPI Str_CchEqualExW(LPCWSTR psz1, UINT cch1, LPCWSTR psz2, UINT cch2) {
-    UINT i = 0;
-    while (i < cch1 && i < cch2) {
-        if (psz1[i] != psz2[i])
+    while (TRUE) {
+        if (String1[i] != String2[i])
             return FALSE;
-        else if (psz1[i] == '\0')
+        else if (String1[i] == '\0')
             return TRUE;
         i++;
     }
     return FALSE;
 }
 
-BOOL NTAPI Str_CcbEqualICExW(LPCWSTR psz1, UINT ccb1, LPCWSTR psz2, UINT ccb2) {
+BOOL NTAPI Str_EqualA(PCSTR String1, PCSTR String2) {
     UINT i = 0;
-    while (i < ccb1 / sizeof(WCHAR) && i < ccb2 / sizeof(WCHAR)) {
-        if (psz1[i] != psz2[i]) {
-            if ((psz1[i] >= 'a' && psz1[i] <= 'z' && psz1[i] - ('a' - 'A') != psz2[i]) ||
-                (psz1[i] >= 'A' && psz1[i] <= 'Z' && psz1[i] + ('a' - 'A') != psz2[i])
+    while (TRUE) {
+        if (String1[i] != String2[i])
+            return FALSE;
+        else if (String1[i] == '\0')
+            return TRUE;
+        i++;
+    }
+    return FALSE;
+}
+
+BOOL NTAPI Str_EqualICW(PCWSTR String1, PCWSTR String2) {
+    UINT i = 0;
+    while (TRUE) {
+        if (String1[i] != String2[i]) {
+            if ((String1[i] >= 'a' && String1[i] <= 'z' && String1[i] - ('a' - 'A') != String2[i]) ||
+                (String1[i] >= 'A' && String1[i] <= 'Z' && String1[i] + ('a' - 'A') != String2[i])
                 )
                 return FALSE;
-        } else if (psz1[i] == '\0')
+        } else if (String1[i] == '\0')
             return TRUE;
         i++;
     }
     return FALSE;
 }
 
+BOOL NTAPI Str_EqualICA(PCSTR String1, PCSTR String2) {
+    UINT i = 0;
+    while (TRUE) {
+        if (String1[i] != String2[i]) {
+            if ((String1[i] >= 'a' && String1[i] <= 'z' && String1[i] - ('a' - 'A') != String2[i]) ||
+                (String1[i] >= 'A' && String1[i] <= 'Z' && String1[i] + ('a' - 'A') != String2[i])
+                )
+                return FALSE;
+        } else if (String1[i] == '\0')
+            return TRUE;
+        i++;
+    }
+    return FALSE;
+}
+
+// String Index
+
 // Algorithm: BF
-UINT NTAPI Str_CchIndex_BFExW(LPCWSTR lpszSrc, UINT cchMaxSrc, LPCWSTR lpszPattern, UINT cchMaxPattern) {
-    UINT    i;
-    LPCWSTR pszSrc;
+SIZE_T NTAPI Str_Index_BFW(PCWSTR String, PCWSTR Pattern) {
+    SIZE_T  i;
+    PCWSTR  pszSrc = String;
     BOOL    bMatched;
-    for (pszSrc = lpszSrc; pszSrc < lpszSrc + cchMaxSrc; pszSrc++) {
+    while (TRUE) {
         bMatched = TRUE;
-        for (i = 0; i < cchMaxPattern && pszSrc + i < lpszSrc + cchMaxSrc; i++) {
-            if (pszSrc[i] != lpszPattern[i]) {
+        i = 0;
+        while (TRUE) {
+            if (pszSrc[i] != Pattern[i]) {
                 if (pszSrc[i] == '\0')
                     return -1;
-                else if (lpszPattern[i] == '\0')
-                    return i == 0 ? -1 : (UINT)(pszSrc - lpszSrc);
+                else if (Pattern[i] == '\0')
+                    return i == 0 ? -1 : (SIZE_T)(pszSrc - String);
                 else {
                     bMatched = FALSE;
                     break;
                 }
             } else if (pszSrc[i] == '\0')
-                return (UINT)(pszSrc - lpszSrc);
+                return (SIZE_T)(pszSrc - String);
+            i++;
         }
         if (bMatched)
             return -1;
+        pszSrc++;
     }
     return -1;
 }
 
-BOOL NTAPI Str_CchEqualExA(LPCSTR psz1, UINT cch1, LPCSTR psz2, UINT cch2) {
-    UINT i = 0;
-    while (i < cch1 && i < cch2) {
-        if (psz1[i] != psz2[i])
-            return FALSE;
-        else if (psz1[i] == '\0')
-            return TRUE;
-        i++;
+SIZE_T NTAPI Str_Index_BFA(PCSTR String, PCSTR Pattern) {
+    SIZE_T  i;
+    PCSTR   pszSrc = String;
+    BOOL    bMatched;
+    while (TRUE) {
+        bMatched = TRUE;
+        i = 0;
+        while (TRUE) {
+            if (pszSrc[i] != Pattern[i]) {
+                if (pszSrc[i] == '\0')
+                    return -1;
+                else if (Pattern[i] == '\0')
+                    return i == 0 ? -1 : (SIZE_T)(pszSrc - String);
+                else {
+                    bMatched = FALSE;
+                    break;
+                }
+            } else if (pszSrc[i] == '\0')
+                return (SIZE_T)(pszSrc - String);
+            i++;
+        }
+        if (bMatched)
+            return -1;
+        pszSrc++;
     }
-    return FALSE;
+    return -1;
 }
 
-UINT NTAPI Str_CchU2AEx(LPSTR lpszANSI, UINT cchANSIMax, LPCWSTR lpszUnicode) {
+ULONG NTAPI Str_CchU2AEx(PSTR Dest, ULONG DestCchSize, PCWSTR Src) {
     ULONG ulANSIBytes = 0;
-    RtlUnicodeToMultiByteN(lpszANSI, cchANSIMax * sizeof(CHAR), &ulANSIBytes, lpszUnicode, Str_CcbLenExW(lpszUnicode, STRSAFE_MAX_CCH * sizeof(WCHAR)) + 1);
+    RtlUnicodeToMultiByteN(Dest, DestCchSize * sizeof(CHAR), &ulANSIBytes, Src, (ULONG)Str_CcbLenW(Src) + 1);
     return ulANSIBytes / sizeof(CHAR);
 }
 
-UINT NTAPI Str_CchA2UEx(_Out_writes_(cchUnicodeMax) LPWSTR lpszUnicode, _In_ UINT cchUnicodeMax, LPCSTR lpszANSI) {
+ULONG NTAPI Str_CchA2UEx(_Out_writes_(DestCchSize) PWSTR Dest, _In_ ULONG DestCchSize, PCSTR Src) {
     ULONG ulUnicodeBytes = 0;
-    RtlMultiByteToUnicodeN(lpszUnicode, cchUnicodeMax * sizeof(WCHAR), &ulUnicodeBytes, lpszANSI, Str_CcbLenExA(lpszANSI, STRSAFE_MAX_CCH * sizeof(CHAR)) + 1);
+    RtlMultiByteToUnicodeN(Dest, DestCchSize * sizeof(WCHAR), &ulUnicodeBytes, Src, (ULONG)Str_CcbLenA(Src) + 1);
     return ulUnicodeBytes / sizeof(WCHAR);
 }
 
-UINT NTAPI Str_CcbA2UEx(_Out_writes_bytes_(ccbUnicodeMax) LPWSTR lpszUnicode, _In_ UINT ccbUnicodeMax, LPCSTR lpszANSI) {
+ULONG NTAPI Str_CcbA2UEx(_Out_writes_bytes_(DestCcbSize) PWSTR Dest, _In_ ULONG DestCcbSize, PCSTR Src) {
     ULONG ulUnicodeBytes = 0;
-    RtlMultiByteToUnicodeN(lpszUnicode, ccbUnicodeMax, &ulUnicodeBytes, lpszANSI, Str_CcbLenExA(lpszANSI, STRSAFE_MAX_CCH * sizeof(CHAR)) + 1);
+    RtlMultiByteToUnicodeN(Dest, DestCcbSize, &ulUnicodeBytes, Src, (ULONG)Str_CcbLenA(Src) + 1);
     return ulUnicodeBytes;
 }
 
-VOID NTAPI Str_CchInitExW(PUNICODE_STRING lpstStr, LPWSTR lpStr, UINT cchMax) {
-    UINT uLen = Str_CcbLenExW(lpStr, cchMax * sizeof(WCHAR));
-    lpstStr->Length = uLen;
-    lpstStr->MaximumLength = uLen + (UINT)sizeof(WCHAR);
-    lpstStr->Buffer = lpStr;
+/*
+    Unicode             | UTF-8
+    ---------------------------------------------------------
+    0000 0000-0000 007F | 0xxxxxxx
+    0000 0080-0000 07FF | 110xxxxx 10xxxxxx
+    0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
+    0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+*/
+NTSTATUS NTAPI Str_UnicodeToUTF8Ex(PSTR Dest, SIZE_T DestCchSize, PCWSTR Src, PSIZE_T CharsWritten) {
+    NTSTATUS    lStatus = STATUS_SUCCESS;
+    UINT        cChDest = 0, cChSrc = 0;
+    PSTR        psz = Dest;
+    ULONG       ch;
+    SIZE_T      uChLength;
+    while (TRUE) {
+        ch = Src[cChSrc];
+        if (ch == '\0') {
+        Label_Terminate:
+            psz[0] = '\0';
+            break;
+        }
+        // Surrogate Pair
+        if (ch >= 0xD800 && ch <= 0xDBFF && Src[cChSrc + 1] != '\0' && Src[cChSrc + 1] >= 0xDC00 && Src[cChSrc + 1] <= 0xDFFF) {
+            ch = ((ch - 0xD800) << 10 | (Src[cChSrc + 1] - 0xDC00)) + 0x010000;
+            cChSrc++;
+            goto Label_Encode;
+        } else if (ch < 0xDC00 || ch > 0xDFFF)
+            goto Label_Encode;
+        // Invalid character
+        ch = 0xFFFD;
+        lStatus = STATUS_SOME_NOT_MAPPED;
+    // Encode, ch always <= 0x10FFFF (MAX_UCSCHAR)
+    Label_Encode:
+        if (ch <= 0x7F) {
+            uChLength = 1;
+            if (psz - Dest + uChLength >= DestCchSize)
+                goto Label_Terminate;
+            psz[0] = ch & 0b01111111;
+        } else if (ch <= 0x7FF) {
+            uChLength = 2;
+            if (psz - Dest + uChLength >= DestCchSize)
+                goto Label_Terminate;
+            psz[0] = 0b11000000 | (ch >> 6 & 0b00011111);
+            psz[1] = 0b10000000 | (ch >> 0 & 0b00111111);
+        } else if (ch <= 0xFFFF) {
+            uChLength = 3;
+            if (psz - Dest + uChLength >= DestCchSize)
+                goto Label_Terminate;
+            psz[0] = 0b11100000 | (ch >> 12 & 0b00001111);
+            psz[1] = 0b10000000 | (ch >> 6 & 0b00111111);
+            psz[2] = 0b10000000 | (ch >> 0 & 0b00111111);
+        } else {
+            uChLength = 4;
+            if (psz - Dest + uChLength >= DestCchSize)
+                goto Label_Terminate;
+            psz[0] = 0b11110000 | (ch >> 18 & 0b00000111);
+            psz[1] = 0b10000000 | (ch >> 12 & 0b00111111);
+            psz[2] = 0b10000000 | (ch >> 6 & 0b00111111);
+            psz[3] = 0b10000000 | (ch >> 0 & 0b00111111);
+        }
+        psz += uChLength;
+        Src++;
+    }
+    // Output number of characters written and exit
+    if (CharsWritten)
+        *CharsWritten = (SIZE_T)(psz - Dest);
+    return lStatus;
 }
 
-VOID NTAPI Str_CchInitExA(PSTRING lpstStr, LPSTR lpStr, UINT cchMax) {
-    UINT uLen = Str_CcbLenExA(lpStr, cchMax);
-    lpstStr->Length = uLen;
-    lpstStr->MaximumLength = uLen + 1;
-    lpstStr->Buffer = lpStr;
+// String Initialize
+
+VOID NTAPI Str_CchInitW(PUNICODE_STRING NTString, PWSTR String) {
+    SIZE_T uLen = Str_CcbLenW(String);
+    NTString->Length = (USHORT)uLen;
+    NTString->MaximumLength = (USHORT)(uLen + sizeof(WCHAR));
+    NTString->Buffer = String;
 }
+
+VOID NTAPI Str_CchInitA(PSTRING NTString, PSTR String) {
+    SIZE_T uLen = Str_CcbLenA(String);
+    NTString->Length = (USHORT)uLen;
+    NTString->MaximumLength = (USHORT)(uLen + sizeof(CHAR));
+    NTString->Buffer = String;
+}
+
+// String Convert
 
 BOOL NTAPI Str_ToIntExW(PCWSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, SIZE_T ValueSize) {
     PCWSTR  psz = StrValue;
+    UINT64  uTotal;
 
     // Minus
     BOOL    bMinus;
@@ -183,9 +299,10 @@ BOOL NTAPI Str_ToIntExW(PCWSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, 
             return FALSE;
         if (*psz == '0') {
             psz++;
-            if (*psz == '\0')
-                return FALSE;
-            if (*psz == 'b') {
+            if (*psz == '\0') {
+                uTotal = 0;
+                goto Label_Output;
+            } else if (*psz == 'b') {
                 psz++;
                 uBase = 2;
             } else if (*psz == 'o') {
@@ -219,7 +336,8 @@ BOOL NTAPI Str_ToIntExW(PCWSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, 
     // Convert
     WCHAR   wc;
     USHORT  uc;
-    UINT64  uTotal = 0, uTemp;
+    UINT64  uTemp;
+    uTotal = 0;
     if (uBase == 2) {
         while ((wc = *psz++) != '\0') {
             if (wc == '0') {
@@ -274,6 +392,7 @@ BOOL NTAPI Str_ToIntExW(PCWSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, 
     // Output
     if (bMinus)
         (INT64)uTotal = -(INT64)uTotal;
+Label_Output:
     if (ValueSize == sizeof(UINT8))
         *((PUINT8)Value) = (UINT8)uTotal;
     else if (ValueSize == sizeof(UINT16))
@@ -514,113 +633,47 @@ BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR HexRGB, UINT MaxCh) {
     return TRUE;
 }
 
-/*
-    Unicode             | UTF-8
-    ---------------------------------------------------------
-    0000 0000-0000 007F | 0xxxxxxx
-    0000 0080-0000 07FF | 110xxxxx 10xxxxxx
-    0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
-    0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
-*/
-NTSTATUS NTAPI Str_UnicodeToUTF8Ex(LPSTR pszDest, UINT cchDest, LPCWSTR pszSrc, PULONG pulChWritten) {
-    NTSTATUS    lStatus = STATUS_SUCCESS;
-    UINT        cChDest = 0, cChSrc = 0;
-    LPSTR       lpsz = pszDest;
-    ULONG       ch, ulChLength;
-    while (TRUE) {
-        ch = pszSrc[cChSrc];
-        if (ch == '\0') {
-        Label_Terminate:
-            lpsz[0] = '\0';
-            break;
-        }
-        // Surrogate Pair
-        if (ch >= 0xD800 && ch <= 0xDBFF && pszSrc[cChSrc + 1] != '\0' && pszSrc[cChSrc + 1] >= 0xDC00 && pszSrc[cChSrc + 1] <= 0xDFFF) {
-            ch = ((ch - 0xD800) << 10 | (pszSrc[cChSrc + 1] - 0xDC00)) + 0x010000;
-            cChSrc++;
-            goto Label_Encode;
-        } else if (ch < 0xDC00 || ch > 0xDFFF)
-            goto Label_Encode;
-        // Invalid character
-        ch = 0xFFFD;
-        lStatus = STATUS_SOME_NOT_MAPPED;
-    // Encode, ch always <= 0x10FFFF (MAX_UCSCHAR)
-    Label_Encode:
-        if (ch <= 0x7F) {
-            ulChLength = 1;
-            if (lpsz - pszDest + ulChLength >= cchDest)
-                goto Label_Terminate;
-            lpsz[0] = ch & 0b01111111;
-        } else if (ch <= 0x7FF) {
-            ulChLength = 2;
-            if (lpsz - pszDest + ulChLength >= cchDest)
-                goto Label_Terminate;
-            lpsz[0] = 0b11000000 | (ch >> 6 & 0b00011111);
-            lpsz[1] = 0b10000000 | (ch >> 0 & 0b00111111);
-        } else if (ch <= 0xFFFF) {
-            ulChLength = 3;
-            if (lpsz - pszDest + ulChLength >= cchDest)
-                goto Label_Terminate;
-            lpsz[0] = 0b11100000 | (ch >> 12 & 0b00001111);
-            lpsz[1] = 0b10000000 | (ch >> 6 & 0b00111111);
-            lpsz[2] = 0b10000000 | (ch >> 0 & 0b00111111);
-        } else {
-            ulChLength = 4;
-            if (lpsz - pszDest + ulChLength >= cchDest)
-                goto Label_Terminate;
-            lpsz[0] = 0b11110000 | (ch >> 18 & 0b00000111);
-            lpsz[1] = 0b10000000 | (ch >> 12 & 0b00111111);
-            lpsz[2] = 0b10000000 | (ch >> 6 & 0b00111111);
-            lpsz[3] = 0b10000000 | (ch >> 0 & 0b00111111);
-        }
-        lpsz += ulChLength;
-        pszSrc++;
-    }
-    // Output number of characters written and exit
-    if (pulChWritten)
-        *pulChWritten = (ULONG)(lpsz - pszDest);
-    return lStatus;
-}
 
-DWORD NTAPI Str_HashExW(LPCWSTR psz, UINT cchMax, STR_HASH_ALGORITHM HashAlgorithm) {
-    LPCWSTR lpsz = psz, lpszMax = psz + cchMax;
+
+DWORD NTAPI Str_HashW(LPCWSTR psz, STR_HASH_ALGORITHM HashAlgorithm) {
+    LPCWSTR lpsz = psz;
     DWORD   dwHash = 0;
     if (HashAlgorithm == StrHashAlgorithmSDBM) {
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash = 65599 * dwHash + *lpsz++;
     } else if (HashAlgorithm == StrHashAlgorithmBKDR) {
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash = 31 * dwHash + *lpsz++;
     } else if (HashAlgorithm == StrHashAlgorithmAP) {
         BOOL    bOdd = FALSE;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash ^= bOdd ? (~(dwHash << 11)) ^ (*lpsz++) ^ (dwHash >> 5) : (dwHash << 7) ^ (*lpsz++) ^ (dwHash >> 3);
             bOdd ^= TRUE;
         }
     } else if (HashAlgorithm == StrHashAlgorithmDJB) {
         dwHash = 5381;
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash += (dwHash << 5) + *lpsz++;
     } else if (HashAlgorithm == StrHashAlgorithmJS) {
         dwHash = 1315423911;
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash ^= (dwHash << 5) + (*lpsz++) + (dwHash >> 2);
     } else if (HashAlgorithm == StrHashAlgorithmRS) {
         DWORD   x = 63689;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash = dwHash * x + *lpsz++;
             x *= 378551;
         }
     } else if (HashAlgorithm == StrHashAlgorithmELF) {
         DWORD   x = 0;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash = (dwHash << 4) + *lpsz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & ~x;
         }
     } else if (HashAlgorithm == StrHashAlgorithmPJW) {
         DWORD   x = 0;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash = (dwHash << 4) + *lpsz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & 0x0FFFFFFF;
@@ -629,45 +682,45 @@ DWORD NTAPI Str_HashExW(LPCWSTR psz, UINT cchMax, STR_HASH_ALGORITHM HashAlgorit
     return dwHash;
 }
 
-DWORD NTAPI Str_HashExA(LPCSTR psz, UINT cchMax, STR_HASH_ALGORITHM HashAlgorithm) {
-    LPCSTR  lpsz = psz, lpszMax = psz + cchMax;
+DWORD NTAPI Str_HashA(LPCSTR psz, STR_HASH_ALGORITHM HashAlgorithm) {
+    LPCSTR  lpsz = psz;
     DWORD   dwHash = 0;
     if (HashAlgorithm == StrHashAlgorithmSDBM) {
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash = 65599 * dwHash + *lpsz++;
     } else if (HashAlgorithm == StrHashAlgorithmBKDR) {
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash = 31 * dwHash + *lpsz++;
     } else if (HashAlgorithm == StrHashAlgorithmAP) {
         BOOL    bOdd = FALSE;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash ^= bOdd ? (~(dwHash << 11)) ^ (*lpsz++) ^ (dwHash >> 5) : (dwHash << 7) ^ (*lpsz++) ^ (dwHash >> 3);
             bOdd ^= TRUE;
         }
     } else if (HashAlgorithm == StrHashAlgorithmDJB) {
         dwHash = 5381;
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash += (dwHash << 5) + *lpsz++;
     } else if (HashAlgorithm == StrHashAlgorithmJS) {
         dwHash = 1315423911;
-        while (lpsz < lpszMax && *lpsz != '\0')
+        while (*lpsz != '\0')
             dwHash ^= (dwHash << 5) + (*lpsz++) + (dwHash >> 2);
     } else if (HashAlgorithm == StrHashAlgorithmRS) {
         DWORD   x = 63689;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash = dwHash * x + *lpsz++;
             x *= 378551;
         }
     } else if (HashAlgorithm == StrHashAlgorithmELF) {
         DWORD   x = 0;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash = (dwHash << 4) + *lpsz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & ~x;
         }
     } else if (HashAlgorithm == StrHashAlgorithmPJW) {
         DWORD   x = 0;
-        while (lpsz < lpszMax && *lpsz != '\0') {
+        while (*lpsz != '\0') {
             dwHash = (dwHash << 4) + *lpsz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & 0x0FFFFFFF;

@@ -17,18 +17,14 @@ BOOL CALLBACK Proc_GetDllByName_EnumDllProc(PLDR_DATA_TABLE_ENTRY lpstDll, LPARA
     return !(
         lpstDll->DllBase &&
         lpstDll->BaseDllName.MaximumLength == lpstDllName->MaximumLength &&
-        Str_CcbEqualICExW(
-            lpstDll->BaseDllName.Buffer,
-            lpstDll->BaseDllName.MaximumLength,
-            lpstDllName->Buffer,
-            (UINT)lpstDllName->MaximumLength)
+        Str_EqualICW(lpstDll->BaseDllName.Buffer, lpstDllName->Buffer)
         );
 }
 
 PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByName(PWSTR DllName) {
     UNICODE_STRING stDllName;
     stDllName.Buffer = DllName;
-    stDllName.MaximumLength = (USHORT)(Str_CcbLenExW(DllName, STRSAFE_MAX_CCH * sizeof(WCHAR)) + sizeof(WCHAR));
+    stDllName.MaximumLength = (USHORT)(Str_CcbLenW(DllName) + sizeof(WCHAR));
     return Proc_EnumDlls(Proc_GetDllByName_EnumDllProc, (LPARAM)&stDllName);
 }
 
@@ -54,7 +50,7 @@ HMODULE NTAPI Proc_LoadDll(PWSTR LibName, BOOL DontResolveRef) {
     HMODULE         hDll;
     ULONG           DllCharacteristics;
     UNICODE_STRING  stLibName;
-    Str_CchInitExW(&stLibName, LibName, MAX_PATH);
+    Str_CchInitW(&stLibName, LibName);
     return NT_SUCCESS(LdrLoadDll(NULL, DontResolveRef ? (DllCharacteristics = IMAGE_FILE_EXECUTABLE_IMAGE, &DllCharacteristics) : NULL, &stLibName, &hDll)) ? hDll : NULL;
 }
 
@@ -64,8 +60,8 @@ PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PSTR ProcName) {
     PVOID           lpProc;
     if ((UINT_PTR)ProcName > MAXWORD) {
         ANSI_STRING stProcName;
-        stProcName.Length = (USHORT)Str_CchLenExA(ProcName, STRSAFE_MAX_CCH);
-        stProcName.MaximumLength = stProcName.Length + 1;
+        stProcName.Length = (USHORT)Str_CchLenA(ProcName);
+        stProcName.MaximumLength = stProcName.Length + sizeof(CHAR);
         stProcName.Buffer = ProcName;
         lpstProcName = &stProcName;
         ulProcOrd = 0;

@@ -1,7 +1,7 @@
 #include "NTAssassin\NTAssassin.h"
 
-PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, UINT BufferSize, PWSTR LibName, PSTR ProcName, PVOID** ProcAddrPointer) {
-    UINT    uSize, iCcb, uDelta;
+PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, SIZE_T BufferSize, PWSTR LibName, PSTR ProcName, PVOID** ProcAddrPointer) {
+    SIZE_T  uSize, iCcb, uDelta;
     WORD    wProcOrdinal;
     PVOID   lpStruct, lpTemp;
     PDWORD  lpdwSize;
@@ -62,7 +62,7 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, UINT BufferSize, PWSTR
     }
 
     // Done
-    *lpdwSize = BufferSize - uSize;
+    *lpdwSize = (DWORD)(BufferSize - uSize);
     return lpStruct;
 }
 

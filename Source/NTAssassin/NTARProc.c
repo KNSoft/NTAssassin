@@ -40,7 +40,7 @@ UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, PWSTR FilePath, UINT F
         BYTE    stString[sizeof(UNICODE_STRING) + MAX_PATH * sizeof(WCHAR)];
         if (NT_SUCCESS(NtQueryInformationProcess(ProcessHandle, ProcessImageFileNameWin32, &stString, sizeof(stString), NULL)) &&
             ((PUNICODE_STRING)stString)->Length < FilePathCch)
-            return Str_CchCopyExW(FilePath, FilePathCch, ((PUNICODE_STRING)stString)->Buffer);
+            return (UINT)Str_CchCopyExW(FilePath, FilePathCch, ((PUNICODE_STRING)stString)->Buffer);
     } else {
         PROCESS_BASIC_INFORMATION   stProcInfo;
         PVOID                       Address;

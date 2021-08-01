@@ -8,11 +8,11 @@ NTSTATUS NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, PVOID Buffer, U
 }
 
 NTSTATUS NTAPI IO_WriteStringW(HANDLE FileHandle, PWSTR String) {
-    return IO_Write(FileHandle, 0, String, Str_CcbLenExW(String, STRSAFE_MAX_CCH * sizeof(WCHAR)));
+    return IO_Write(FileHandle, 0, String, (ULONG)Str_CcbLenW(String));
 }
 
 NTSTATUS NTAPI IO_WriteStringA(HANDLE FileHandle, PSTR String) {
-    return IO_Write(FileHandle, 0, String, Str_CcbLenExA(String, STRSAFE_MAX_CCH));
+    return IO_Write(FileHandle, 0, String, (ULONG)Str_CcbLenA(String));
 }
 
 NTSTATUS NTAPI IO_WriteLineW(HANDLE FileHandle, PWSTR String) {
