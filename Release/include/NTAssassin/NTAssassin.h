@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // NTAssassin Exports, both of static and dynamic library targets are supported
 // Static library target is recommended
 #ifdef _WINDLL
@@ -13,11 +9,7 @@ extern "C" {
 #define NTA_API DECLSPEC_IMPORT
 #endif
 #else
-#if __cplusplus
-#define NTA_API EXTERN_C
-#else
 #define NTA_API
-#endif
 #endif
 
 // NTAssassin Options
@@ -96,10 +88,14 @@ extern "C" {
 #include <Shlobj.h>
 #include <shellscalingapi.h>
 #include <dwmapi.h>
+#include <Tpcshrd.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // NTAssassin dependencies
 #pragma comment(lib, "ntdll.lib")
-#pragma comment(lib, "UxTheme.lib")
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(lib, "ShLwApi.Lib")
 
@@ -161,8 +157,8 @@ extern "C" {
 // Gets is the value is within the valid range of an atom
 #define IS_ATOM(val) (((ULONG_PTR)(val) & 0xFFFF) > 0 && ((ULONG_PTR)(val) & 0xFFFF) < MAXINTATOM)
 
-// Adds offset to address
-#define ADD_OFFSET(address, offset, type) ((type *)((PBYTE)(address) + (LONG_PTR)(offset)))
+// Moves pointer
+#define MOVE_PTR(address, offset, type) ((type *)((PBYTE)(address) + (LONG_PTR)(offset)))
 
 // Memory alignment
 #define PAGE_SIZE 0x1000

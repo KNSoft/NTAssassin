@@ -114,7 +114,7 @@ BOOL CALLBACK RProc_TranslateAddress_EnumDllProc(HANDLE ProcessHandle, PLDR_DATA
 }
 
 UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, PVOID Address, PWSTR OutputString, UINT OutputStringCch) {
-    RPROC_TRANSLATEADDRESS      st = { Address, OutputString, OutputStringCch, 0 };
+    RPROC_TRANSLATEADDRESS  st = { Address, OutputString, OutputStringCch, 0 };
     return NT_SUCCESS(RProc_EnumDlls(ProcessHandle, RProc_TranslateAddress_EnumDllProc, (LPARAM)&st)) ?
         (st.CchOutput ? st.CchOutput : wnsprintfW(OutputString, OutputStringCch, L"%p", Address)) :
         0;

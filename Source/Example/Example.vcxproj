@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Example.c" />
+    <ClCompile Include="CppExample.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />

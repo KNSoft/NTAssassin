@@ -254,6 +254,22 @@ NTSTATUS NTAPI Str_UnicodeToUTF8Ex(PSTR Dest, SIZE_T DestCchSize, PCWSTR Src, PS
     return lStatus;
 }
 
+VOID NTAPI Str_UpperW(PWSTR String) {
+    while (*String != '\0') {
+        if (*String >= 'a' && *String <= 'z')
+            *String -= 'a' - 'A';
+        String++;
+    }
+}
+
+VOID NTAPI Str_UpperA(PSTR String) {
+    while (*String != '\0') {
+        if (*String >= 'a' && *String <= 'z')
+            *String -= 'a' - 'A';
+        String++;
+    }
+}
+
 // String Initialize
 
 VOID NTAPI Str_CchInitW(PUNICODE_STRING NTString, PWSTR String) {
@@ -538,90 +554,14 @@ BOOL NTAPI Str_ToIntExA(PCSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, S
     return TRUE;
 }
 
-BOOL NTAPI Str_HexTo32ExW(LPCWSTR lpsz, UINT cchMax, PDWORD lpdwOut) {
-    UINT    i = 0;
-    DWORD   dwOut = 0;
-    WCHAR   ch;
-    UCHAR   uc;
-    while ((ch = lpsz[i]) != '\0') {
-        if (i >= cchMax || i >= sizeof(DWORD) * 2)
-            return FALSE;
-        if (ch >= 'a' && ch <= 'f')
-            uc = ch - 'a' + 10;
-        else if (ch >= 'A' && ch <= 'F')
-            uc = ch - 'A' + 10;
-        else if (ch >= '0' && ch <= '9')
-            uc = ch - '0';
-        else
-            return FALSE;
-        dwOut = (dwOut << 4) | uc;
-        i++;
-    }
-    *lpdwOut = dwOut;
-    return TRUE;
-}
-
-BOOL NTAPI Str_HexTo32ExA(LPCSTR lpsz, UINT cchMax, PDWORD lpdwOut) {
-    UINT    i = 0;
-    DWORD   dwOut = 0;
-    CHAR    ch;
-    UCHAR   uc;
-    while ((ch = lpsz[i]) != '\0') {
-        if (i >= cchMax || i >= sizeof(DWORD) * 2)
-            return FALSE;
-        if (ch >= 'a' && ch <= 'f')
-            uc = ch - 'a' + 10;
-        else if (ch >= 'A' && ch <= 'F')
-            uc = ch - 'A' + 10;
-        else if (ch >= '0' && ch <= '9')
-            uc = ch - '0';
-        else
-            return FALSE;
-        dwOut = (dwOut << 4) | uc;
-        i++;
-    }
-    *lpdwOut = dwOut;
-    return TRUE;
-}
-
-BOOL NTAPI Str_16ToUDecExW(USHORT uNum, LPWSTR lpszOutput, UINT cchMax) {
-    LPWSTR  lpsz = lpszOutput;
-    USHORT  uRemain = uNum;
-    USHORT  uQuotient;
-    USHORT  uDivisor;
-    ULONG   uTemp = 1;
-    BOOL    bWritten = FALSE;
-    if (cchMax == 0)
-        return FALSE;
-    do {
-        uDivisor = LOWORD(uTemp);
-        uTemp *= 10;
-    } while (uTemp < uRemain);
-    do {
-        if (lpsz >= lpszOutput + cchMax) {
-            *(lpsz - 1) = '\0';
-            return FALSE;
-        }
-        uQuotient = uRemain / uDivisor;
-        uRemain %= uDivisor;
-        if (bWritten || uRemain != 0) {
-            *lpsz++ = uQuotient + '0';
-            bWritten = TRUE;
-        }
-        uDivisor /= 10;
-    } while (uDivisor > 0);
-    *lpsz = '\0';
-    return TRUE;
-}
-
-BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR HexRGB, UINT MaxCh) {
+BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR Dest, SIZE_T DestCchSize) {
     PWSTR   psz;
     WCHAR   ch;
     UINT    uCh = 6;
     DWORD   dwColor = Color;
-    if (MaxCh < HEXRGB_CCH)
+    if (DestCchSize < HEXRGB_CCH)
         return FALSE;
-    psz = HexRGB;
+    psz = Dest;
     *psz++ = '#';
     psz[uCh] = '\0';
     do {
@@ -633,48 +573,67 @@ BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR HexRGB, UINT MaxCh) {
     return TRUE;
 }
 
+BOOL NTAPI Str_RGBToHexExA(COLORREF Color, PSTR Dest, SIZE_T DestCchSize) {
+    PSTR   psz;
+    CHAR   ch;
+    UINT    uCh = 6;
+    DWORD   dwColor = Color;
+    if (DestCchSize < HEXRGB_CCH)
+        return FALSE;
+    psz = Dest;
+    *psz++ = '#';
+    psz[uCh] = '\0';
+    do {
+        ch = (CHAR)(dwColor & 0xF);
+        ch += ch <= 9 ? '0' : ('A' - 0xA);
+        psz[--uCh] = ch;
+        dwColor >>= 4;
+    } while (uCh);
+    return TRUE;
+}
 
+// String Hash
 
-DWORD NTAPI Str_HashW(LPCWSTR psz, STR_HASH_ALGORITHM HashAlgorithm) {
-    LPCWSTR lpsz = psz;
+DWORD NTAPI Str_HashW(PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
+    PCWSTR  psz = String;
     DWORD   dwHash = 0;
     if (HashAlgorithm == StrHashAlgorithmSDBM) {
-        while (*lpsz != '\0')
-            dwHash = 65599 * dwHash + *lpsz++;
+        while (*psz != '\0')
+            dwHash = 65599 * dwHash + *psz++;
     } else if (HashAlgorithm == StrHashAlgorithmBKDR) {
-        while (*lpsz != '\0')
-            dwHash = 31 * dwHash + *lpsz++;
+        while (*psz != '\0')
+            dwHash = 31 * dwHash + *psz++;
     } else if (HashAlgorithm == StrHashAlgorithmAP) {
         BOOL    bOdd = FALSE;
-        while (*lpsz != '\0') {
-            dwHash ^= bOdd ? (~(dwHash << 11)) ^ (*lpsz++) ^ (dwHash >> 5) : (dwHash << 7) ^ (*lpsz++) ^ (dwHash >> 3);
+        while (*psz != '\0') {
+            dwHash ^= bOdd ? (~(dwHash << 11)) ^ (*psz++) ^ (dwHash >> 5) : (dwHash << 7) ^ (*psz++) ^ (dwHash >> 3);
             bOdd ^= TRUE;
         }
     } else if (HashAlgorithm == StrHashAlgorithmDJB) {
         dwHash = 5381;
-        while (*lpsz != '\0')
-            dwHash += (dwHash << 5) + *lpsz++;
+        while (*psz != '\0')
+            dwHash += (dwHash << 5) + *psz++;
     } else if (HashAlgorithm == StrHashAlgorithmJS) {
         dwHash = 1315423911;
-        while (*lpsz != '\0')
-            dwHash ^= (dwHash << 5) + (*lpsz++) + (dwHash >> 2);
+        while (*psz != '\0')
+            dwHash ^= (dwHash << 5) + (*psz++) + (dwHash >> 2);
     } else if (HashAlgorithm == StrHashAlgorithmRS) {
         DWORD   x = 63689;
-        while (*lpsz != '\0') {
-            dwHash = dwHash * x + *lpsz++;
+        while (*psz != '\0') {
+            dwHash = dwHash * x + *psz++;
             x *= 378551;
         }
     } else if (HashAlgorithm == StrHashAlgorithmELF) {
         DWORD   x = 0;
-        while (*lpsz != '\0') {
-            dwHash = (dwHash << 4) + *lpsz++;
+        while (*psz != '\0') {
+            dwHash = (dwHash << 4) + *psz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & ~x;
         }
     } else if (HashAlgorithm == StrHashAlgorithmPJW) {
         DWORD   x = 0;
-        while (*lpsz != '\0') {
-            dwHash = (dwHash << 4) + *lpsz++;
+        while (*psz != '\0') {
+            dwHash = (dwHash << 4) + *psz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & 0x0FFFFFFF;
         }
@@ -682,57 +641,49 @@ DWORD NTAPI Str_HashW(LPCWSTR psz, STR_HASH_ALGORITHM HashAlgorithm) {
     return dwHash;
 }
 
-DWORD NTAPI Str_HashA(LPCSTR psz, STR_HASH_ALGORITHM HashAlgorithm) {
-    LPCSTR  lpsz = psz;
+DWORD NTAPI Str_HashA(PCSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
+    PCSTR   psz = String;
     DWORD   dwHash = 0;
     if (HashAlgorithm == StrHashAlgorithmSDBM) {
-        while (*lpsz != '\0')
-            dwHash = 65599 * dwHash + *lpsz++;
+        while (*psz != '\0')
+            dwHash = 65599 * dwHash + *psz++;
     } else if (HashAlgorithm == StrHashAlgorithmBKDR) {
-        while (*lpsz != '\0')
-            dwHash = 31 * dwHash + *lpsz++;
+        while (*psz != '\0')
+            dwHash = 31 * dwHash + *psz++;
     } else if (HashAlgorithm == StrHashAlgorithmAP) {
         BOOL    bOdd = FALSE;
-        while (*lpsz != '\0') {
-            dwHash ^= bOdd ? (~(dwHash << 11)) ^ (*lpsz++) ^ (dwHash >> 5) : (dwHash << 7) ^ (*lpsz++) ^ (dwHash >> 3);
+        while (*psz != '\0') {
+            dwHash ^= bOdd ? (~(dwHash << 11)) ^ (*psz++) ^ (dwHash >> 5) : (dwHash << 7) ^ (*psz++) ^ (dwHash >> 3);
             bOdd ^= TRUE;
         }
     } else if (HashAlgorithm == StrHashAlgorithmDJB) {
         dwHash = 5381;
-        while (*lpsz != '\0')
-            dwHash += (dwHash << 5) + *lpsz++;
+        while (*psz != '\0')
+            dwHash += (dwHash << 5) + *psz++;
     } else if (HashAlgorithm == StrHashAlgorithmJS) {
         dwHash = 1315423911;
-        while (*lpsz != '\0')
-            dwHash ^= (dwHash << 5) + (*lpsz++) + (dwHash >> 2);
+        while (*psz != '\0')
+            dwHash ^= (dwHash << 5) + (*psz++) + (dwHash >> 2);
     } else if (HashAlgorithm == StrHashAlgorithmRS) {
         DWORD   x = 63689;
-        while (*lpsz != '\0') {
-            dwHash = dwHash * x + *lpsz++;
+        while (*psz != '\0') {
+            dwHash = dwHash * x + *psz++;
             x *= 378551;
         }
     } else if (HashAlgorithm == StrHashAlgorithmELF) {
         DWORD   x = 0;
-        while (*lpsz != '\0') {
-            dwHash = (dwHash << 4) + *lpsz++;
+        while (*psz != '\0') {
+            dwHash = (dwHash << 4) + *psz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & ~x;
         }
     } else if (HashAlgorithm == StrHashAlgorithmPJW) {
         DWORD   x = 0;
-        while (*lpsz != '\0') {
-            dwHash = (dwHash << 4) + *lpsz++;
+        while (*psz != '\0') {
+            dwHash = (dwHash << 4) + *psz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & 0x0FFFFFFF;
         }
     }
     return dwHash;
-}
-
-VOID NTAPI Str_UpperW(PWSTR psz) {
-    while (*psz != '\0') {
-        if (*psz >= 'a' && *psz <= 'z')
-            *psz -= 'a' - 'A';
-        psz++;
-    }
 }
