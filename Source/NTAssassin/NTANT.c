@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 VOID NTAPI NT_InitObject(POBJECT_ATTRIBUTES Object, HANDLE RootDirectory, PUNICODE_STRING ObjectName, ULONG Attributes) {
     Object->Length = sizeof(OBJECT_ATTRIBUTES);
@@ -14,8 +14,4 @@ NTSTATUS NTAPI NT_InitPathObject(PCWSTR Path, HANDLE RootDirectory, POBJECT_ATTR
         return STATUS_SUCCESS;
     } else
         return STATUS_OBJECT_NAME_INVALID;
-}
-
-int NT_SEH_NopHandler(LPEXCEPTION_POINTERS ExceptionInfo) {
-    return EXCEPTION_EXECUTE_HANDLER;
 }

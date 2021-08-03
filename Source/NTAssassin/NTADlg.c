@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
     Template->wMenu = Template->wClass = Template->wTitle = Template->Template.cdit = 0;

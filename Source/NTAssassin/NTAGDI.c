@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 BOOL NTAPI GDI_FillSolidRect(HDC DC, PRECT Rect, COLORREF Color) {
     COLORREF    crPrev = SetBkColor(DC, Color);
@@ -127,10 +127,11 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, HICON Icon, INT X, INT Y, INT CX, INT CY) {
     INT         iCX, iCY, iIconHeight;
     BOOL        bRet = FALSE;
 
+    // Get icon info and bitmaps
     if (!GetIconInfo(Icon, &stIconInfo))
         return FALSE;
-
     if (GetObject(stIconInfo.hbmMask, sizeof(stBmp), &stBmp)) {
+        // Height of icon is half of bmHeight member if has mask bitmap only
         iIconHeight = stIconInfo.hbmColor ? stBmp.bmHeight : (stBmp.bmHeight / 2);
         if (CX && CY) {
             iCX = CX;
@@ -139,19 +140,18 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, HICON Icon, INT X, INT Y, INT CX, INT CY) {
             iCX = stBmp.bmWidth;
             iCY = iIconHeight;
         }
-
+        // Prepare memory DC
         HDC     hDC;
-        INT     iPrevMode;
         hDC = CreateCompatibleDC(DC);
         SelectBitmap(hDC, stIconInfo.hbmMask);
-        iPrevMode = SetStretchBltMode(DC, HALFTONE);
         rcDst.left = X;
         rcDst.top = Y;
         rcDst.right = X + iCX;
         rcDst.bottom = Y + iCY;
         GDI_FillSolidRect(DC, &rcDst, RGB(255, 255, 255));
-
+        // Draw mask bitmap
         if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, 0, stBmp.bmWidth, iIconHeight, SRCAND))
+            // Draw color bitmap or bottom half of mask bitmap
             if (stIconInfo.hbmColor) {
                 SelectBitmap(hDC, stIconInfo.hbmColor);
                 if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, 0, stBmp.bmWidth, iIconHeight, SRCAND))
@@ -160,10 +160,9 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, HICON Icon, INT X, INT Y, INT CX, INT CY) {
                 if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, iIconHeight, stBmp.bmWidth, iIconHeight, SRCINVERT))
                     bRet = TRUE;
             }
-        SetStretchBltMode(DC, iPrevMode);
         DeleteDC(hDC);
     }
-
+    // Cleanup
     DeleteObject(stIconInfo.hbmMask);
     if (stIconInfo.hbmColor)
         DeleteObject(stIconInfo.hbmColor);

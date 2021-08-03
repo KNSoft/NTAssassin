@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
     DWORD               dwNewDPIX;

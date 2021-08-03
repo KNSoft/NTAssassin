@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 typedef DWORD64 QWORD, *PQWORD, *LPQWORD;
 

@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 HDC NTAPI UI_BeginPaint(HWND Window, PUI_WINDBPAINT Paint) {
     Paint->DC = CreateCompatibleDC(BeginPaint(Window, &Paint->Paint));
@@ -251,7 +251,7 @@ BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR Re
         NT_ClearLastError();
         lResult = ClassLong ? (LONG_PTR)GetClassLongPtr(Window, Index) : GetWindowLongPtr(Window, Index);
         bRet = lResult ? TRUE : (NT_GetLastError() == ERROR_SUCCESS);
-    } __except (NT_SEH_NopHandler(NULL)) {
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
         lResult = 0;
         NT_SetLastError(ERROR_INVALID_FUNCTION);
         bRet = FALSE;

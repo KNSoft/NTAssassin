@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "NTAssassin\NTAssassin.h"
+#include "..\NTAssassin\include\NTAssassin\NTAssassin.h"
 
 #pragma comment (lib, "NTAssassin.lib")
 

@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 HMODULE hSysDlls[SysLoadDllMax] = { NULL };
 PWSTR   pszSysDllNames[] = {

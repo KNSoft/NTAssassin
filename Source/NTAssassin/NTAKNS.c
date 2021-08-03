@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 #define KNS_MAX_VER_CCH 48
 #define KNS_DEFAULT_DLGFONTSIZE 20

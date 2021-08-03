@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 HMENU NTAPI Ctl_CreateMenuEx(CTL_MENU Menus[], UINT Count, HMENU Parent) {
     HMENU       hMenu = Parent ? Parent : CreateMenu();

@@ -82,7 +82,6 @@
 #include <Windows.h>
 #include <Winternl.h>
 #include <WindowsX.h>
-#include <Uxtheme.h>
 #include <CommCtrl.h>
 #include <Shlwapi.h>
 #include <Shlobj.h>

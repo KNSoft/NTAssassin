@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 typedef enum _STR_HASH_ALGORITHM {
     StrHashAlgorithmSDBM,

@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "..\NTAssassin\include\NTAssassin\NTAssassin.h"
 
 NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     PVOID*      ppProc;

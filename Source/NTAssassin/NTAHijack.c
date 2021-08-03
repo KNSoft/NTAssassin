@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, SIZE_T BufferSize, PWSTR LibName, PSTR ProcName, PVOID** ProcAddrPointer) {
     SIZE_T  uSize, iCcb, uDelta;

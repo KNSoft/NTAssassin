@@ -1,4 +1,4 @@
-#include "NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAssassin.h"
 
 PVOID NTAPI Mem_PageAlloc(SIZE_T Size, ULONG Protect) {
     PVOID   lpBase = NULL;
