@@ -554,6 +554,124 @@ BOOL NTAPI Str_ToIntExA(PCSTR StrValue, BOOL Unsigned, UINT Base, PVOID Value, S
     return TRUE;
 }
 
+BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, PWSTR StrValue, ULONG DestCchSize) {
+    PWSTR psz = StrValue;
+    UINT64  uTotal, uDivisor, uPowerFlag;
+
+    // Minus
+    BOOL bNegative = !Unsigned && Value < 0;
+    uTotal = bNegative ? -Value : (UINT64)Value;
+
+    // Base
+    if (Base == 2)
+        uPowerFlag = 1;
+    else if (Base == 8)
+        uPowerFlag = 3;
+    else if (Base == 10 || Base == 0)
+        uPowerFlag = 0;
+    else if (Base == 16)
+        uPowerFlag = 4;
+    else
+        return FALSE;
+
+    if (!DestCchSize)
+        return FALSE;
+
+    // Find max divisor
+    UINT64 uDivisorTemp = Base;
+    do {
+        uDivisor = uDivisorTemp;
+        uDivisorTemp = uPowerFlag ? uDivisorTemp << uPowerFlag : uDivisorTemp * 10;
+    } while (uTotal > uDivisorTemp && uDivisorTemp > uDivisor);
+
+    // Convert
+    BOOL bRet = TRUE;
+    if (bNegative)
+        *psz++ = '-';
+    while (TRUE) {
+        UINT64 i = uTotal / uDivisor;
+        uTotal = uTotal % uDivisor;
+        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
+            *psz++ = (WCHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
+        } else {
+            bRet = FALSE;
+            break;
+        }
+        if (uDivisor == Base) {
+            i = uTotal;
+            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
+                *psz++ = (WCHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
+            } else {
+                bRet = FALSE;
+            }
+            break;
+        }
+        uDivisor = uPowerFlag ? uDivisor >> uPowerFlag : uDivisor / 10;
+    };
+    *psz = '\0';
+
+    return bRet;
+}
+
+BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, PSTR StrValue, ULONG DestCchSize) {
+    PSTR psz = StrValue;
+    UINT64  uTotal, uDivisor, uPowerFlag;
+
+    // Minus
+    BOOL bNegative = !Unsigned && Value < 0;
+    uTotal = bNegative ? -Value : (UINT64)Value;
+
+    // Base
+    if (Base == 2)
+        uPowerFlag = 1;
+    else if (Base == 8)
+        uPowerFlag = 3;
+    else if (Base == 10 || Base == 0)
+        uPowerFlag = 0;
+    else if (Base == 16)
+        uPowerFlag = 4;
+    else
+        return FALSE;
+
+    if (!DestCchSize)
+        return FALSE;
+
+    // Find max divisor
+    UINT64 uDivisorTemp = Base;
+    do {
+        uDivisor = uDivisorTemp;
+        uDivisorTemp = uPowerFlag ? uDivisorTemp << uPowerFlag : uDivisorTemp * 10;
+    } while (uTotal > uDivisorTemp && uDivisorTemp > uDivisor);
+
+    // Convert
+    BOOL bRet = TRUE;
+    if (bNegative)
+        *psz++ = '-';
+    while (TRUE) {
+        UINT64 i = uTotal / uDivisor;
+        uTotal = uTotal % uDivisor;
+        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
+            *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
+        } else {
+            bRet = FALSE;
+            break;
+        }
+        if (uDivisor == Base) {
+            i = uTotal;
+            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
+                *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
+            } else {
+                bRet = FALSE;
+            }
+            break;
+        }
+        uDivisor = uPowerFlag ? uDivisor >> uPowerFlag : uDivisor / 10;
+    };
+    *psz = '\0';
+
+    return bRet;
+}
+
 BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR Dest, SIZE_T DestCchSize) {
     PWSTR   psz;
     WCHAR   ch;
