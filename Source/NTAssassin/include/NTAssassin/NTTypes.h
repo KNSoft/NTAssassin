@@ -24,6 +24,13 @@ typedef HRESULT(STDAPICALLTYPE* PFNDwmGetWindowAttribute)(
     DWORD cbAttribute
     );
 
+typedef HRESULT(STDAPICALLTYPE* PFNDwmSetWindowAttribute)(
+    HWND hwnd,
+    DWORD dwAttribute,
+    _In_reads_bytes_(cbAttribute) LPCVOID pvAttribute,
+    DWORD cbAttribute
+    );
+
 typedef BOOL(WINAPI* PFNGetWindowDisplayAffinity)(
     HWND hWnd,
     DWORD* pdwAffinity

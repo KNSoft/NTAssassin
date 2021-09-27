@@ -27,11 +27,8 @@ BOOL Dlg_RectEditor_GetValue(HWND hDlg, INT iCtlID, PINT pValue) {
 
 VOID Dlg_RectEditor_SetValue(HWND hCtl, INT iNum) {
     WCHAR           szNum[DRE_MAX_NUM_CCH];
-    UNICODE_STRING  stStrNum;
-    stStrNum.MaximumLength = sizeof(szNum);
-    stStrNum.Length = sizeof(szNum) - sizeof(WCHAR);
-    stStrNum.Buffer = szNum;
-    UI_SendMsg(hCtl, WM_SETTEXT, 0, NT_SUCCESS(RtlIntegerToUnicodeString(iNum, 10, &stStrNum)) ? szNum : 0);
+    BOOL bSucc = Str_DecFromInt(iNum, szNum);
+    UI_SendMsg(hCtl, WM_SETTEXT, 0, bSucc ? szNum : NULL);
 }
 
 VOID Dlg_RectEditor_CreateCtl(HWND hDlg, INT nIDText, INT nIDEdit, LPCWSTR lpszText, INT iX, INT iY, INT iNum) {

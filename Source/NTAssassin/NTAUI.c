@@ -27,6 +27,30 @@ BOOL NTAPI UI_GetWindowRect(HWND Window, PRECT Rect) {
     return GetWindowRect(Window, Rect);
 }
 
+BOOL NTAPI UI_SetWindowRect(HWND Window, PRECT Rect) {
+    RECT    rcDwmDiff, rcOrgDiff;
+    BOOL    bDwmDiff = FALSE;
+    if (NT_GetKUSD()->NtMajorVersion >= 6) {
+        if (!pfnDwmGetWindowAttribute)
+            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
+        if (pfnDwmGetWindowAttribute &&
+            pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, &rcDwmDiff, sizeof(rcDwmDiff)) == S_OK &&
+            GetWindowRect(Window, &rcOrgDiff))
+            bDwmDiff = TRUE;
+    }
+    if (bDwmDiff) {
+        return SetWindowPos(
+            Window,
+            NULL,
+            Rect->left + rcOrgDiff.left - rcDwmDiff.left,
+            Rect->top + rcOrgDiff.top - rcDwmDiff.top,
+            (Rect->right + rcOrgDiff.right - rcDwmDiff.right) - (Rect->left + rcOrgDiff.left - rcDwmDiff.left),
+            (Rect->bottom + rcOrgDiff.bottom - rcDwmDiff.bottom) - (Rect->top + rcOrgDiff.top - rcDwmDiff.top),
+            SWP_NOZORDER | SWP_NOACTIVATE);
+    } else
+        return SetWindowPos(Window, NULL, Rect->left, Rect->top, Rect->right - Rect->left, Rect->bottom - Rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
+}
+
 BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, PRECT Rect) {
     POINT   pt;
     HANDLE  hParent;
