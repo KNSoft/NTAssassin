@@ -6,7 +6,11 @@ NTSTATUS NTAPI File_Create(PHANDLE FileHandle, PWSTR FileName, HANDLE RootDirect
     IO_STATUS_BLOCK     stIOStatusBlock;
     NTSTATUS            lStatus;
     lStatus = NT_InitPathObject(FileName, RootDirectory ,&stObjectAttr, &stString);
-    return NT_SUCCESS(lStatus) ? NtCreateFile(FileHandle, DesiredAccess, &stObjectAttr, &stIOStatusBlock, NULL, 0, ShareAccess, CreateDisposition, CreateOptions, NULL, 0) : lStatus;
+    if (NT_SUCCESS(lStatus)) {
+        lStatus = NtCreateFile(FileHandle, DesiredAccess, &stObjectAttr, &stIOStatusBlock, NULL, 0, ShareAccess, CreateDisposition, CreateOptions, NULL, 0);
+        Mem_HeapFree(stString.Buffer);
+    }
+    return lStatus;
 }
 
 NTSTATUS NTAPI File_IsDirectory(PWSTR FilePath, PBOOL Result) {
@@ -19,6 +23,7 @@ NTSTATUS NTAPI File_IsDirectory(PWSTR FilePath, PBOOL Result) {
         lStatus = NtQueryFullAttributesFile(&stObjectAttr, &stFileInfo);
         if (NT_SUCCESS(lStatus))
             *Result = stFileInfo.FileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+        Mem_HeapFree(stString.Buffer);
     }
     return lStatus;
 }
@@ -34,6 +39,7 @@ NTSTATUS NTAPI File_Delete(PWSTR FileName) {
         lStatus = NtCreateFile(&hFile, DELETE | SYNCHRONIZE, &stObjectAttr, &stIOStatusBlock, NULL, 0, 0, FILE_OPEN, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_DELETE_ON_CLOSE, NULL, 0);
         if (NT_SUCCESS(lStatus))
             lStatus = NtClose(hFile);
+        Mem_HeapFree(stString.Buffer);
     }
     return lStatus;
 }

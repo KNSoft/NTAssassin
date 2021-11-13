@@ -5,7 +5,7 @@
 
 #include "include\NTAssassin\NTAssassin.h"
 
-EXTERN_C BYTE SYM_Hijack_LoadProcAddr_InjectThread_x86[976];
-EXTERN_C BYTE SYM_Hijack_LoadProcAddr_InjectThread_x64[1108];
+EXTERN_C BYTE SYM_Hijack_LoadProcAddr_InjectThread_x86[982];
+EXTERN_C BYTE SYM_Hijack_LoadProcAddr_InjectThread_x64[1120];
 EXTERN_C BYTE SYM_Hijack_CallProc_InjectThread_x86[138];
 EXTERN_C BYTE SYM_Hijack_CallProc_InjectThread_x64[266];

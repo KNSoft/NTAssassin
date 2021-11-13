@@ -582,7 +582,7 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, PWSTR StrValue,
     do {
         uDivisor = uDivisorTemp;
         uDivisorTemp = uPowerFlag ? uDivisorTemp << uPowerFlag : uDivisorTemp * 10;
-    } while (uTotal > uDivisorTemp && uDivisorTemp > uDivisor);
+    } while (uTotal >= uDivisorTemp && uDivisorTemp > uDivisor);
 
     // Convert
     BOOL bRet = TRUE;
@@ -592,7 +592,8 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, PWSTR StrValue,
         UINT64 i = uTotal / uDivisor;
         uTotal = uTotal % uDivisor;
         if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
-            *psz++ = (WCHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
+            if (i != 0 || (bNegative ? psz != StrValue + 1 : psz != StrValue))
+                *psz++ = (WCHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
         } else {
             bRet = FALSE;
             break;
@@ -641,7 +642,7 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, PSTR StrValue, 
     do {
         uDivisor = uDivisorTemp;
         uDivisorTemp = uPowerFlag ? uDivisorTemp << uPowerFlag : uDivisorTemp * 10;
-    } while (uTotal > uDivisorTemp && uDivisorTemp > uDivisor);
+    } while (uTotal >= uDivisorTemp && uDivisorTemp > uDivisor);
 
     // Convert
     BOOL bRet = TRUE;
@@ -651,8 +652,10 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, PSTR StrValue, 
         UINT64 i = uTotal / uDivisor;
         uTotal = uTotal % uDivisor;
         if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
-            *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
-        } else {
+            if (i != 0 || (bNegative ? psz != StrValue + 1 : psz != StrValue))
+                *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
+        }
+        else {
             bRet = FALSE;
             break;
         }
@@ -660,7 +663,8 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, PSTR StrValue, 
             i = uTotal;
             if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < DestCchSize - 1) {
                 *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
-            } else {
+            }
+            else {
                 bRet = FALSE;
             }
             break;
@@ -694,8 +698,8 @@ BOOL NTAPI Str_RGBToHexExW(COLORREF Color, PWSTR Dest, SIZE_T DestCchSize) {
 BOOL NTAPI Str_RGBToHexExA(COLORREF Color, PSTR Dest, SIZE_T DestCchSize) {
     PSTR   psz;
     CHAR   ch;
-    UINT    uCh = 6;
-    DWORD   dwColor = Color;
+    UINT   uCh = 6;
+    DWORD  dwColor = Color;
     if (DestCchSize < HEXRGB_CCH)
         return FALSE;
     psz = Dest;
