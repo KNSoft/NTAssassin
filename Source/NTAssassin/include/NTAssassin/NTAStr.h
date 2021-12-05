@@ -31,7 +31,8 @@ typedef enum _STR_HASH_ALGORITHM {
     StrHashAlgorithmRS,
     StrHashAlgorithmELF,
     StrHashAlgorithmPJW,
-    StrHashAlgorithmX65599 = StrHashAlgorithmSDBM
+    StrHashAlgorithmX65599 = StrHashAlgorithmSDBM,
+    StrHashAlgorithmFNV1a
 } STR_HASH_ALGORITHM, * PSTR_HASH_ALGORITHM;
 
 // String Length

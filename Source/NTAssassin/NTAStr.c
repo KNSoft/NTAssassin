@@ -759,6 +759,12 @@ DWORD NTAPI Str_HashW(PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & 0x0FFFFFFF;
         }
+    } else if (HashAlgorithm == StrHashAlgorithmFNV1a) {
+        dwHash = 2166136261U;
+        while (*psz != '\0') {
+            dwHash ^= *psz;
+            dwHash *= 16777619U;
+        }
     }
     return dwHash;
 }
@@ -805,6 +811,12 @@ DWORD NTAPI Str_HashA(PCSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
             dwHash = (dwHash << 4) + *psz++;
             if ((x = dwHash & 0xF0000000) != 0)
                 dwHash = (dwHash ^ (x >> 24)) & 0x0FFFFFFF;
+        }
+    } else if (HashAlgorithm == StrHashAlgorithmFNV1a) {
+        dwHash = 2166136261U;
+        while (*psz != '\0') {
+            dwHash ^= *psz;
+            dwHash *= 16777619U;
         }
     }
     return dwHash;
