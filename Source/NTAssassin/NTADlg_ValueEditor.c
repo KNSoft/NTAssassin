@@ -13,9 +13,9 @@
 INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR lpstDVE, LPWSTR lpszBuff, INT iCchBuff, QWORD qwValue) {
     INT     iTemp;
     if (lpstDVE->Flags & DVE_VALUE_HEXQWORD)
-        iTemp = Str_CchPrintfExW(lpszBuff, iCchBuff, L"0x%016llX", qwValue);
+        iTemp = Str_PrintfExW(lpszBuff, iCchBuff, L"0x%016llX", qwValue);
     else
-        iTemp = Str_CchPrintfExW(lpszBuff, iCchBuff, L"0x%08X", (DWORD)qwValue);
+        iTemp = Str_PrintfExW(lpszBuff, iCchBuff, L"0x%08X", (DWORD)qwValue);
     return iTemp;
 }
 

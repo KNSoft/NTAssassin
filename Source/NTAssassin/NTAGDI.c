@@ -106,7 +106,7 @@ VOID NTAPI GDI_SetFontInfo(PLOGFONTW FontInfo, LONG FontSize, LONG FontWeight, P
     if (FontName == NULL)
         FontInfo->lfFaceName[0] = '\0';
     else
-        Str_CchCopyW(FontInfo->lfFaceName, FontName);
+        Str_CopyW(FontInfo->lfFaceName, FontName);
 }
 
 HFONT NTAPI GDI_CreateFont(LONG FontSize, LONG FontWeight, PCWSTR FontName) {

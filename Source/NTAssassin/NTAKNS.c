@@ -29,7 +29,7 @@ BOOL NTAPI KNS_GetVersionStringEx(PWSTR StrVersion, UINT ChCount) {
         lpszEdition = L"Release";
     else
         lpszEdition = L"";
-    return Str_CchPrintfExW(StrVersion, ChCount, L"V%u.%u.%u.%u %s", lpstVer->Major, lpstVer->Minor, lpstVer->Revision, lpstVer->Build, lpszEdition) > 0;
+    return Str_PrintfExW(StrVersion, ChCount, L"V%u.%u.%u.%u %s", lpstVer->Major, lpstVer->Minor, lpstVer->Revision, lpstVer->Build, lpszEdition) > 0;
 }
 
 HICON NTAPI KNS_GetIcon() {

@@ -96,7 +96,6 @@
 #include <Winternl.h>
 #include <WindowsX.h>
 #include <CommCtrl.h>
-#include <Shlwapi.h>
 #include <Shlobj.h>
 #include <shellscalingapi.h>
 #include <dwmapi.h>
@@ -107,7 +106,7 @@ extern "C" {
 #endif
 
 // NTAssassin dependencies
-#pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "ntdllp.lib")
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(lib, "ShLwApi.Lib")
 
@@ -182,7 +181,8 @@ extern "C" {
 #define MAX_CLASSNAME_CCH                       256
 #define MAX_CIDENTIFIERNAME_CCH                 247
 #define MAX_ATOM_CCH                            255
-#define MAX_REG_VALUE_SIZE                      4096
+#define MAX_REG_KEYNAME_CCH                     255
+#define MAX_REG_VALUENAME_CCH                   16383
 #define MAX_LOCALENAME_CCH                      85
 #define HEXRGB_CCH                              8   // #RRGGBB
 #define MAX_POINTER_CCH                         (sizeof(PVOID) * 2 + 1)

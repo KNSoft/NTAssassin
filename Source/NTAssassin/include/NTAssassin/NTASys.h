@@ -84,3 +84,5 @@ NTA_API VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status);
   * @see "IsProcessorFeaturePresent"
   */
 #define Sys_TestCPUFeature(Feature) ((Feature) < PROCESSOR_FEATURE_MAX ? (BOOL)NT_GetKUSD()->ProcessorFeatures[(Feature)] : FALSE)
+
+NTA_API BOOL NTAPI Sys_RegVolatileDriver(PCWSTR Name, PCWSTR ImagePath);

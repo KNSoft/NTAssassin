@@ -40,7 +40,7 @@ UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, PWSTR FilePath, UINT F
         BYTE    stString[sizeof(UNICODE_STRING) + MAX_PATH * sizeof(WCHAR)];
         if (NT_SUCCESS(NtQueryInformationProcess(ProcessHandle, ProcessImageFileNameWin32, &stString, sizeof(stString), NULL)) &&
             ((PUNICODE_STRING)stString)->Length < FilePathCch)
-            return (UINT)Str_CchCopyExW(FilePath, FilePathCch, ((PUNICODE_STRING)stString)->Buffer);
+            return (UINT)Str_CopyExW(FilePath, FilePathCch, ((PUNICODE_STRING)stString)->Buffer);
     } else {
         PROCESS_BASIC_INFORMATION   stProcInfo;
         PVOID                       Address;
@@ -106,7 +106,7 @@ BOOL CALLBACK RProc_TranslateAddress_EnumDllProc(HANDLE ProcessHandle, PLDR_DATA
             sNameBytes = sizeof(szDllName) - sizeof(WCHAR);
         if (NT_SUCCESS(NtReadVirtualMemory(ProcessHandle, DllLdrEntry->BaseDllName.Buffer, szDllName, sNameBytes, &sReadBytes))) {
             szDllName[sReadBytes / sizeof(WCHAR)] = '\0';
-            lpst->CchOutput = wnsprintfW(lpst->String, lpst->Cch, L"%s!%p", szDllName, lpst->Address);
+            lpst->CchOutput = Str_PrintfExW(lpst->String, lpst->Cch, L"%s!%p", szDllName, lpst->Address);
         }
         return FALSE;
     } else
@@ -116,7 +116,7 @@ BOOL CALLBACK RProc_TranslateAddress_EnumDllProc(HANDLE ProcessHandle, PLDR_DATA
 UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, PVOID Address, PWSTR OutputString, UINT OutputStringCch) {
     RPROC_TRANSLATEADDRESS  st = { Address, OutputString, OutputStringCch, 0 };
     return NT_SUCCESS(RProc_EnumDlls(ProcessHandle, RProc_TranslateAddress_EnumDllProc, (LPARAM)&st)) ?
-        (st.CchOutput ? st.CchOutput : wnsprintfW(OutputString, OutputStringCch, L"%p", Address)) :
+        (st.CchOutput ? st.CchOutput : Str_PrintfExW(OutputString, OutputStringCch, L"%p", Address)) :
         0;
 }
 

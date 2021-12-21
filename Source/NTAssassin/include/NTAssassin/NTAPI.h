@@ -411,6 +411,53 @@ NtTerminateProcess(
     NTSTATUS ExitStatus
 );
 
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtCreateKey(
+    OUT PHANDLE KeyHandle,
+    IN ACCESS_MASK DesiredAccess,
+    IN POBJECT_ATTRIBUTES ObjectAttributes,
+    IN ULONG TitleIndex,
+    IN PUNICODE_STRING Class OPTIONAL,
+    IN ULONG CreateOptions,
+    OUT PULONG Disposition OPTIONAL
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtSetValueKey(
+    IN HANDLE KeyHandle,
+    IN PUNICODE_STRING ValueName,
+    IN ULONG TitleIndex,
+    IN ULONG Type,
+    IN PVOID Data,
+    IN ULONG DataSize
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtDeleteKey(
+    IN HANDLE KeyHandle
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtLoadDriver(
+    IN PUNICODE_STRING DriverServiceName
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtUnloadDriver(
+    IN PUNICODE_STRING DriverServiceName
+);
+
+
 // User32
 
 WINUSERAPI

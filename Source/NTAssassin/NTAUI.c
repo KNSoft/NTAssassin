@@ -154,7 +154,7 @@ BOOL NTAPI UI_ShellExec(PCWSTR File, PCWSTR Param, UI_SHELLEXEC_VERB Verb, INT S
         PIDLIST_ABSOLUTE    pidlDir, pidlFile;
         UINT                uIndexSlash;
         HRESULT             hr;
-        uIndexSlash = (UINT)Str_CchCopyW(szFile, File);
+        uIndexSlash = (UINT)Str_CopyW(szFile, File);
         while (uIndexSlash > 0)
             if (szFile[--uIndexSlash] == '\\')
                 break;
