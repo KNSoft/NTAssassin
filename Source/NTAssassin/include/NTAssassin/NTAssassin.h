@@ -106,9 +106,8 @@ extern "C" {
 #endif
 
 // NTAssassin dependencies
-#pragma comment(lib, "ntdllp.lib")
+#pragma comment(lib, "ntdll.lib")
 #pragma comment(lib, "ComCtl32.Lib")
-#pragma comment(lib, "ShLwApi.Lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -214,6 +213,7 @@ extern "C" {
 #include "..\NTA_NAC_Output.h"
 #endif
 
+#include "NTAUCRT.h"
 #include "NTANT.h"
 #include "NTAData.h"
 #include "NTADbg.h"

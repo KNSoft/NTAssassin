@@ -238,6 +238,7 @@
     <ClCompile Include="NTAStr.c" />
     <ClCompile Include="NTASys.c" />
     <ClCompile Include="NTATime.c" />
+    <ClCompile Include="NTAUCRT.c" />
     <ClCompile Include="NTAUI.c" />
     <ClCompile Include="NTA_NAC_Output.c" />
   </ItemGroup>
@@ -270,6 +271,7 @@
     <ClInclude Include="include\NTAssassin\NTAStr.h" />
     <ClInclude Include="include\NTAssassin\NTASys.h" />
     <ClInclude Include="include\NTAssassin\NTATime.h" />
+    <ClInclude Include="include\NTAssassin\NTAUCRT.h" />
     <ClInclude Include="include\NTAssassin\NTAUI.h" />
     <ClInclude Include="include\NTAssassin\NTConst.h" />
     <ClInclude Include="include\NTAssassin\NTStruct.h" />

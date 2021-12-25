@@ -1,64 +1,13 @@
-#define _INC_WCHAR
-#define _INC_STRING
 #include "include\NTAssassin\NTAssassin.h"
-#undef _INC_WCHAR
-#undef _INC_STRING
-
-// UCRT functions in ntdll.dll
-
-NTSYSAPI
-_Check_return_
-size_t __cdecl wcslen(
-	_In_z_ wchar_t const* _String
-);
-
-
-NTSYSAPI
-_Check_return_
-size_t __cdecl strlen(
-	_In_z_ char const* _Str
-);
-
-NTSYSAPI
-_Success_(return >= 0)
-int __CRTDECL vswprintf_s(
-	_Out_writes_(_BufferCount) _Always_(_Post_z_) wchar_t* const _Buffer,
-	_In_                                          size_t         const _BufferCount,
-	_In_z_ _Printf_format_string_                 wchar_t const* const _Format,
-	va_list              _ArgList
-);
-
-NTSYSAPI
-_Success_(return >= 0)
-int __CRTDECL vsprintf_s(
-	_Out_writes_(_BufferCount) _Always_(_Post_z_) char* const _Buffer,
-	_In_                                          size_t      const _BufferCount,
-	_In_z_ _Printf_format_string_                 char const* const _Format,
-	va_list           _ArgList
-);
-
-NTSYSAPI
-_Check_return_
-int __cdecl wcscmp(
-	_In_z_ wchar_t const* _String1,
-	_In_z_ wchar_t const* _String2
-);
-
-NTSYSAPI
-_Check_return_
-int __cdecl strcmp(
-	_In_z_ char const* _Str1,
-	_In_z_ char const* _Str2
-);
 
 // String Length and Size
 
 SIZE_T NTAPI Str_LenW(_In_z_ PCWSTR String) {
-	return wcslen(String);
+	return UCRT_wcslen(String);
 }
 
 SIZE_T NTAPI Str_LenA(_In_z_ PCSTR String) {
-	return strlen(String);
+	return UCRT_strlen(String);
 }
 
 // String Copy
@@ -86,11 +35,11 @@ SIZE_T NTAPI Str_CopyExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, SIZE_T De
 // String Compare
 
 INT NTAPI Str_CmpW(_In_z_ PCWSTR String1, _In_z_ PCWSTR String2) {
-	return wcscmp(String1, String2);
+	return UCRT_wcscmp(String1, String2);
 }
 
 INT NTAPI Str_CmpA(_In_z_ PCSTR String1, _In_z_ PCSTR String2) {
-	return strcmp(String1, String2);
+	return UCRT_strcmp(String1, String2);
 }
 
 INT NTAPI Str_ICmpW(_In_z_ PCWSTR String1, _In_z_ PCWSTR String2) {
@@ -116,17 +65,17 @@ INT NTAPI Str_ICmpA(_In_z_ PCSTR String1, _In_z_ PCSTR String2) {
 // String Format
 
 INT NTAPI Str_VPrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList) {
-	return vswprintf_s(Dest, DestCchSize, Format, ArgList);
+	return UCRT_vswprintf_s(Dest, DestCchSize, Format, ArgList);
 }
 
 INT NTAPI Str_VPrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
-	return vsprintf_s(Dest, DestCchSize, Format, ArgList);
+	return UCRT_vsprintf_s(Dest, DestCchSize, Format, ArgList);
 }
 
 INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, ...) {
 	va_list args;
 	va_start(args, Format);
-	INT i = vswprintf_s(Dest, DestCchSize, Format, args);
+	INT i = UCRT_vswprintf_s(Dest, DestCchSize, Format, args);
 	va_end(args);
 	return i;
 }
@@ -134,7 +83,7 @@ INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SI
 INT WINAPIV Str_PrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, ...) {
 	va_list args;
 	va_start(args, Format);
-	INT i = vsprintf_s(Dest, DestCchSize, Format, args);
+	INT i = UCRT_vsprintf_s(Dest, DestCchSize, Format, args);
 	va_end(args);
 	return i;
 }

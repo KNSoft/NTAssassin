@@ -12,6 +12,12 @@ typedef enum _SYS_LOADDLL_NAME {
     SysLoadDllMax
 } SYS_LOADDLL_NAME, * PSYS_LOADDLL_NAME;
 
+/**
+  * @brief Loads specified system DLL with cache
+  * @param[in] SysDll System DLL
+  * @return Returns Handle to the DLL loaded, or NULL if failed
+  * @see "LoadLibrary"
+  */
 NTA_API HMODULE NTAPI Sys_LoadDll(SYS_LOADDLL_NAME SysDll);
 
 /**
