@@ -19,7 +19,7 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, SIZE_T BufferSize, PCW
 	uSize -= uDelta;
 
 	// szLibName
-	iCcb = Str_CopyExW((PWSTR)lpTemp, uSize > 1, LibName) < 1;
+	iCcb = Str_CopyExW((PWSTR)lpTemp, uSize >> 1, LibName) << 1;
 	uDelta = iCcb + sizeof(WCHAR);
 	if (uSize < uDelta)
 		return NULL;
