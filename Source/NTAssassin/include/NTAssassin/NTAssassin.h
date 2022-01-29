@@ -91,6 +91,9 @@
 #define SystemLookasideInformation MS_SystemLookasideInformation
 #define SystemCodeIntegrityInformation MS_SystemCodeIntegrityInformation
 #define SystemPolicyInformation MS_SystemPolicyInformation
+#define OBJECT_INFORMATION_CLASS MS_OBJECT_INFORMATION_CLASS
+#define ObjectBasicInformation MS_ObjectBasicInformation
+#define ObjectTypeInformation MS_ObjectTypeInformation
 
 #include <Windows.h>
 #include <Winternl.h>

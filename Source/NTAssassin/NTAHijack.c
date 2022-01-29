@@ -149,7 +149,7 @@ NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR Pro
 	lStatus = Hijack_CreateThread(ProcessHandle, &stThread, Timeout);
 	if (NT_SUCCESS(lStatus)) {
 		lStatus = stThread.ExitCode;
-		if (NT_SUCCESS(lStatus))
+		if (NT_SUCCESS(lStatus) && ProcAddr)
 			*ProcAddr = *lpProc;
 	}
 	return lStatus;

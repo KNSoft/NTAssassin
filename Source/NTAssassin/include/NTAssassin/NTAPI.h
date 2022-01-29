@@ -457,7 +457,6 @@ NtUnloadDriver(
     IN PUNICODE_STRING DriverServiceName
 );
 
-
 // User32
 
 WINUSERAPI

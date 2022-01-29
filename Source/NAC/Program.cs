@@ -110,11 +110,21 @@ namespace NAC {
             // Write file
             string DstHeader = Path.GetFullPath(ProjectDir + ConfigObject.Output.HeaderFile);
             string DstSource = Path.GetFullPath(ProjectDir + ConfigObject.Output.SourceFile);
-            if (bModified || !File.Exists(DstHeader))
+            if (!File.Exists(DstHeader))
+            {
+                var fs = File.Create(DstHeader);
+                fs.Dispose();
+            }
+            if (bModified)
                 HeaderFile.Replace(DstHeader, null);
             else
                 HeaderFile.Delete();
-            if (bModified || !File.Exists(DstSource))
+            if (!File.Exists(DstSource))
+            {
+                var fs = File.Create(DstSource);
+                fs.Dispose();
+            }
+            if (bModified)
                 SourceFile.Replace(DstSource, null);
             else
                 SourceFile.Delete();
