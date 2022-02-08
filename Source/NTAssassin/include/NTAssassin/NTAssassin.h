@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 // NTAssassin Exports, both of static and dynamic library targets are supported
 // Static library target is recommended
@@ -108,7 +108,7 @@
 extern "C" {
 #endif
 
-// NTAssassin dependencies
+    // NTAssassin dependencies
 #pragma comment(lib, "ntdll.lib")
 #pragma comment(lib, "ComCtl32.Lib")
 
@@ -241,6 +241,7 @@ extern "C" {
 #include "NTASys.h"
 #include "NTAHijack.h"
 #include "NTADPI.h"
+#include "NTAGDIP.h"
 
 #ifdef __cplusplus
 }

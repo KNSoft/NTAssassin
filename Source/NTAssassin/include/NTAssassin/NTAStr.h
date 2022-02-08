@@ -1,4 +1,4 @@
-/**
+﻿/**
   * @brief Native library of NTAssassin provides basic string functions.
   * @note ***WILL BE DEPRECATED, assembly language and existing function in ntdll.dll instead***
   * @details Functions are named in pattern: Str_[Cch|Ccb][Len|Cat|Copy|...][IC][Ex]

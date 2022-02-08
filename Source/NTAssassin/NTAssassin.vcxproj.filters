@@ -105,6 +105,9 @@
     <ClCompile Include="NTAUCRT.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NTAGDIP.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTACon.h">
@@ -204,6 +207,9 @@
       <Filter>Header Files\NTDef</Filter>
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTAUCRT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAGDIP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

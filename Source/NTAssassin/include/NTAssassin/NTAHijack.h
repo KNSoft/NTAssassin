@@ -1,4 +1,4 @@
-// Still in testing, no more information available
+﻿// Still in testing, no more information available
 
 #pragma once
 
@@ -74,7 +74,7 @@ NTA_API NTSTATUS NTAPI Hijack_CreateThread(HANDLE ProcessHandle, PHIJACK_CREATET
 
 // Gets remote procedure address
 // PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | SYNCHRONIZE accesses are required
-NTA_API NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR ProcName, PVOID *ProcAddr, DWORD Timeout);
+NTA_API NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR ProcName, PVOID* ProcAddr, DWORD Timeout);
 
 // Calls remote procedure
 // PROCESS_CREATE_THREAD | PROCESS_QUERY_INFORMATION | PROCESS_VM_OPERATION | PROCESS_VM_READ | PROCESS_VM_WRITE | SYNCHRONIZE accesses are required

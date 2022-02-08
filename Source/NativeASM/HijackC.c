@@ -1,7 +1,7 @@
 #include "..\NTAssassin\include\NTAssassin\NTAssassin.h"
 
 NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
-    PVOID*      ppProc;
+    PVOID* ppProc;
     PWSTR       pszLib;
     PSTR        pszProc;
     PWORD       pwOrd;
@@ -92,7 +92,7 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     // Get LdrLoadDll and LdrGetProcedureAddress address
     PFNLdrLoadDll               pLdrLoadDll = NULL;
     PFNLdrGetProcedureAddress   pLdrGetProcedureAddress = NULL;
-    PVOID*                  ppLdrFunc;
+    PVOID* ppLdrFunc;
     PIMAGE_DATA_DIRECTORY   pExportDir;
     PIMAGE_EXPORT_DIRECTORY pExportTable;
     PDWORD                  pdwFuncName;

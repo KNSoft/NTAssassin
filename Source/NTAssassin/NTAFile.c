@@ -5,7 +5,7 @@ NTSTATUS NTAPI File_Create(PHANDLE FileHandle, PWSTR FileName, HANDLE RootDirect
     OBJECT_ATTRIBUTES   stObjectAttr;
     IO_STATUS_BLOCK     stIOStatusBlock;
     NTSTATUS            lStatus;
-    lStatus = NT_InitPathObject(FileName, RootDirectory ,&stObjectAttr, &stString);
+    lStatus = NT_InitPathObject(FileName, RootDirectory, &stObjectAttr, &stString);
     if (NT_SUCCESS(lStatus)) {
         lStatus = NtCreateFile(FileHandle, DesiredAccess, &stObjectAttr, &stIOStatusBlock, NULL, 0, ShareAccess, CreateDisposition, CreateOptions, NULL, 0);
         Mem_HeapFree(stString.Buffer);

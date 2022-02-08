@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "NTAssassin.h"
 
@@ -25,7 +25,7 @@ NTA_API HMODULE NTAPI Sys_LoadDll(SYS_LOADDLL_NAME SysDll);
   * @param[in] ModuleHandle Handle to the module
   * @param[in] MessageId ID of message
   * @return Returns Pointer to the message, or NULL if failed
-  * @see "RtlFindMessage" 
+  * @see "RtlFindMessage"
   */
 NTA_API PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId);
 
@@ -67,7 +67,7 @@ NTA_API VOID NTAPI Sys_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error);
 NTA_API VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status);
 
 /**
-  * @see "Sys_GetErrorInfo" 
+  * @see "Sys_GetErrorInfo"
   */
 #define Sys_GetLastErrorInfo() Sys_GetErrorInfo(NT_GetLastError())
 
