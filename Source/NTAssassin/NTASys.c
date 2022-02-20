@@ -83,6 +83,20 @@ VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status) {
     );
 }
 
+BOOL Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2) {
+    return GUID1->Data1 == GUID2->Data1 &&
+        GUID1->Data2 == GUID2->Data2 &&
+        GUID1->Data3 == GUID2->Data3 &&
+        *(PQWORD)(GUID1->Data4) == *(PQWORD)(GUID2->Data4);
+}
+
+VOID Sys_CopyGUID(LPGUID Dest, REFGUID Src) {
+    Dest->Data1 = Src->Data1;
+    Dest->Data2 = Src->Data2;
+    Dest->Data3 = Src->Data3;
+    *(PQWORD)(Dest->Data4) = *(PQWORD)(Src->Data4);
+}
+
 #define SYS_REG_SERVICES_PATH L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Services"
 
 BOOL NTAPI Sys_RegVolatileDriver(PCWSTR Name, PCWSTR ImagePath) {

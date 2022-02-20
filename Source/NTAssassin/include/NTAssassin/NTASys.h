@@ -91,4 +91,14 @@ NTA_API VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status);
   */
 #define Sys_TestCPUFeature(Feature) ((Feature) < PROCESSOR_FEATURE_MAX ? (BOOL)NT_GetKUSD()->ProcessorFeatures[(Feature)] : FALSE)
 
+/**
+  * @see "IsEqualGUID"
+  */
+NTA_API BOOL Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2);
+
+/**
+  * @brief Copies GUID
+  */
+NTA_API VOID Sys_CopyGUID(LPGUID Dest, REFGUID Src);
+
 NTA_API BOOL NTAPI Sys_RegVolatileDriver(PCWSTR Name, PCWSTR ImagePath);

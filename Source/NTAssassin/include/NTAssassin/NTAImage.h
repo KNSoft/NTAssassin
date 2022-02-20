@@ -30,7 +30,7 @@ typedef enum _IMAGE_FILE_FORMAT {
     ImageFileFormatGIF,
     ImageFileFormatTIFF,
     ImageFileFormatEXIF,
-    ImageFileFormatIcon,
+    ImageFileFormatICON,
     ImageFileFormatHEIF,
     ImageFileFormatWEBP
 } IMAGE_FILE_FORMAT, * PIMAGE_FILE_FORMAT;

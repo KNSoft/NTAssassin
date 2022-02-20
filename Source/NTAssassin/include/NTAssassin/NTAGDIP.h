@@ -2,25 +2,23 @@
 
 #include "NTAssassin.h"
 
-typedef struct _GDIP_IMAGECODECINFO {
-    CLSID Clsid;
-    GUID  FormatID;
-    const WCHAR* CodecName;
-    const WCHAR* DllName;
-    const WCHAR* FormatDescription;
-    const WCHAR* FilenameExtension;
-    const WCHAR* MimeType;
-    DWORD Flags;
-    DWORD Version;
-    DWORD SigCount;
-    DWORD SigSize;
-    const BYTE* SigPattern;
-    const BYTE* SigMask;
-} GDIP_IMAGECODECINFO, * PGDIP_IMAGECODECINFO;
+typedef PVOID PGDIP_IMAGE;
 
-typedef BOOL(CALLBACK* GDIP_IMGCODECENUMPROC)(PGDIP_IMAGECODECINFO ImageCodecInfo, LPARAM Param);
+typedef enum _GDIP_ENCODER_PARAM {
+    TIFF_ParamValue_CompressionUnused,
+    TIFF_ParamValue_CompressionLZW,
+    TIFF_ParamValue_CompressionCCITT3,
+    TIFF_ParamValue_CompressionCCITT4,
+    TIFF_ParamValue_CompressionRle,
+    TIFF_ParamValue_CompressionNone,
+    TIFF_ParamValue_CompressionMax
+} GDIP_ENCODER_PARAM, *PGDIP_ENCODER_PARAM;
 
 NTA_API PCWSTR NTAPI GDIP_GetStatusText(INT Status);
 NTA_API BOOL NTAPI GDIP_Startup(PULONG_PTR Token);
-NTA_API BOOL NTAPI GDIP_EnumImageEncoders(GDIP_IMGCODECENUMPROC ImgEncEnumProc, LPARAM Param);
-NTA_API BOOL NTAPI GDIP_EnumImageDecoders(GDIP_IMGCODECENUMPROC ImgDecEnumProc, LPARAM Param);
+NTA_API PGDIP_IMAGE NTAPI GDIP_LoadImageFromFile(PCWSTR FileName);
+NTA_API BOOL NTAPI GDIP_SaveImageToBMPFile(PGDIP_IMAGE Image, PCWSTR FileName);
+NTA_API BOOL NTAPI GDIP_SaveImageToGIFFile(PGDIP_IMAGE Image, PCWSTR FileName);
+NTA_API BOOL NTAPI GDIP_SaveImageToPNGFile(PGDIP_IMAGE Image, PCWSTR FileName);
+NTA_API BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, PCWSTR FileName, INT Quality);
+NTA_API BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, PCWSTR FileName, GDIP_ENCODER_PARAM Compression, INT ColorDepth);
