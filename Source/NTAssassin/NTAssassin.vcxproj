@@ -120,7 +120,7 @@
     <Lib />
     <ProjectReference />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net5.0\publish\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -148,7 +148,7 @@
     <ProjectReference />
     <Lib />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net5.0\publish\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -180,7 +180,7 @@
     <ProjectReference />
     <Lib />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net5.0\publish\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -208,7 +208,7 @@
     <ProjectReference />
     <Lib />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net5.0\publish\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
