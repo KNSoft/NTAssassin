@@ -2,14 +2,11 @@
 
 // NTAssassin Exports, both of static and dynamic library targets are supported
 // Static library target is recommended
-#ifdef _WINDLL
+
 #ifdef NTA_EXPORTS
 #define NTA_API DECLSPEC_EXPORT
 #else
 #define NTA_API DECLSPEC_IMPORT
-#endif
-#else
-#define NTA_API
 #endif
 
 // NTAssassin Options
@@ -108,7 +105,7 @@
 extern "C" {
 #endif
 
-    // NTAssassin dependencies
+// NTAssassin dependencies
 #pragma comment(lib, "ntdll.lib")
 #pragma comment(lib, "ComCtl32.Lib")
 
@@ -120,7 +117,7 @@ extern "C" {
 #define DECLSPEC_EXPORT __declspec(dllexport)
 
 // Avoid "unused parameter" warnings
-#define UNUSED(x) UNREFERENCED_PARAMETER(x);
+#define UNUSED UNREFERENCED_PARAMETER
 
 #if _WIN64
 #define IS_WIN64 TRUE
@@ -148,9 +145,6 @@ extern "C" {
 
 // Handle to current directory
 #define CURRENT_DIR_HANDLE (NT_GetPEB()->ProcessParameters->CurrentDirectory.Handle)
-
-// Current system locale
-#define CURRENT_LOCALE ((LCID)NT_GetTEBMember(CurrentLocale))
 
 // Clear high 32-bit of HWND
 #if _WIN64
@@ -195,8 +189,6 @@ extern "C" {
 #define CURRENT_THREAD_EFFECTIVETOKEN_HANDLE    ((HANDLE)-6)
 #define FIXED_IMAGE_BASE32                      ((HINSTANCE)0x00400000)
 #define FIXED_IMAGE_BASE64                      ((HINSTANCE)0x0000000140000000)
-
-#define LCID_FUZZY_MASK                         0b1111111111
 
 #define EOLW                                    ((DWORD)0x000A000D)
 #define EOLA                                    ((WORD)0x0A0D)
