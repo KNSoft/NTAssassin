@@ -108,6 +108,7 @@ extern "C" {
 // NTAssassin dependencies
 #pragma comment(lib, "ntdll.lib")
 #pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(lib, "gdiplus.lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
