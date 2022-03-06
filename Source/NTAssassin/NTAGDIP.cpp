@@ -6,7 +6,7 @@
 using namespace Gdiplus;
 using namespace Gdiplus::DllExports;
 
-typedef BOOL(CALLBACK* GDIP_IMGCODECENUMPROC)(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param);
+typedef BOOL(GDIP_IMGCODECENUMPROC)(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param);
 
 BOOL NTAPI GDIP_Startup(PULONG_PTR Token) {
     GdiplusStartupInput gdiplusStartupInput;

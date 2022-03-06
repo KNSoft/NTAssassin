@@ -108,6 +108,9 @@
     <ClCompile Include="NTAGDIP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NTAHook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTACon.h">
