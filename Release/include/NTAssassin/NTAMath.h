@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 /**
   * @brief Rounds a value
@@ -25,3 +25,8 @@ NTA_API ULONG NTAPI Math_Random();
   * @see "RtlRandomEx"
   */
 NTA_API ULONG NTAPI Math_RangedRandom(ULONG Min, ULONG Max);
+
+/**
+  * @brief Checks the number is a power of 2
+  */
+#define Math_IsPowerOf2(n) ((n != 0) && ((n & (n - 1)) == 0))

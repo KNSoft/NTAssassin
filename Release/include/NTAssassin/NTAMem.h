@@ -1,8 +1,8 @@
-// Memory management
+﻿// Memory management
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 /**
   * @brief Allocates heap memory

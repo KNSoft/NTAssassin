@@ -1,8 +1,8 @@
-// KNSoft application framework, do not use
+﻿// KNSoft application framework, do not use
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 #define KNS_VERSION_ALPHA 1
 #define KNS_VERSION_BETA 2

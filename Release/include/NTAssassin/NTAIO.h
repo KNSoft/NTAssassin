@@ -1,8 +1,8 @@
-// I/O a file or device
+﻿// I/O a file or device
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 /**
   * @brief Writes data to specified file or device

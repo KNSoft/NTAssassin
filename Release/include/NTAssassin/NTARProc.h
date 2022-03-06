@@ -1,8 +1,8 @@
-// Remote Process accessibility
+﻿// Remote Process accessibility
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 typedef struct _RPROC_MAP {
     PVOID   Local;

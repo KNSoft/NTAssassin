@@ -1,8 +1,8 @@
-// Native library of NTAssassin provides interfaces to access down-level x86/x64 CPU and Windows NT in R3.
+﻿// Native library of NTAssassin provides interfaces to access down-level x86/x64 CPU and Windows NT in R3.
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 /**
   * @brief Gets any member of current TEB
@@ -22,7 +22,7 @@
   * @return Returns the value of member in QWORD(x64 only)/DWORD/WORD/BYTE
   */
 #if defined(_M_AMD64)
-// NT_SetTEBMember may cause code analysis warning, use following NT_SetTEBMember[QWORD/DWORD/WORD/BYTE] instead
+    // NT_SetTEBMember may cause code analysis warning, use following NT_SetTEBMember[QWORD/DWORD/WORD/BYTE] instead
 #define NT_SetTEBMember(m, val) ((RTL_FIELD_SIZE(TEB, m) == sizeof(DWORD64) ? __writegsqword(FIELD_OFFSET(TEB, m), val) : (RTL_FIELD_SIZE(TEB, m) == sizeof(DWORD) ? __writegsdword(FIELD_OFFSET(TEB, m), val) : (RTL_FIELD_SIZE(TEB, m) == sizeof(WORD) ? __writegsword(FIELD_OFFSET(TEB, m), val) : __writegsbyte(FIELD_OFFSET(TEB, m), val)))))
 #define NT_SetTEBMemberQWORD(m, val) __writegsqword(FIELD_OFFSET(TEB, m), val)
 #define NT_SetTEBMemberDWORD(m, val) __writegsdword(FIELD_OFFSET(TEB, m), val)
@@ -42,17 +42,17 @@
   */
 #define NT_GetTEB() ((PTEB)NT_GetTEBMember(NtTib.Self))
 
-/**
-  * @brief Gets the pointer to current PEB
-  * @return Returns pointer to PEB
-  */
+  /**
+    * @brief Gets the pointer to current PEB
+    * @return Returns pointer to PEB
+    */
 #define NT_GetPEB() ((PPEB)NT_GetTEBMember(ProcessEnvironmentBlock))
 
 /**
   * @brief Gets the pointer to current KUSER_SHARED_DATA
   * @return Returns pointer to KUSER_SHARED_DATA
   */
-#define NT_GetKUSD() ((PKUSER_SHARED_DATA)MM_SHARED_USER_DATA_VA)
+#define NT_GetKUSD() ((CONST PKUSER_SHARED_DATA)MM_SHARED_USER_DATA_VA)
 
 // Last Win32 Error value
 #define NT_ClearLastError() NT_SetTEBMember(LastErrorValue, ERROR_SUCCESS)
@@ -81,11 +81,6 @@ NTA_API VOID NTAPI NT_InitObject(POBJECT_ATTRIBUTES Object, HANDLE RootDirectory
   * @param[in] RootDirectory RootDirectory member of OBJECT_ATTRIBUTES
   * @param[out] Object Pointer to OBJECT_ATTRIBUTES to be filled
   * @param[out] ObjectName ObjectName member of OBJECT_ATTRIBUTES
+  * @warning ObjectName.Buffer should be freed by "Mem_HeapFree" when you no longer need
   */
 NTA_API NTSTATUS NTAPI NT_InitPathObject(PCWSTR Path, HANDLE RootDirectory, POBJECT_ATTRIBUTES Object, PUNICODE_STRING ObjectName);
-
-/**
-  * @brief A SEH handler do nothing just returns EXCEPTION_EXECUTE_HANDLER
-  * @details __try {...} __except (NT_SEH_NopHandler(NULL)) {...}
-  */
-NTA_API int NT_SEH_NopHandler(LPEXCEPTION_POINTERS ExceptionInfo);

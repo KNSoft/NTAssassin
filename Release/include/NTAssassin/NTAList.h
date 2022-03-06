@@ -1,8 +1,8 @@
-// Implement of two-way linked-list data structure.
+﻿// Implement of two-way linked-list data structure.
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 typedef struct _DATA_LIST_NODE DATA_LIST_NODE, * PDATA_LIST_NODE;
 

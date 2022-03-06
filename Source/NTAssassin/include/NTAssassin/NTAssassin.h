@@ -2,11 +2,15 @@
 
 // NTAssassin Exports, both of static and dynamic library targets are supported
 // Static library target is recommended
-
+#define NTA_DLL 0
+#if NTA_DLL
 #ifdef NTA_EXPORTS
 #define NTA_API DECLSPEC_EXPORT
 #else
 #define NTA_API DECLSPEC_IMPORT
+#endif
+#else
+#define NTA_API
 #endif
 
 // NTAssassin Options

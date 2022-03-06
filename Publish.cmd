@@ -18,5 +18,5 @@ COPY /Y "%~dp0Source\Win32\Debug\NTAssassin.lib" "%~dp0Release\lib\x86\Debug\NTA
 COPY /Y "%~dp0Source\Win32\Debug\NTAssassin.pdb" "%~dp0Release\lib\x86\Debug\NTAssassin.pdb"
 COPY /Y "%~dp0Source\Win32\Release\NTAssassin.lib" "%~dp0Release\lib\x86\Release\NTAssassin.lib"
 COPY /Y "%~dp0Source\Win32\Release\NTAssassin.pdb" "%~dp0Release\lib\x86\Release\NTAssassin.pdb"
-XCOPY /E /I /H /R /K /Y "%~dp0Source\NAC\bin\Release\net6.0\publish" "%~dp0Release\bin\NTAssassin\NAC"
+XCOPY /E /I /H /R /K /Y "%~dp0Source\NAC\bin\Release\net6.0" "%~dp0Release\bin\NTAssassin\NAC"
 PAUSE

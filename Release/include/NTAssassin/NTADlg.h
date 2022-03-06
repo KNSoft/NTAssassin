@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #define DLG_PADDING_X   14
 #define DLG_PADDING_Y   20
 #define DLG_CONTROL_H   28
 #define DLG_BUTTON_W    124
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 typedef struct _DLG_TEMPLATE {
     DLGTEMPLATE Template;
@@ -40,9 +40,9 @@ NTA_API LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(PDLG_TEMPLATE Template, DWORD Styl
   */
 #define Dlg_MsgBox(Owner, Text, Title, Type) MessageBoxTimeoutW(Owner, Text, Title, Type, 0, -1)
 
-/**
-  * @see "GetOpenFileName" and "GetSaveFileName"
-  */
+  /**
+    * @see "GetOpenFileName" and "GetSaveFileName"
+    */
 NTA_API BOOL NTAPI Dlg_GetOpenFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD MaxFile, PCWSTR DefExt);
 NTA_API BOOL NTAPI Dlg_GetSaveFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD MaxFile, PCWSTR DefExt);
 #define Dlg_GetOpenFileName(Owner, Filter, File, DefExt) Dlg_GetOpenFileNameEx(Owner, Filter, File, ARRAYSIZE(File), DefExt)

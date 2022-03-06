@@ -1,8 +1,8 @@
-// I18N support, used with NAC is recommanded
+﻿// I18N support, used with NAC is recommanded
 
 #pragma once
 
-#include "NTAssassin\NTAssassin.h"
+#include "NTAssassin.h"
 
 typedef struct _I18N_ITEM {
     DWORD   KeyHash;
