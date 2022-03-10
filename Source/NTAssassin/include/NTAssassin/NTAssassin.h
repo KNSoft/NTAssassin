@@ -239,6 +239,7 @@ extern "C" {
 #include "NTAHijack.h"
 #include "NTADPI.h"
 #include "NTAGDIP.h"
+#include "NTAHook.h"
 
 #ifdef __cplusplus
 }

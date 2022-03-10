@@ -20,7 +20,7 @@ PFNDwmGetWindowAttribute pfnDwmGetWindowAttribute = NULL;
 BOOL NTAPI UI_GetWindowRect(HWND Window, PRECT Rect) {
     if (NT_GetKUSD()->NtMajorVersion >= 6) {
         if (!pfnDwmGetWindowAttribute)
-            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
+            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmGetWindowAttribute");
         if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, Rect, sizeof(*Rect)) == S_OK)
             return TRUE;
     }
@@ -32,7 +32,7 @@ BOOL NTAPI UI_SetWindowRect(HWND Window, PRECT Rect) {
     BOOL    bDwmDiff = FALSE;
     if (NT_GetKUSD()->NtMajorVersion >= 6) {
         if (!pfnDwmGetWindowAttribute)
-            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
+            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmGetWindowAttribute");
         if (pfnDwmGetWindowAttribute &&
             pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, &rcDwmDiff, sizeof(rcDwmDiff)) == S_OK &&
             GetWindowRect(Window, &rcOrgDiff))
@@ -83,7 +83,7 @@ PFNDwmIsCompositionEnabled pfnDwmIsCompositionEnabled = NULL;
 BOOL NTAPI UI_IsDWMComposited() {
     BOOL    bEnabled;
     if (!pfnDwmIsCompositionEnabled) {
-        pfnDwmIsCompositionEnabled = (PFNDwmIsCompositionEnabled)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmIsCompositionEnabled");
+        pfnDwmIsCompositionEnabled = (PFNDwmIsCompositionEnabled)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmIsCompositionEnabled");
     }
     return pfnDwmIsCompositionEnabled ?
         (SUCCEEDED(pfnDwmIsCompositionEnabled(&bEnabled)) ? bEnabled : FALSE) :
@@ -95,7 +95,7 @@ DWORD NTAPI UI_GetWindowCloackedState(HWND Window) {
     if (NT_GetKUSD()->NtMajorVersion > 6 ||
         (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 1) {
         if (!pfnDwmGetWindowAttribute)
-            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllDwmapi), "DwmGetWindowAttribute");
+            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmGetWindowAttribute");
         if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_CLOAKED, &dwCloackedState, sizeof(dwCloackedState)) == S_OK)
             return dwCloackedState;
     }
@@ -108,7 +108,7 @@ BOOL NTAPI UI_GetWindowDisplayAffinity(HWND Window, PDWORD Affinity) {
     if (NT_GetKUSD()->NtMajorVersion > 6 ||
         (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 0) {
         if (!pfnGetWindowDisplayAffinity) {
-            pfnGetWindowDisplayAffinity = (PFNGetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUser32), "GetWindowDisplayAffinity");
+            pfnGetWindowDisplayAffinity = (PFNGetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUser32), "GetWindowDisplayAffinity");
             if (!pfnGetWindowDisplayAffinity)
                 return FALSE;
         }
@@ -123,7 +123,7 @@ BOOL NTAPI UI_SetWindowDisplayAffinity(HWND Window, DWORD Affinity) {
     if (NT_GetKUSD()->NtMajorVersion > 6 ||
         (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 0) {
         if (!pfnSetWindowDisplayAffinity)
-            pfnSetWindowDisplayAffinity = (PFNSetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUser32), "SetWindowDisplayAffinity");
+            pfnSetWindowDisplayAffinity = (PFNSetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUser32), "SetWindowDisplayAffinity");
         return pfnSetWindowDisplayAffinity ? pfnSetWindowDisplayAffinity(Window, Affinity) : FALSE;
     }
     return FALSE;
@@ -134,7 +134,7 @@ PFNSetWindowTheme pfnSetWindowTheme = NULL;
 BOOL NTAPI UI_SetTheme(HWND Window) {
     if (NT_GetKUSD()->NtMajorVersion >= 6) {
         if (!pfnSetWindowTheme)
-            pfnSetWindowTheme = (PFNSetWindowTheme)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUxTheme), "SetWindowTheme");
+            pfnSetWindowTheme = (PFNSetWindowTheme)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUxTheme), "SetWindowTheme");
         return pfnSetWindowTheme ? pfnSetWindowTheme(Window, L"Explorer", NULL) == S_OK : FALSE;
     }
     return FALSE;

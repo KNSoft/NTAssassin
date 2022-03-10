@@ -13,8 +13,8 @@ Hijack_CallProc_InjectThread_x86 PROC USES ebx edi esi lParam
     xor eax, eax
     mov     edi, lParam
     assume  edi:ptr HIJACK_CALLPROCHEADER
-    ; Support stdcall only
-    .if [edi].CallConvention != 0
+    ; Support stdcall(CC_STDCALL) only
+    .if [edi].CallConvention != CC_STDCALL
         mov     eax, STATUS_NOT_IMPLEMENTED
         ret
     .endif

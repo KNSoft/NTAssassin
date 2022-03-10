@@ -258,6 +258,7 @@
     <ClInclude Include="include\NTAssassin\NTAGDI.h" />
     <ClInclude Include="include\NTAssassin\NTAGDIP.h" />
     <ClInclude Include="include\NTAssassin\NTAHijack.h" />
+    <ClInclude Include="include\NTAssassin\NTAHook.h" />
     <ClInclude Include="include\NTAssassin\NTAI18N.h" />
     <ClInclude Include="include\NTAssassin\NTAImage.h" />
     <ClInclude Include="include\NTAssassin\NTAIO.h" />

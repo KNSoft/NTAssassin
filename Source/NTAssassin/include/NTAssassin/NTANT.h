@@ -64,7 +64,7 @@
 #define NT_ClearLastStatus() NT_SetTEBMember(LastStatusValue, STATUS_SUCCESS)
 #define NT_GetLastStatus() NT_GetTEBMember(LastStatusValue)
 #define NT_SetLastStatus(lStatus) NT_SetTEBMemberDWORD(LastStatusValue, lStatus)
-#define NT_LastStatusSucceed() (NT_GetTEBMember(LastStatusValue) == ERROR_SUCCESS)
+#define NT_LastStatusSucceed() (NT_GetTEBMember(LastStatusValue) == STATUS_SUCCESS)
 
 /**
   * @brief Initializes OBJECT_ATTRIBUTES structure

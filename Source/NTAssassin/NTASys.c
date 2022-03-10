@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-HMODULE hSysDlls[SysLoadDllMax] = { NULL };
+HMODULE hSysDlls[SysDllNameMax] = { NULL };
 PWSTR   pszSysDllNames[] = {
     // ntdll.dll always is the first module initialized
     L"kernel32.dll",
@@ -10,13 +10,18 @@ PWSTR   pszSysDllNames[] = {
     L"Shcore.dll"
 };
 
-HMODULE NTAPI Sys_LoadDll(SYS_LOADDLL_NAME SysDll) {
-    if (SysDll >= 0 && SysDll < SysLoadDllMax) {
+HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll) {
+    if (SysDll >= 0 && SysDll < SysDllNameMax) {
         if (!hSysDlls[SysDll])
-            hSysDlls[SysDll] = SysDll == SysLoadDllNTDll ? Proc_GetNtdllHandle() : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
+            hSysDlls[SysDll] = SysDll == SysDllNameNTDll ? Proc_GetNtdllHandle() : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
         return hSysDlls[SysDll];
     } else
         return NULL;
+}
+
+PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, PSTR APIName) {
+    HMODULE hDll = Sys_LoadDll(SysDll);
+    return hDll ? Proc_GetProcAddr(hDll, APIName) : NULL;
 }
 
 PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId) {
@@ -38,7 +43,7 @@ PCWSTR NTAPI Sys_GetErrorInfo(DWORD Error) {
     if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
         HRESULT_FACILITY(dwError) == FACILITY_WIN32)
         dwError = HRESULT_CODE(dwError);
-    return Sys_GetMessage(Sys_LoadDll(SysLoadDllKernel32), dwError);
+    return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
 }
 
 PCWSTR NTAPI Sys_GetStatusInfo(NTSTATUS Status) {
@@ -49,7 +54,7 @@ PCWSTR NTAPI Sys_GetStatusErrorInfo(NTSTATUS Status) {
     DWORD   dwError = RtlNtStatusToDosError(Status);
     if (dwError == ERROR_MR_MID_NOT_FOUND)
         return Sys_GetStatusInfo(Status);
-    return Sys_GetMessage(Sys_LoadDll(SysLoadDllKernel32), dwError);
+    return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
 }
 
 VOID NTAPI Sys_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
@@ -59,7 +64,7 @@ VOID NTAPI Sys_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
         dwError = HRESULT_CODE(dwError);
     Dlg_MsgBox(
         Owner,
-        Sys_GetMessage(Sys_LoadDll(SysLoadDllKernel32), dwError),
+        Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError),
         Title,
         dwError == ERROR_SUCCESS ? 0 : MB_ICONERROR
     );
@@ -99,7 +104,7 @@ VOID Sys_CopyGUID(LPGUID Dest, REFGUID Src) {
 
 #define SYS_REG_SERVICES_PATH L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Services"
 
-BOOL NTAPI Sys_RegVolatileDriver(PCWSTR Name, PCWSTR ImagePath) {
+BOOL NTAPI Sys_RegDriver(PCWSTR Name, PCWSTR ImagePath, BOOL Volatile) {
     HANDLE              hKey;
     WCHAR               szRegSvc[MAX_REG_KEYNAME_CCH];
     UNICODE_STRING      strRegSvc, strKeyName;
@@ -114,21 +119,26 @@ BOOL NTAPI Sys_RegVolatileDriver(PCWSTR Name, PCWSTR ImagePath) {
     if (sIndex > ARRAYSIZE(SYS_REG_SERVICES_PATH) && sIndex < ARRAYSIZE(szRegSvc)) {
         Str_InitW(&strRegSvc, szRegSvc);
         NT_InitObject(&obRegSvc, NULL, &strRegSvc, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE);
-        lStatus = NtCreateKey(&hKey, KEY_SET_VALUE, &obRegSvc, 0, NULL, REG_OPTION_VOLATILE, &ulDisposition);
+        lStatus = NtCreateKey(&hKey, KEY_SET_VALUE, &obRegSvc, 0, NULL, Volatile ? REG_OPTION_VOLATILE : REG_OPTION_NON_VOLATILE, &ulDisposition);
         if (NT_SUCCESS(lStatus)) {
             Str_InitW(&strKeyName, (PWSTR)L"ImagePath");
-            if (NT_SUCCESS(NtSetValueKey(hKey, &strKeyName, 0, REG_EXPAND_SZ, (PVOID)ImagePath, (ULONG)(Str_SizeW(ImagePath) + sizeof(WCHAR))))) {
-                Str_InitW(&strKeyName, L"Type");
-                DWORD dwType = SERVICE_KERNEL_DRIVER;
-                if (NT_SUCCESS(NtSetValueKey(hKey, &strKeyName, 0, REG_DWORD, &dwType, sizeof(dwType)))) {
-                    bRet = TRUE;
-                }
-            } else if (ulDisposition == REG_CREATED_NEW_KEY) {
+            lStatus = NtSetValueKey(hKey, &strKeyName, 0, REG_EXPAND_SZ, (PVOID)ImagePath, (ULONG)(Str_SizeW(ImagePath) + sizeof(WCHAR)));
+            if (!NT_SUCCESS(lStatus))
+                goto Label_1;
+            Str_InitW(&strKeyName, L"Type");
+            DWORD dwType = SERVICE_KERNEL_DRIVER;
+            lStatus = NtSetValueKey(hKey, &strKeyName, 0, REG_DWORD, &dwType, sizeof(dwType));
+            if (!NT_SUCCESS(lStatus))
+                goto Label_1;
+            bRet = TRUE;
+            goto Label_0;
+        Label_1:
+            if (ulDisposition == REG_CREATED_NEW_KEY) {
                 NtDeleteKey(hKey);
             }
+        Label_0:
             NtClose(hKey);
         }
     }
-
     return bRet;
 }

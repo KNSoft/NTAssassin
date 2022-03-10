@@ -15,7 +15,7 @@ BOOL NTAPI DPI_FromWindow(HWND Window, PUINT DPIX, PUINT DPIY) {
     PKUSER_SHARED_DATA  pKUSD = NT_GetKUSD();
     if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3)) {
         if (!pfnGetDpiForMonitor)
-            pfnGetDpiForMonitor = (PFNGetDpiForMonitor)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllShcore), "GetDpiForMonitor");
+            pfnGetDpiForMonitor = (PFNGetDpiForMonitor)Proc_GetProcAddr(Sys_LoadDll(SysDllNameShcore), "GetDpiForMonitor");
         if (pfnGetDpiForMonitor) {
             HMONITOR hMon = MonitorFromWindow(Window, MONITOR_DEFAULTTONULL);
             if (hMon && pfnGetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, DPIX, DPIY) == S_OK)
@@ -37,7 +37,7 @@ PFNIsProcessDPIAware pfnIsProcessDPIAware = NULL;
 BOOL NTAPI DPI_IsAware() {
     if (NT_GetKUSD()->NtMajorVersion >= 6) {
         if (!pfnIsProcessDPIAware)
-            pfnIsProcessDPIAware = (PFNIsProcessDPIAware)Proc_GetProcAddr(Sys_LoadDll(SysLoadDllUser32), "IsProcessDPIAware");
+            pfnIsProcessDPIAware = (PFNIsProcessDPIAware)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUser32), "IsProcessDPIAware");
         return pfnIsProcessDPIAware ? pfnIsProcessDPIAware() : FALSE;
     } else
         return FALSE;

@@ -5,8 +5,8 @@ include HijackASM.inc
 Hijack_CallProc_InjectThread_x64 PROC USES rbx rdi rsi
     ; rdi point to HIJACK_CALLPROCHEADER
     mov     rdi, rcx
-    ; Support stdcall only
-    cmp     dword ptr [rdi + 8], 0  ; [rdi].CallConvention
+    ; Support stdcall(CC_STDCALL) only
+    cmp     dword ptr [rdi + 8], CC_STDCALL  ; [rdi].CallConvention
     je      @f
     mov     eax, STATUS_NOT_IMPLEMENTED
     ret

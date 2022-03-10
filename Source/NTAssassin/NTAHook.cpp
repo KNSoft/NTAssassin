@@ -9,6 +9,10 @@ BOOL NTAPI Hook_Begin() {
     return DetourTransactionBegin() == NO_ERROR;
 }
 
+BOOL NTAPI Hook_Set(BOOL Enable, PVOID* Address, PVOID HookAddress) {
+    return (Enable ? DetourAttach(Address, HookAddress) : DetourDetach(Address, HookAddress)) == NO_ERROR;
+}
+
 BOOL NTAPI Hook_Attach(PVOID* Address, PVOID HookAddress) {
     return DetourAttach(Address, HookAddress) == NO_ERROR;
 }
