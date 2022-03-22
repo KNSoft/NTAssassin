@@ -16,7 +16,7 @@ BOOL CALLBACK Proc_GetDllByName_EnumDllProc(PLDR_DATA_TABLE_ENTRY lpstDll, LPARA
     PUNICODE_STRING lpstDllName = (PUNICODE_STRING)lParam;
     return !(
         lpstDll->DllBase &&
-        lpstDll->BaseDllName.MaximumLength == lpstDllName->MaximumLength &&
+        lpstDll->BaseDllName.Length == lpstDllName->Length &&
         Str_IEqualW(lpstDll->BaseDllName.Buffer, lpstDllName->Buffer)
         );
 }
@@ -24,8 +24,16 @@ BOOL CALLBACK Proc_GetDllByName_EnumDllProc(PLDR_DATA_TABLE_ENTRY lpstDll, LPARA
 PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByName(PWSTR DllName) {
     UNICODE_STRING stDllName;
     stDllName.Buffer = DllName;
-    stDllName.MaximumLength = (USHORT)(Str_SizeW(DllName) + sizeof(WCHAR));
+    stDllName.Length = (USHORT)Str_SizeW(DllName);
     return Proc_EnumDlls(Proc_GetDllByName_EnumDllProc, (LPARAM)&stDllName);
+}
+
+BOOL CALLBACK Proc_GetDllByHandle_EnumDllProc(PLDR_DATA_TABLE_ENTRY lpstDll, LPARAM lParam) {
+    return lpstDll->DllBase != (HMODULE)lParam;
+}
+
+PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByHandle(HMODULE DllHandle) {
+    return Proc_EnumDlls(Proc_GetDllByHandle_EnumDllProc, (LPARAM)DllHandle);
 }
 
 HMODULE NTAPI Proc_GetDllHandleByName(PWSTR DllName) {

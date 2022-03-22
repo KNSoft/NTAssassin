@@ -7,8 +7,18 @@ NTSTATUS NTAPI File_Create(PHANDLE FileHandle, PWSTR FileName, HANDLE RootDirect
     NTSTATUS            lStatus;
     lStatus = NT_InitPathObject(FileName, RootDirectory, &stObjectAttr, &stString);
     if (NT_SUCCESS(lStatus)) {
-        lStatus = NtCreateFile(FileHandle, DesiredAccess, &stObjectAttr, &stIOStatusBlock, NULL, 0, ShareAccess, CreateDisposition, CreateOptions, NULL, 0);
+        lStatus = NtCreateFile(FileHandle, DesiredAccess, &stObjectAttr, &stIOStatusBlock, NULL, FILE_ATTRIBUTE_NORMAL, ShareAccess, CreateDisposition, CreateOptions, NULL, 0);
         Mem_HeapFree(stString.Buffer);
+    }
+    return lStatus;
+}
+
+NTSTATUS NTAPI File_Read(HANDLE FileHandle, PVOID Buffer, ULONG Length, PLARGE_INTEGER ByteOffset, PULONG BytesRead) {
+    IO_STATUS_BLOCK stIOStatusBlock;
+    NTSTATUS        lStatus;
+    lStatus = NtReadFile(FileHandle, NULL, NULL, NULL, &stIOStatusBlock, Buffer, Length, ByteOffset, NULL);
+    if (NT_SUCCESS(lStatus) && BytesRead) {
+        *BytesRead = (ULONG)stIOStatusBlock.Information;
     }
     return lStatus;
 }

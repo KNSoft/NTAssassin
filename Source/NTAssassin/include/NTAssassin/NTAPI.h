@@ -270,6 +270,21 @@ NtQueryVirtualMemory(
 NTSYSAPI
 NTSTATUS
 NTAPI
+NtReadFile(
+    HANDLE              FileHandle,
+    HANDLE              Event,
+    PIO_APC_ROUTINE     ApcRoutine,
+    PVOID               ApcContext,
+    PIO_STATUS_BLOCK    IoStatusBlock,
+    PVOID               Buffer,
+    ULONG               Length,
+    PLARGE_INTEGER      ByteOffset,
+    PULONG              Key
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
 NtWriteFile(
     HANDLE           FileHandle,
     HANDLE           Event,

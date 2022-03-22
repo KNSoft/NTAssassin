@@ -131,7 +131,7 @@ Label_0:
 NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR ProcName, PVOID* ProcAddr, DWORD Timeout) {
     NTSTATUS                lStatus;
     BYTE                    Buffer[HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE];
-    LPVOID                  lpParam, * lpProc;
+    LPVOID                  lpParam, *lpProc;
     HIJACK_CREATETHREAD     stThread;
 
     // Initialize parameter
@@ -145,7 +145,7 @@ NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR Pro
     stThread.Proc64 = (LPTHREAD_START_ROUTINE)SYM_Hijack_LoadProcAddr_InjectThread_x64;
     stThread.ProcSize64 = sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x64);
     stThread.Param = lpParam;
-    stThread.ParamSize = *(LPUINT)lpParam;
+    stThread.ParamSize = *(PUINT)lpParam;
     lStatus = Hijack_CreateThread(ProcessHandle, &stThread, Timeout);
     if (NT_SUCCESS(lStatus)) {
         lStatus = stThread.ExitCode;
@@ -160,7 +160,7 @@ NTSTATUS NTAPI Hijack_CallProc(HANDLE ProcessHandle, PHIJACK_CALLPROCHEADER Hija
     SIZE_T                  usTotalSize, usPageSize;
     UINT                    i, uParamCount;
     HIJACK_CALLPROCHEADER   stCallProcRet;
-    HIJACK_CALLPROCPARAM* pParam, * pRemoteParam, stMemParam;
+    HIJACK_CALLPROCPARAM*   pParam, *pRemoteParam, stMemParam;
     PVOID                   pRemoteBuffer, pRemoteRandomParam, pTemp;
     BOOL                    b32Proc;
     LPTHREAD_START_ROUTINE  pProc;
