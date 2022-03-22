@@ -79,7 +79,7 @@ NTSTATUS NTAPI Hijack_CreateThread(HANDLE ProcessHandle, PHIJACK_CREATETHREAD Hi
     SIZE_T      usProcSize;
 
     // Map code and parameter to remote
-    if (!IsWow64Process(ProcessHandle, &b32Proc))
+    if (!NT_SUCCESS(RProc_IsWow64(ProcessHandle, &b32Proc)))
         return STATUS_ACCESS_DENIED;
     if (b32Proc) {
         pProc = HijackThread->Proc32;
@@ -206,7 +206,7 @@ NTSTATUS NTAPI Hijack_CallProc(HANDLE ProcessHandle, PHIJACK_CALLPROCHEADER Hija
     }
 
     // Create remote thread
-    if (!IsWow64Process(ProcessHandle, &b32Proc))
+    if (!NT_SUCCESS(RProc_IsWow64(ProcessHandle, &b32Proc)))
         return STATUS_ACCESS_DENIED;
     if (b32Proc) {
         pProc = (LPTHREAD_START_ROUTINE)SYM_Hijack_CallProc_InjectThread_x86;

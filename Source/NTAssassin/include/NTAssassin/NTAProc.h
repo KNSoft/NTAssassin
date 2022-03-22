@@ -159,3 +159,8 @@ NTA_API NTSTATUS NTAPI Proc_DelayExec(DWORD Milliseconds);
   * @see "GetExitCodeThread"
   */
 NTA_API NTSTATUS NTAPI Proc_GetThreadExitCode(HANDLE ThreadHandle, PDWORD ExitCode);
+
+/**
+  * @see "IsWow64Process"
+  */
+#define Proc_IsWow64(Wow64Process) RProc_IsWow64(CURRENT_PROCESS_HANDLE, Wow64Process)

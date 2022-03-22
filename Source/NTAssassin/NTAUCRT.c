@@ -1,5 +1,7 @@
 #include "include\NTAssassin\NTAssassin.h"
 
+#pragma warning(disable: 6001)
+
 typedef _Check_return_ size_t(__cdecl* PFNwcslen)(
     _In_z_ wchar_t const* _String
     );
@@ -8,7 +10,7 @@ typedef _Check_return_ size_t(__cdecl* PFNstrlen)(
     _In_z_ char const* _Str
     );
 
-typedef _Success_(return >= 0) int (__CRTDECL * PFNvswprintf_s)(
+typedef _Success_(return >= 0) int(__CRTDECL * PFNvswprintf_s)(
     _Out_writes_(_BufferCount) _Always_(_Post_z_) wchar_t* const _Buffer,
     _In_										  size_t         const _BufferCount,
     _In_z_ _Printf_format_string_				  wchar_t const* const _Format,
@@ -30,6 +32,18 @@ typedef _Check_return_ int(__cdecl* PFNwcscmp)(
 typedef _Check_return_ int(__cdecl* PFNstrcmp)(
     _In_z_ char const* _Str1,
     _In_z_ char const* _Str2
+    );
+
+typedef _Post_equal_to_(_Dst)
+_At_buffer_(
+    (unsigned char*)_Dst,
+    _Iter_,
+    _Size,
+    _Post_satisfies_(((unsigned char*)_Dst)[_Iter_] == _Val)
+) void*(__cdecl* PFNmemset)(
+    _Out_writes_bytes_all_(_Size) void*  _Dst,
+    _In_                          int    _Val,
+    _In_                          size_t _Size
     );
 
 HMODULE hNtDLL = NULL;
@@ -113,3 +127,22 @@ _Success_(return >= 0) int __CRTDECL UCRT_vsprintf_s(
         pfnvsprintf_s = (PFNvsprintf_s)UCRT_GetProcAddr("vsprintf_s");
     return pfnvsprintf_s(_Buffer, _BufferCount, _Format, _ArgList);
 }
+
+PFNmemset pfnmemset = NULL;
+_Post_equal_to_(_Dst)
+_At_buffer_(
+    (unsigned char*)_Dst,
+    _Iter_,
+    _Size,
+    _Post_satisfies_(((unsigned char*)_Dst)[_Iter_] == _Val)
+) void* __cdecl UCRT_memset(
+    _Out_writes_bytes_all_(_Size) void*  _Dst,
+    _In_                          int    _Val,
+    _In_                          size_t _Size
+) {
+    if (!pfnmemset)
+        pfnmemset = (PFNmemset)UCRT_GetProcAddr("memset");
+    return pfnmemset(_Dst, _Val, _Size);
+}
+
+#pragma warning(default: 6001)

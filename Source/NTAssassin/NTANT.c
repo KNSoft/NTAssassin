@@ -15,3 +15,10 @@ NTSTATUS NTAPI NT_InitPathObject(PCWSTR Path, HANDLE RootDirectory, POBJECT_ATTR
     } else
         return STATUS_OBJECT_NAME_INVALID;
 }
+
+DWORD NTAPI NT_SetLastNTError(NTSTATUS Status) {
+    DWORD dwErrCode;
+    dwErrCode = RtlNtStatusToDosError(Status);
+    NT_SetLastError(dwErrCode);
+    return dwErrCode;
+}

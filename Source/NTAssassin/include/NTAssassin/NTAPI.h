@@ -414,6 +414,29 @@ NtFlushInstructionCache(
 NTSYSAPI
 NTSTATUS
 NTAPI
+NtGetContextThread(
+    IN HANDLE ThreadHandle,
+    IN OUT PCONTEXT ThreadContext
+);
+
+NTSTATUS
+NTAPI
+NtSetContextThread(
+    IN HANDLE ThreadHandle,
+    IN PCONTEXT ThreadContext
+);
+
+
+NTSTATUS
+NTAPI
+NtResumeThread(
+    _In_ HANDLE ThreadHandle,
+    _Out_opt_ PULONG SuspendCount
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
 NtQueryInformationAtom(
     RTL_ATOM Atom,
     ATOM_INFORMATION_CLASS AtomInformationClass,

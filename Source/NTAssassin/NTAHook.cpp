@@ -1,9 +1,7 @@
 ﻿#include "include\NTAssassin\NTAssassin.h"
 
 // Hook by using Detours
-#include "3rdParty\src\Detours\detours.cpp"
-#include "3rdParty\src\Detours\disasm.cpp"
-#include "3rdParty\src\Detours\modules.cpp"
+#include "NTAHook_Detours.cpp"
 
 BOOL NTAPI Hook_Begin() {
     return DetourTransactionBegin() == NO_ERROR;

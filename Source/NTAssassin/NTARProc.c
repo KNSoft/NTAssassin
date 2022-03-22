@@ -206,3 +206,12 @@ Label_1:
 Label_0:
     return lStatus;
 }
+
+NTSTATUS NTAPI RProc_IsWow64(IN HANDLE hProcess, OUT PBOOL Wow64Process) {
+    ULONG_PTR pwi;
+    NTSTATUS lStatus = NtQueryInformationProcess(hProcess, ProcessWow64Information, &pwi, sizeof(pwi), NULL);
+    if (NT_SUCCESS(lStatus)) {
+        *Wow64Process = (pwi != 0);
+    }
+    return lStatus;
+}
