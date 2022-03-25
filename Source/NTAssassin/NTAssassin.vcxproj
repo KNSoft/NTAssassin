@@ -283,6 +283,7 @@
     <ClInclude Include="include\NTAssassin\NTConst.h" />
     <ClInclude Include="include\NTAssassin\NTStruct.h" />
     <ClInclude Include="include\NTAssassin\NTTypes.h" />
+    <ClInclude Include="include\NTAssassin\NTAOpCode.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

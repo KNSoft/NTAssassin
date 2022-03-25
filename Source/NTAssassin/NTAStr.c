@@ -64,15 +64,15 @@ INT NTAPI Str_ICmpA(_In_z_ PCSTR String1, _In_z_ PCSTR String2) {
 
 // String Format
 
-INT NTAPI Str_VPrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList) {
+INT NTAPI Str_VPrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList) {
     return UCRT_vswprintf_s(Dest, DestCchSize, Format, ArgList);
 }
 
-INT NTAPI Str_VPrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
-    return UCRT_vsprintf_s(Dest, DestCchSize, Format, ArgList);
+INT NTAPI Str_VPrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
+    return UCRT__vsnprintf(Dest, DestCchSize, Format, ArgList);
 }
 
-INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, ...) {
+INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, ...) {
     va_list args;
     va_start(args, Format);
     INT i = UCRT_vswprintf_s(Dest, DestCchSize, Format, args);
@@ -80,10 +80,15 @@ INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SI
     return i;
 }
 
-INT WINAPIV Str_PrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, ...) {
+INT WINAPIV Str_PrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, ...) {
     va_list args;
     va_start(args, Format);
-    INT i = UCRT_vsprintf_s(Dest, DestCchSize, Format, args);
+    INT i = UCRT__vsnprintf(Dest, DestCchSize, Format, args);
+    if (i > DestCchSize) {
+        Dest[DestCchSize - 1] = '\0';
+    } else if (i == -1) {
+        Dest[0] = '\0';
+    }
     va_end(args);
     return i;
 }

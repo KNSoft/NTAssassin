@@ -222,6 +222,7 @@ extern "C" {
 #include "..\NTA_NAC_Output.h"
 #endif
 
+#include "NTAOpCode.h"
 #include "NTAUCRT.h"
 #include "NTANT.h"
 #include "NTAData.h"

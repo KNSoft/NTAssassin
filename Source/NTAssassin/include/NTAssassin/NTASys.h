@@ -95,6 +95,9 @@ NTA_API VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status);
   */
 #define Sys_LastStatusMsgBox(Owner, Title) Sys_StatusMsgBox(Owner, Title, NT_GetLastStatus())
 
+NTA_API PSYSTEM_PROCESS_INFORMATION Sys_GetProcessInfo();
+#define Sys_FreeProcessInfo(p) Mem_Free(p);
+
 /**
   * @see "IsProcessorFeaturePresent"
   */

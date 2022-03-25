@@ -91,10 +91,10 @@ NTA_API INT NTAPI Str_ICmpA(_In_z_ PCSTR String1, _In_z_ PCSTR String2);
 
 // String Printf
 
-NTA_API INT NTAPI Str_VPrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList);
-NTA_API INT NTAPI Str_VPrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList);
-NTA_API INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, ...);
-NTA_API INT WINAPIV Str_PrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ SIZE_T DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, ...);
+NTA_API INT NTAPI Str_VPrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList);
+NTA_API INT NTAPI Str_VPrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList);
+NTA_API INT WINAPIV Str_PrintfExW(_Out_writes_(DestCchSize) _Post_z_ PWSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCWSTR Format, ...);
+NTA_API INT WINAPIV Str_PrintfExA(_Out_writes_(DestCchSize) _Post_z_ PSTR Dest, _In_ INT DestCchSize, _In_z_ _Printf_format_string_ PCSTR Format, ...);
 #ifdef UNICODE
 #define Str_VPrintfEx Str_VPrintfExW
 #define Str_PrintfEx Str_PrintfExW

@@ -17,11 +17,11 @@ typedef _Success_(return >= 0) int(__CRTDECL * PFNvswprintf_s)(
     va_list _ArgList
     );
 
-typedef _Success_(return >= 0) int(__CRTDECL * PFNvsprintf_s)(
-    _Out_writes_(_BufferCount) _Always_(_Post_z_) char* const _Buffer,
-    _In_                                          size_t      const _BufferCount,
-    _In_z_ _Printf_format_string_                 char const* const _Format,
-    va_list _ArgList
+typedef _Success_(return >= 0) int(__CRTDECL * PFN_vsnprintf)(
+    _Out_writes_opt_(_BufferCount) _Post_maybez_ char*       const _Buffer,
+    _In_                                        size_t      const _BufferCount,
+    _In_z_ _Printf_format_string_               char const* const _Format,
+    va_list           _ArgList
     );
 
 typedef _Check_return_ int(__cdecl* PFNwcscmp)(
@@ -116,16 +116,16 @@ _Success_(return >= 0) int __CRTDECL UCRT_vswprintf_s(
     return pfnvswprintf_s(_Buffer, _BufferCount, _Format, _ArgList);
 }
 
-PFNvsprintf_s pfnvsprintf_s = NULL;
-_Success_(return >= 0) int __CRTDECL UCRT_vsprintf_s(
-    _Out_writes_(_BufferCount) _Always_(_Post_z_) char* const _Buffer,
-    _In_                                          size_t      const _BufferCount,
-    _In_z_ _Printf_format_string_                 char const* const _Format,
+PFN_vsnprintf pfn_vsnprintf = NULL;
+_Success_(return >= 0) _Check_return_opt_ int __CRTDECL UCRT__vsnprintf(
+    _Out_writes_opt_(_BufferCount) _Post_maybez_ char*       const _Buffer,
+    _In_                                        size_t      const _BufferCount,
+    _In_z_ _Printf_format_string_               char const* const _Format,
     va_list           _ArgList
 ) {
-    if (!pfnvsprintf_s)
-        pfnvsprintf_s = (PFNvsprintf_s)UCRT_GetProcAddr("vsprintf_s");
-    return pfnvsprintf_s(_Buffer, _BufferCount, _Format, _ArgList);
+    if (!pfn_vsnprintf)
+        pfn_vsnprintf = (PFN_vsnprintf)UCRT_GetProcAddr("_vsnprintf");
+    return pfn_vsnprintf(_Buffer, _BufferCount, _Format, _ArgList);
 }
 
 PFNmemset pfnmemset = NULL;

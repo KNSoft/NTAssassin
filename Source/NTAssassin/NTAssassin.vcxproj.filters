@@ -218,5 +218,8 @@
     <ClInclude Include="include\NTAssassin\NTAHook.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAOpCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

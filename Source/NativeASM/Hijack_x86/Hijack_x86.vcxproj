@@ -79,7 +79,6 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-    <MASM />
     <MASM>
       <PreprocessorDefinitions>_DEBUG;_ARCHIA32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </MASM>
