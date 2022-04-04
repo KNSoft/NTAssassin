@@ -13,6 +13,54 @@ BOOL NTAPI GDIP_Startup(PULONG_PTR Token) {
     return GdiplusStartup(Token, &gdiplusStartupInput, NULL) == Ok;
 }
 
+VOID NTAPI GDIP_Shutdown(ULONG_PTR Token) {
+    GdiplusShutdown(Token);
+}
+
+PGDIP_GRAPHICS NTAPI GDIP_CreateFromHDC(HDC DC) {
+    GpGraphics* pGraphics;
+    return GdipCreateFromHDC(DC, &pGraphics) == Ok ? (PGDIP_GRAPHICS)pGraphics : NULL;
+}
+
+BOOL NTAPI GDIP_DeleteGraphics(PGDIP_GRAPHICS Graphics) {
+    return GdipDeleteGraphics((GpGraphics*)Graphics) == Ok;
+}
+
+BOOL NTAPI GDIP_SetGraphicsSmoothingMode(PGDIP_GRAPHICS Graphics, GDIP_SMOOTHINGMODE Mode) {
+    return GdipSetSmoothingMode((GpGraphics*)Graphics, (SmoothingMode)Mode) == Ok;
+}
+
+BOOL NTAPI GDIP_DrawImage(PGDIP_GRAPHICS Graphics, PGDIP_IMAGE Image, INT X, INT Y) {
+    return GdipDrawImageI((GpGraphics*)Graphics, (GpImage*)Image, X, Y) == Ok;
+}
+
+BOOL NTAPI GDIP_DrawImageRect(PGDIP_GRAPHICS Graphics, PGDIP_IMAGE Image, INT X, INT Y, INT Width, INT Height) {
+    return GdipDrawImageRectI((GpGraphics*)Graphics, (GpImage*)Image, X, Y, Width, Height) == Ok;
+}
+
+BOOL NTAPI GDIP_GetImageDimension(PGDIP_IMAGE Image, PUINT Width, PUINT Height) {
+    return GdipGetImageWidth((GpImage*)Image, Width) == Ok &&
+        GdipGetImageHeight((GpImage*)Image, Height) == Ok;
+}
+
+PGDIP_BRUSH NTAPI GDIP_CreateSolidBrush(ARGB Color) {
+    GpSolidFill* pBrush;
+    return GdipCreateSolidFill(Color, &pBrush) == Ok ? (GpBrush*)pBrush : NULL;
+}
+
+BOOL NTAPI GDIP_FillRect(PGDIP_GRAPHICS Graphics, PGDIP_BRUSH Brush, INT X, INT Y, INT Width, INT Height) {
+    return GdipFillRectangleI((GpGraphics*)Graphics, (GpBrush*)Brush, X, Y, Width, Height) == Ok;
+}
+
+BOOL NTAPI GDIP_DeleteBrush(PGDIP_BRUSH Brush) {
+    return GdipDeleteBrush((GpBrush*)Brush) == Ok;
+}
+
+PGDIP_PATH NTAPI GDIP_CreatePath() {
+    GpPath* pPath;
+    return GdipCreatePath(FillModeAlternate, &pPath) == Ok ? (PGDIP_PATH)pPath : NULL;
+}
+
 BOOL NTAPI GDIP_EnumImageEncoders(GDIP_IMGCODECENUMPROC ImgEncEnumProc, LPARAM Param) {
     BOOL bRet = FALSE;
     UINT uNum, uSize;
@@ -52,24 +100,34 @@ BOOL NTAPI GDIP_EnumImageDecoders(GDIP_IMGCODECENUMPROC ImgDecEnumProc, LPARAM P
 }
 
 PGDIP_IMAGE NTAPI GDIP_LoadImageFromFile(PCWSTR FileName) {
-    GpImage *pImage;
+    GpImage* pImage;
     return GdipLoadImageFromFile(FileName, &pImage) == Ok ? (PGDIP_IMAGE)pImage : NULL;
 }
 
 PGDIP_IMAGE NTAPI GDIP_LoadImageFromBitmap(HBITMAP Bitmap) {
-    GpBitmap *pBitmap;
+    GpBitmap* pBitmap;
     return GdipCreateBitmapFromHBITMAP(Bitmap, NULL, &pBitmap) == Ok ? (GpImage*)pBitmap : NULL;
 }
 
+PGDIP_IMAGE NTAPI GDIP_LoadImageFromBuffer(PVOID Buffer, UINT Size) {
+    GpImage* pImage = NULL;
+    IStream* Stream = SHCreateMemStream((const BYTE*)Buffer, Size);
+    if (Stream) {
+        GdipLoadImageFromStream(Stream, &pImage);
+        Stream->Release();
+    }
+    return pImage;
+}
+
 BOOL NTAPI GDIP_DisposeImage(PGDIP_IMAGE Image) {
-    return GdipDisposeImage((Gdiplus::GpImage*)Image) == Ok;
+    return GdipDisposeImage((GpImage*)Image) == Ok;
 }
 
 typedef struct _GDIP_IMGCODECENUMPARAM {
     REFCLSID    FormatCLSID;
     LPCLSID     OutCLSID;
     BOOL        Found;
-} GDIP_IMGCODECENUMPARAM, * PGDIP_IMGCODECENUMPARAM;
+} GDIP_IMGCODECENUMPARAM, *PGDIP_IMGCODECENUMPARAM;
 
 BOOL GDIP_FindCodecEnumProc(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param) {
     PGDIP_IMGCODECENUMPARAM pParam = reinterpret_cast<PGDIP_IMGCODECENUMPARAM>(Param);

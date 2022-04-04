@@ -69,12 +69,6 @@ typedef BOOL(CALLBACK* PROC_DLLENUMPROC)(PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPAR
   */
 #define Proc_GetNtdllHandle() (CONTAINING_RECORD(NT_GetPEB()->Ldr->InInitializationOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InInitializationOrderModuleList)->DllBase)
 
- /**
-  * @brief Gets handle to exe module, which the first loaded module of executable image
-  * @return Returns handle of exe module
-  */
-#define Proc_GetExeHandle() (CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList)->DllBase)
-
 /**
   * @brief Enumerates DLL modules of current process
   * @param[in] DllEnumProc Callback procedure to receive information of each DLL
@@ -117,18 +111,18 @@ NTA_API PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByAddr(PVOID Address);
   * @param[in] DontResolveRef Set to TRUE to don't resolve references
   * @return Returns handle to the DLL or NULL if failed
   */
-NTA_API HMODULE NTAPI Proc_LoadDll(PWSTR LibName, BOOL DontResolveRef);
+NTA_API HMODULE NTAPI Proc_LoadDll(PCWSTR LibName, BOOL DontResolveRef);
 
 /**
   * @see "GetProcAddress"
   */
-NTA_API PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PSTR ProcName);
+NTA_API PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PCSTR ProcName);
 
 /**
   * @brief Loads procedure address of specified module, module will be loaded if not yet
   * @see "LoadLibrary" and "GetProcAddress"
   */
-NTA_API PVOID NTAPI Proc_LoadProcAddr(PWSTR LibName, PSTR ProcName);
+NTA_API PVOID NTAPI Proc_LoadProcAddr(PCWSTR LibName, PCSTR ProcName);
 
 /**
   * @brief Adjusts current process privilege

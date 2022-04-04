@@ -14,9 +14,15 @@
         public string File { get; set; }
         public CO_SymbolExtract_Symbol[] Symbols { get; set; }
     }
+    public class CO_Binary
+    {
+        public string File { get; set; }
+        public string Export { get; set; }
+    }
     public class CO_Loaders {
         public CO_I18N I18N { get; set; }
         public CO_SymbolExtract[] SymExtract { get; set; }
+        public CO_Binary[] Binary { get; set; }
     }
     public class CO_Output {
         public string HeaderFile { get; set; }

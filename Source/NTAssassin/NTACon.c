@@ -1,12 +1,12 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-DWORD Con_Write(HANDLE ConHandle, PVOID Buffer, SIZE_T Length) {
+DWORD Con_Write(HANDLE ConHandle, PVOID Buffer, ULONG Length) {
     IO_STATUS_BLOCK stIOStatusBlock;
     return NT_SUCCESS(NtWriteFile(ConHandle, NULL, NULL, NULL, &stIOStatusBlock, Buffer, Length, NULL, NULL)) ? (DWORD)stIOStatusBlock.Information : 0;
 }
 
 DWORD Con_WriteString(HANDLE ConHandle, PCSTR String) {
-    return Con_Write(ConHandle, (PVOID)String, Str_SizeA(String));
+    return Con_Write(ConHandle, (PVOID)String, (ULONG)Str_SizeA(String));
 }
 
 DWORD Con_WriteLine(HANDLE ConHandle, PCSTR String) {

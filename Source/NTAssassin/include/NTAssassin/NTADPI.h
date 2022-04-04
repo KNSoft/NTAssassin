@@ -15,11 +15,12 @@ NTA_API BOOL NTAPI DPI_FromWindow(HWND Window, PUINT DPIX, PUINT DPIY);
 
 /**
   * @brief Scales a value according to given DPI
-  * @param[in, out] Value Pointer to the RECT structure to be scaled
+  * @param[in, out] Value Pointer to the value to be scaled
   * @param[in] OldDPI Old DPI value
   * @param[in] NewDPI New DPI value
   */
-NTA_API VOID NTAPI DPI_Scale(PINT Value, UINT OldDPI, UINT NewDPI);
+NTA_API VOID NTAPI DPI_ScaleInt(PINT Value, UINT OldDPI, UINT NewDPI);
+NTA_API VOID NTAPI DPI_ScaleUInt(PUINT Value, UINT OldDPI, UINT NewDPI);
 
 /**
   * @brief Scales a value according to given DPI

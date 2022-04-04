@@ -54,15 +54,15 @@ PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByAddr(PVOID Address) {
     return Proc_EnumDlls(Proc_GetDllByAddr_EnumDllProc, (LPARAM)Address);
 }
 
-HMODULE NTAPI Proc_LoadDll(PWSTR LibName, BOOL DontResolveRef) {
+HMODULE NTAPI Proc_LoadDll(PCWSTR LibName, BOOL DontResolveRef) {
     HMODULE         hDll;
     ULONG           DllCharacteristics;
     UNICODE_STRING  stLibName;
-    Str_InitW(&stLibName, LibName);
+    Str_InitW(&stLibName, (PWSTR)LibName);
     return NT_SUCCESS(LdrLoadDll(NULL, DontResolveRef ? (DllCharacteristics = IMAGE_FILE_EXECUTABLE_IMAGE, &DllCharacteristics) : NULL, &stLibName, &hDll)) ? hDll : NULL;
 }
 
-PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PSTR ProcName) {
+PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PCSTR ProcName) {
     PANSI_STRING    lpstProcName;
     ULONG           ulProcOrd;
     PVOID           lpProc;
@@ -70,7 +70,7 @@ PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PSTR ProcName) {
         ANSI_STRING stProcName;
         stProcName.Length = (USHORT)Str_LenA(ProcName);
         stProcName.MaximumLength = stProcName.Length + sizeof(CHAR);
-        stProcName.Buffer = ProcName;
+        stProcName.Buffer = (PCHAR)ProcName;
         lpstProcName = &stProcName;
         ulProcOrd = 0;
     } else {
@@ -80,7 +80,7 @@ PVOID NTAPI Proc_GetProcAddr(HMODULE Module, PSTR ProcName) {
     return NT_SUCCESS(LdrGetProcedureAddress(Module, lpstProcName, ulProcOrd, &lpProc)) ? lpProc : NULL;
 }
 
-PVOID NTAPI Proc_LoadProcAddr(PWSTR LibName, PSTR ProcName) {
+PVOID NTAPI Proc_LoadProcAddr(PCWSTR LibName, PCSTR ProcName) {
     HMODULE hDll = Proc_LoadDll(LibName, FALSE);
     return hDll ? Proc_GetProcAddr(hDll, ProcName) : NULL;
 }

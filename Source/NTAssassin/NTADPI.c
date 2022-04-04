@@ -43,15 +43,19 @@ BOOL NTAPI DPI_IsAware() {
         return FALSE;
 }
 
-VOID NTAPI DPI_Scale(PINT Value, UINT OldDPI, UINT NewDPI) {
+VOID NTAPI DPI_ScaleInt(PINT Value, UINT OldDPI, UINT NewDPI) {
     *Value = Math_RoundInt(*Value * ((FLOAT)NewDPI / OldDPI));
 }
 
+VOID NTAPI DPI_ScaleUInt(PUINT Value, UINT OldDPI, UINT NewDPI) {
+    *Value = Math_RoundUInt(*Value * ((FLOAT)NewDPI / OldDPI));
+}
+
 VOID NTAPI DPI_ScaleRect(PRECT Rect, UINT OldDPIX, UINT NewDPIX, UINT OldDPIY, UINT NewDPIY) {
-    DPI_Scale(&Rect->left, OldDPIX, NewDPIX);
-    DPI_Scale(&Rect->right, OldDPIX, NewDPIX);
-    DPI_Scale(&Rect->top, OldDPIY, NewDPIY);
-    DPI_Scale(&Rect->bottom, OldDPIY, NewDPIY);
+    DPI_ScaleInt(&Rect->left, OldDPIX, NewDPIX);
+    DPI_ScaleInt(&Rect->right, OldDPIX, NewDPIX);
+    DPI_ScaleInt(&Rect->top, OldDPIY, NewDPIY);
+    DPI_ScaleInt(&Rect->bottom, OldDPIY, NewDPIY);
 }
 
 BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
@@ -81,7 +85,7 @@ LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM 
         UI_SetWindowRect(hDlg, (PRECT)lParam);
         // Adjust font
         HFONT   hFont;
-        DPI_Scale(&pstRef->stFont.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
+        DPI_ScaleInt(&pstRef->stFont.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
         hFont = CreateFontIndirectExW(&pstRef->stFont);
         if (hFont) {
             if (pstRef->hFont)

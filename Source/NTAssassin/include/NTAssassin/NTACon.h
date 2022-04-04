@@ -6,7 +6,7 @@
 #define CON_OUTPUT_HANDLE (NT_GetPEB()->ProcessParameters->StandardOutput)
 #define CON_ERROR_HANDLE (NT_GetPEB()->ProcessParameters->StandardError)
 
-NTA_API DWORD Con_Write(HANDLE ConHandle, PVOID Buffer, SIZE_T Length);
+NTA_API DWORD Con_Write(HANDLE ConHandle, PVOID Buffer, ULONG Length);
 
 NTA_API DWORD Con_WriteString(HANDLE ConHandle, PCSTR String);
 

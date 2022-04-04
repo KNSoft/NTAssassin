@@ -102,6 +102,7 @@
 #include <WindowsX.h>
 #include <CommCtrl.h>
 #include <Shlobj.h>
+#include <Shlwapi.h>
 #include <shellscalingapi.h>
 #include <dwmapi.h>
 #include <Tpcshrd.h>
@@ -120,6 +121,7 @@ extern "C" {
 #pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "Ole32.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")

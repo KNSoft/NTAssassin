@@ -9,6 +9,8 @@ typedef enum _SYS_DLL_NAME {
     SysDllNameUxTheme,
     SysDllNameDwmapi,
     SysDllNameShcore,
+    SysDllNameWs2_32,
+    SysDllNameWinmm,
     SysDllNameMax
 } SYS_DLL_NAME, * PSYS_DLL_NAME;
 
@@ -27,7 +29,7 @@ NTA_API HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll);
   * @return Returns address of API, or NULL if failed
   * @see "GetProcAddress"
   */
-NTA_API PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, PSTR APIName);
+NTA_API PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, PCSTR APIName);
 
 /**
   * @brief Gets Unicode message text in specified module by message ID

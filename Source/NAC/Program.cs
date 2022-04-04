@@ -95,12 +95,16 @@ namespace NAC {
                 bModified |= Loaders.I18N.IsModified(ProjectDir, ConfigObject.Loaders.I18N, DstLastModifyTime);
             if (!bModified && ConfigObject.Loaders.SymExtract != null)
                 bModified |= Loaders.SymExtract.IsModified(ProjectDir, ConfigObject.Loaders.SymExtract, DstLastModifyTime);
+            if (!bModified && ConfigObject.Loaders.Binary != null)
+                bModified |= Loaders.Binary.IsModified(ProjectDir, ConfigObject.Loaders.Binary, DstLastModifyTime);
 
             if (bModified) {
                 if (ConfigObject.Loaders.I18N != null)
                     Loaders.I18N.Process(ProjectDir, fsHeader, fsSource, ConfigObject.Loaders.I18N);
                 if (ConfigObject.Loaders.SymExtract != null)
                     Loaders.SymExtract.Process(ProjectDir, fsHeader, fsSource, ConfigObject.Loaders.SymExtract);
+                if (ConfigObject.Loaders.Binary != null)
+                    Loaders.Binary.Process(ProjectDir, fsHeader, fsSource, ConfigObject.Loaders.Binary);
             }
 
             // Cleanup

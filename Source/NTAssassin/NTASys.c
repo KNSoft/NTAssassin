@@ -1,13 +1,15 @@
 #include "include\NTAssassin\NTAssassin.h"
 
 HMODULE hSysDlls[SysDllNameMax] = { NULL };
-PWSTR   pszSysDllNames[] = {
+PCWSTR  pszSysDllNames[] = {
     // ntdll.dll always is the first module initialized
     L"kernel32.dll",
     L"user32.dll",
     L"UxTheme.dll",
     L"Dwmapi.dll",
-    L"Shcore.dll"
+    L"Shcore.dll",
+    L"Ws2_32.dll",
+    L"Winmm.dll"
 };
 
 HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll) {
@@ -19,7 +21,7 @@ HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll) {
         return NULL;
 }
 
-PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, PSTR APIName) {
+PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, PCSTR APIName) {
     HMODULE hDll = Sys_LoadDll(SysDll);
     return hDll ? Proc_GetProcAddr(hDll, APIName) : NULL;
 }
