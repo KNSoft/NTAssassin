@@ -6,6 +6,8 @@ typedef enum _SYS_DLL_NAME {
     SysDllNameNTDll = 0,
     SysDllNameKernel32,
     SysDllNameUser32,
+    SysDllNameComDlg32,
+    SysDllNameOle32,
     SysDllNameUxTheme,
     SysDllNameDwmapi,
     SysDllNameShcore,

@@ -130,8 +130,8 @@ LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wP
         pstRef->dwOldDPIY = pstRef->dwNewDPIY;
         pstRef->dwNewDPIX = LOWORD(wParam);
         pstRef->dwNewDPIY = HIWORD(wParam);
-        DPI_Scale(&pstRef->lMinWidth, pstRef->dwOldDPIX, pstRef->dwNewDPIX);
-        DPI_Scale(&pstRef->lMinHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
+        DPI_ScaleInt(&pstRef->lMinWidth, pstRef->dwOldDPIX, pstRef->dwNewDPIX);
+        DPI_ScaleInt(&pstRef->lMinHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_SIZING) {
         PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;

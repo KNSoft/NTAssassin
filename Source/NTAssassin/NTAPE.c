@@ -156,7 +156,7 @@ BOOL NTAPI PE_GetExportedName(PPE_STRUCT PEStruct, PVOID Function, PZPCSTR Name)
                             pszName = PE_RVA2Ptr(PEStruct, padwNameRVAs[uNameIndex]);
                         }
                     }
-                    *Name = IF_NULL(pszName, (PCSTR)(DWORD_PTR)(uFuncIndex + pExportTable->Base));
+                    *Name = IF_NULL(pszName, (PCSTR)(DWORD_PTR)(uFuncIndex + (DWORD_PTR)pExportTable->Base));
                     bRet = TRUE;
                 }
             }

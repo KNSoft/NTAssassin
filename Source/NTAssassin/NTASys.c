@@ -5,6 +5,8 @@ PCWSTR  pszSysDllNames[] = {
     // ntdll.dll always is the first module initialized
     L"kernel32.dll",
     L"user32.dll",
+    L"Comdlg32.dll",
+    L"Ole32.dll",
     L"UxTheme.dll",
     L"Dwmapi.dll",
     L"Shcore.dll",
