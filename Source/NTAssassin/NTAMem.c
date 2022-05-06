@@ -13,8 +13,8 @@ NTSTATUS NTAPI Mem_PageProt(PVOID BaseAddress, SIZE_T Size, ULONG Protect, PULON
     return NtProtectVirtualMemory(CURRENT_PROCESS_HANDLE, &lpBase, &sSize, Protect, OldProtect);
 }
 
-NTSTATUS NTAPI Mem_PageFree(PVOID BaseAddress, SIZE_T Size) {
+NTSTATUS NTAPI Mem_PageFree(PVOID BaseAddress) {
     PVOID   lpBase = BaseAddress;
-    SIZE_T  uSize = Size;
+    SIZE_T  uSize = 0;
     return NtFreeVirtualMemory(CURRENT_PROCESS_HANDLE, &lpBase, &uSize, MEM_RELEASE);
 }

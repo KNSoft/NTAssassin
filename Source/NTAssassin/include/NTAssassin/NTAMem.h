@@ -32,7 +32,7 @@ NTA_API NTSTATUS NTAPI Mem_PageProt(PVOID BaseAddress, SIZE_T Size, ULONG Protec
   * @brief Frees memory pages
   * @see "VirtualFree"
   */
-NTA_API NTSTATUS NTAPI Mem_PageFree(PVOID BaseAddress, SIZE_T Size);
+NTA_API NTSTATUS NTAPI Mem_PageFree(PVOID BaseAddress);
 
 // Alias of "Mem_HeapAlloc"
 #define Mem_Alloc Mem_HeapAlloc
