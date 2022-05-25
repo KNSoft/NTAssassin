@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-HDC NTAPI UI_BeginPaint(HWND Window, PUI_WINDBPAINT Paint) {
+HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint) {
     Paint->DC = CreateCompatibleDC(BeginPaint(Window, &Paint->Paint));
     GetClientRect(Window, &Paint->Rect);
     Paint->Bitmap = CreateCompatibleBitmap(Paint->Paint.hdc, Paint->Rect.right, Paint->Rect.bottom);
@@ -8,196 +8,82 @@ HDC NTAPI UI_BeginPaint(HWND Window, PUI_WINDBPAINT Paint) {
     return Paint->DC;
 }
 
-VOID NTAPI UI_EndPaint(HWND Window, PUI_WINDBPAINT Paint) {
+VOID NTAPI UI_EndPaint(HWND Window, _In_ PUI_WINDBPAINT Paint) {
     BitBlt(Paint->Paint.hdc, 0, 0, Paint->Rect.right, Paint->Rect.bottom, Paint->DC, 0, 0, SRCCOPY);
     DeleteDC(Paint->DC);
     DeleteObject(Paint->Bitmap);
     EndPaint(Window, &Paint->Paint);
 }
 
-PFNDwmGetWindowAttribute pfnDwmGetWindowAttribute = NULL;
-
-BOOL NTAPI UI_GetWindowRect(HWND Window, PRECT Rect) {
-    if (NT_GetKUSD()->NtMajorVersion >= 6) {
-        if (!pfnDwmGetWindowAttribute)
-            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmGetWindowAttribute");
-        if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, Rect, sizeof(*Rect)) == S_OK)
-            return TRUE;
-    }
-    return GetWindowRect(Window, Rect);
+BOOL NTAPI UI_GetWindowRect(HWND Window, _Out_ PRECT Rect) {
+    return DwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, Rect, sizeof(*Rect)) == S_OK ||
+        GetWindowRect(Window, Rect);
 }
 
-BOOL NTAPI UI_SetWindowRect(HWND Window, PRECT Rect) {
-    RECT    rcDwmDiff, rcOrgDiff;
-    BOOL    bDwmDiff = FALSE;
-    if (NT_GetKUSD()->NtMajorVersion >= 6) {
-        if (!pfnDwmGetWindowAttribute)
-            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmGetWindowAttribute");
-        if (pfnDwmGetWindowAttribute &&
-            pfnDwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, &rcDwmDiff, sizeof(rcDwmDiff)) == S_OK &&
-            GetWindowRect(Window, &rcOrgDiff))
-            bDwmDiff = TRUE;
-    }
-    if (bDwmDiff) {
-        return SetWindowPos(
+BOOL NTAPI UI_SetWindowRect(HWND Window, _In_ PRECT Rect) {
+    RECT rcDwmDiff, rcOrgDiff;
+    return DwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, &rcDwmDiff, sizeof(rcDwmDiff)) == S_OK &&
+        GetWindowRect(Window, &rcOrgDiff) ?
+        SetWindowPos(
             Window,
             NULL,
             Rect->left + rcOrgDiff.left - rcDwmDiff.left,
             Rect->top + rcOrgDiff.top - rcDwmDiff.top,
             (Rect->right + rcOrgDiff.right - rcDwmDiff.right) - (Rect->left + rcOrgDiff.left - rcDwmDiff.left),
             (Rect->bottom + rcOrgDiff.bottom - rcDwmDiff.bottom) - (Rect->top + rcOrgDiff.top - rcDwmDiff.top),
+            SWP_NOZORDER | SWP_NOACTIVATE) :
+        SetWindowPos(
+            Window,
+            NULL,
+            Rect->left,
+            Rect->top,
+            Rect->right - Rect->left,
+            Rect->bottom - Rect->top,
             SWP_NOZORDER | SWP_NOACTIVATE);
-    } else
-        return SetWindowPos(Window, NULL, Rect->left, Rect->top, Rect->right - Rect->left, Rect->bottom - Rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
-BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, PRECT Rect) {
+_Success_(return != FALSE)
+BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, _Out_ PRECT Rect) {
     POINT   pt;
     HANDLE  hParent;
     RECT    rcWnd;
-    BOOL    bSucc;
-    bSucc = UI_GetWindowRect(Window, &rcWnd);
-    if (bSucc) {
+    BOOL    bRet;
+    bRet = UI_GetWindowRect(Window, &rcWnd);
+    if (bRet) {
         pt.x = rcWnd.left;
         pt.y = rcWnd.top;
         hParent = IF_NULL(RefWindow, GetParent(Window));
-        bSucc = ScreenToClient(IF_NULL(hParent, GetDesktopWindow()), &pt);
-        if (bSucc) {
+        bRet = ScreenToClient(IF_NULL(hParent, GetDesktopWindow()), &pt);
+        if (bRet) {
             Rect->right = rcWnd.right + pt.x - rcWnd.left;
             Rect->bottom = rcWnd.bottom + pt.y - rcWnd.top;
             Rect->left = pt.x;
             Rect->top = pt.y;
         }
     }
-    return bSucc;
+    return bRet;
 }
 
-VOID NTAPI UI_EnumChildWindows(HWND ParentWindow, WNDENUMPROC WindowEnumProc, LPARAM Param) {
+VOID NTAPI UI_EnumChildWindows(HWND ParentWindow, _In_ WNDENUMPROC WindowEnumProc, LPARAM Param) {
     HWND hWndChild = GetWindow(ParentWindow, GW_CHILD);
     while (hWndChild && WindowEnumProc(hWndChild, Param))
         hWndChild = GetWindow(hWndChild, GW_HWNDNEXT);
 }
 
-PFNDwmIsCompositionEnabled pfnDwmIsCompositionEnabled = NULL;
-
 BOOL NTAPI UI_IsDWMComposited() {
-    BOOL    bEnabled;
-    if (!pfnDwmIsCompositionEnabled) {
-        pfnDwmIsCompositionEnabled = (PFNDwmIsCompositionEnabled)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmIsCompositionEnabled");
-    }
-    return pfnDwmIsCompositionEnabled ?
-        (SUCCEEDED(pfnDwmIsCompositionEnabled(&bEnabled)) ? bEnabled : FALSE) :
-        FALSE;
+    BOOL bEnabled;
+    return SUCCEEDED(DwmIsCompositionEnabled(&bEnabled)) && bEnabled;
 }
 
 DWORD NTAPI UI_GetWindowCloackedState(HWND Window) {
-    DWORD   dwCloackedState;
-    if (NT_GetKUSD()->NtMajorVersion > 6 ||
-        (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 1) {
-        if (!pfnDwmGetWindowAttribute)
-            pfnDwmGetWindowAttribute = (PFNDwmGetWindowAttribute)Proc_GetProcAddr(Sys_LoadDll(SysDllNameDwmapi), "DwmGetWindowAttribute");
-        if (pfnDwmGetWindowAttribute && pfnDwmGetWindowAttribute(Window, DWMWA_CLOAKED, &dwCloackedState, sizeof(dwCloackedState)) == S_OK)
-            return dwCloackedState;
-    }
-    return 0;
+    DWORD dwCloackedState;
+    return (NT_GetKUSD()->NtMajorVersion > 6 ||
+        (NT_GetKUSD()->NtMajorVersion == 6 && NT_GetKUSD()->NtMinorVersion > 1)) &&
+        DwmGetWindowAttribute(Window, DWMWA_CLOAKED, &dwCloackedState, sizeof(dwCloackedState)) == S_OK ? dwCloackedState : 0;
 }
-
-PFNGetWindowDisplayAffinity pfnGetWindowDisplayAffinity = NULL;
-
-BOOL NTAPI UI_GetWindowDisplayAffinity(HWND Window, PDWORD Affinity) {
-    if (NT_GetKUSD()->NtMajorVersion > 6 ||
-        (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 0) {
-        if (!pfnGetWindowDisplayAffinity) {
-            pfnGetWindowDisplayAffinity = (PFNGetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUser32), "GetWindowDisplayAffinity");
-            if (!pfnGetWindowDisplayAffinity)
-                return FALSE;
-        }
-        return UI_IsDWMComposited() ? pfnGetWindowDisplayAffinity(Window, Affinity) : FALSE;
-    }
-    return FALSE;
-}
-
-PFNSetWindowDisplayAffinity pfnSetWindowDisplayAffinity = NULL;
-
-BOOL NTAPI UI_SetWindowDisplayAffinity(HWND Window, DWORD Affinity) {
-    if (NT_GetKUSD()->NtMajorVersion > 6 ||
-        (NT_GetKUSD()->NtMajorVersion == 6) && NT_GetKUSD()->NtMinorVersion > 0) {
-        if (!pfnSetWindowDisplayAffinity)
-            pfnSetWindowDisplayAffinity = (PFNSetWindowDisplayAffinity)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUser32), "SetWindowDisplayAffinity");
-        return pfnSetWindowDisplayAffinity ? pfnSetWindowDisplayAffinity(Window, Affinity) : FALSE;
-    }
-    return FALSE;
-}
-
-PFNSetWindowTheme pfnSetWindowTheme = NULL;
 
 BOOL NTAPI UI_SetTheme(HWND Window) {
-    if (NT_GetKUSD()->NtMajorVersion >= 6) {
-        if (!pfnSetWindowTheme)
-            pfnSetWindowTheme = (PFNSetWindowTheme)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUxTheme), "SetWindowTheme");
-        return pfnSetWindowTheme ? pfnSetWindowTheme(Window, L"Explorer", NULL) == S_OK : FALSE;
-    }
-    return FALSE;
-}
-
-VOID NTAPI UI_SetWindowIcon(HWND Window, HICON Icon) {
-    SendMessage(Window, WM_SETICON, ICON_BIG, (LPARAM)Icon);
-    SendMessage(Window, WM_SETICON, ICON_SMALL, (LPARAM)Icon);
-}
-
-BOOL NTAPI UI_ShellExec(PCWSTR File, PCWSTR Param, UI_SHELLEXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle) {
-    SHELLEXECUTEINFOW   stSEIW = { sizeof(SHELLEXECUTEINFOW) };
-    BOOL                bRet;
-    if (Verb == UIShellExecExplore) {
-        WCHAR               szFile[MAX_PATH];
-        SFGAOF              dwAttr;
-        PIDLIST_ABSOLUTE    pidlDir, pidlFile;
-        UINT                uIndexSlash;
-        HRESULT             hr;
-        uIndexSlash = (UINT)Str_CopyW(szFile, File);
-        while (uIndexSlash > 0)
-            if (szFile[--uIndexSlash] == '\\')
-                break;
-        if (uIndexSlash > 0) {
-            szFile[uIndexSlash] = '\0';
-            if (SHParseDisplayName(szFile, NULL, &pidlDir, 0, &dwAttr) == S_OK) {
-                szFile[uIndexSlash] = '\\';
-                if (SHParseDisplayName(szFile, NULL, &pidlFile, 0, &dwAttr) == S_OK) {
-                    hr = SHOpenFolderAndSelectItems(pidlDir, 1, &pidlFile, 0);
-                    CoTaskMemFree(pidlFile);
-                    if (hr == S_OK) {
-                        CoTaskMemFree(pidlDir);
-                        return TRUE;
-                    }
-                }
-                CoTaskMemFree(pidlDir);
-            }
-        }
-    }
-    stSEIW.fMask = (ProcessHandle ? SEE_MASK_NOCLOSEPROCESS : SEE_MASK_DEFAULT) | SEE_MASK_INVOKEIDLIST;
-    stSEIW.lpFile = File;
-    stSEIW.lpParameters = Param;
-    if (Verb == UIShellExecOpen)
-        stSEIW.lpVerb = L"open";
-    else if (Verb == UIShellExecExplore)
-        stSEIW.lpVerb = L"explore";
-    else if (Verb == UIShellExecRunAs)
-        stSEIW.lpVerb = L"runas";
-    else if (Verb == UIShellExecProperties)
-        stSEIW.lpVerb = L"properties";
-    else if (Verb == UIShellExecEdit)
-        stSEIW.lpVerb = L"edit";
-    else if (Verb == UIShellExecPrint)
-        stSEIW.lpVerb = L"print";
-    else if (Verb == UIShellExecFind)
-        stSEIW.lpVerb = L"find";
-    else
-        return FALSE;
-    stSEIW.nShow = ShowCmd;
-    bRet = ShellExecuteExW(&stSEIW);
-    if (ProcessHandle && bRet)
-        *ProcessHandle = stSEIW.hProcess;
-    return bRet;
+    return SetWindowTheme(Window, L"Explorer", NULL) == S_OK;
 }
 
 BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag, BOOL EnableState) {
@@ -217,21 +103,9 @@ BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag,
 }
 
 HANDLE NTAPI UI_OpenProc(DWORD DesiredAccess, HWND Window) {
-    DWORD   dwProcessId;
+    DWORD dwProcessId;
     GetWindowThreadProcessId(Window, &dwProcessId);
     return RProc_Open(DesiredAccess, dwProcessId);
-}
-
-UINT NTAPI UI_GetWindowModuleFileNameEx(HWND Window, PWSTR FileName, UINT FileNameCch) {
-    HANDLE  hProc;
-    UINT    cCh;
-    hProc = UI_OpenProc(NT_GetKUSD()->NtMajorVersion >= 6 ? PROCESS_QUERY_LIMITED_INFORMATION : PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, Window);
-    if (hProc) {
-        cCh = RProc_GetFullImageNameEx(hProc, FileName, FileNameCch);
-        NtClose(hProc);
-        return cCh;
-    }
-    return 0;
 }
 
 BOOL NTAPI UI_SetNoNotifyFlag(HWND Window, BOOL EnableState) {
@@ -244,7 +118,7 @@ BOOL NTAPI UI_GetNoNotifyFlag(HWND Window) {
     return (BOOL)(DWORD_PTR)GetProp(Window, UI_NONOTIFYPROP);
 }
 
-LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, PCWSTR Text) {
+LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, _In_opt_ PCWSTR Text) {
     LRESULT lResult;
     UI_SetNoNotifyFlag(Window, TRUE);
     lResult = SendMessageW(Window, WM_SETTEXT, 0, (LPARAM)Text);
@@ -252,25 +126,26 @@ LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, PCWSTR Text) {
     return lResult;
 }
 
-UINT NTAPI UI_GetWindowTextExW(HWND Window, PWSTR Text, UINT TextCch) {
-    UINT    cCh = (UINT)SendMessageW(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
+UINT _Success_(return > 0) NTAPI UI_GetWindowTextExW(HWND Window, _Out_writes_z_(TextCch) PWSTR Text, UINT TextCch) {
+    UINT cCh = (UINT)SendMessageW(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
     if (cCh >= TextCch)
         cCh = 0;
     Text[cCh] = '\0';
     return cCh;
 }
 
-UINT NTAPI UI_GetWindowTextExA(HWND Window, PSTR Text, UINT TextCch) {
-    UINT    cCh = (UINT)SendMessageA(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
+UINT _Success_(return > 0) NTAPI UI_GetWindowTextExA(HWND Window, _Out_writes_z_(TextCch) PSTR Text, UINT TextCch) {
+    UINT cCh = (UINT)SendMessageA(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
     if (cCh >= TextCch)
         cCh = 0;
     Text[cCh] = '\0';
     return cCh;
 }
 
-BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, PLONG_PTR Result) {
+_Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, _Out_ PLONG_PTR Result) {
     LONG_PTR    lResult;
     BOOL        bRet;
+    // GetWindowLongPtr may crash in some cases
     __try {
         NT_ClearLastError();
         lResult = ClassLong ? (LONG_PTR)GetClassLongPtr(Window, Index) : GetWindowLongPtr(Window, Index);
@@ -292,12 +167,13 @@ BOOL NTAPI UI_MessageLoop(HWND Window) {
         if (bRet != 0 && bRet != -1) {
             TranslateMessage(&stMsg);
             DispatchMessage(&stMsg);
-        } else
+        } else {
             return bRet == 0;
+        }
     }
 }
 
-VOID NTAPI UI_GetScreenPos(PPOINT Point, PSIZE Size) {
+VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size) {
     if (Point) {
         Point->x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         Point->y = GetSystemMetrics(SM_YVIRTUALSCREEN);

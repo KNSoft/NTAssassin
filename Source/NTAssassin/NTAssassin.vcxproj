@@ -31,21 +31,21 @@
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <ConfigurationType>StaticLibrary</ConfigurationType>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -53,7 +53,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <UseOfMfc>Static</UseOfMfc>
+    <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -121,7 +121,7 @@
     <Lib />
     <ProjectReference />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(ProjectDir)3rdParty\bin\Precomp4C\Precomp4C.exe $(ProjectDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -135,6 +135,7 @@
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -150,7 +151,7 @@
     <ProjectReference />
     <Lib />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(ProjectDir)3rdParty\bin\Precomp4C\Precomp4C.exe $(ProjectDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -182,7 +183,7 @@
     <ProjectReference />
     <Lib />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(ProjectDir)3rdParty\bin\Precomp4C\Precomp4C.exe $(ProjectDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -196,6 +197,7 @@
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <DebugInformationFormat>None</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -211,13 +213,12 @@
     <ProjectReference />
     <Lib />
     <PreBuildEvent>
-      <Command>$(SolutionDir)NAC\bin\Release\net6.0\NAC.exe $(ProjectDir) $(IntDir)</Command>
+      <Command>$(ProjectDir)3rdParty\bin\Precomp4C\Precomp4C.exe $(ProjectDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="NTACtl_ColorPicker.c" />
     <ClCompile Include="NTADPI.c" />
-    <ClCompile Include="NTABitmap.c" />
     <ClCompile Include="NTACon.c" />
     <ClCompile Include="NTACtl.c" />
     <ClCompile Include="NTAData.c" />
@@ -230,7 +231,6 @@
     <ClCompile Include="NTAHijack.c" />
     <ClCompile Include="NTAHook.cpp" />
     <ClCompile Include="NTAI18N.c" />
-    <ClCompile Include="NTAImage.c" />
     <ClCompile Include="NTAIO.c" />
     <ClCompile Include="NTAKNS.c" />
     <ClCompile Include="NTAList.c" />
@@ -240,12 +240,13 @@
     <ClCompile Include="NTAPE.c" />
     <ClCompile Include="NTAProc.c" />
     <ClCompile Include="NTARProc.c" />
+    <ClCompile Include="NTAShell.c" />
     <ClCompile Include="NTAStr.c" />
     <ClCompile Include="NTASys.c" />
     <ClCompile Include="NTATime.c" />
     <ClCompile Include="NTAUCRT.c" />
     <ClCompile Include="NTAUI.c" />
-    <ClCompile Include="NTA_NAC_Output.c" />
+    <ClCompile Include="Precomp4C.Output.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTACon.h" />
@@ -263,7 +264,6 @@
     <ClInclude Include="include\NTAssassin\NTAHijack.h" />
     <ClInclude Include="include\NTAssassin\NTAHook.h" />
     <ClInclude Include="include\NTAssassin\NTAI18N.h" />
-    <ClInclude Include="include\NTAssassin\NTAImage.h" />
     <ClInclude Include="include\NTAssassin\NTAIO.h" />
     <ClInclude Include="include\NTAssassin\NTAKNS.h" />
     <ClInclude Include="include\NTAssassin\NTAList.h" />
@@ -274,6 +274,7 @@
     <ClInclude Include="include\NTAssassin\NTAPI.h" />
     <ClInclude Include="include\NTAssassin\NTAProc.h" />
     <ClInclude Include="include\NTAssassin\NTARProc.h" />
+    <ClInclude Include="include\NTAssassin\NTAShell.h" />
     <ClInclude Include="include\NTAssassin\NTAssassin.h" />
     <ClInclude Include="include\NTAssassin\NTAStr.h" />
     <ClInclude Include="include\NTAssassin\NTASys.h" />
@@ -284,6 +285,7 @@
     <ClInclude Include="include\NTAssassin\NTStruct.h" />
     <ClInclude Include="include\NTAssassin\NTTypes.h" />
     <ClInclude Include="include\NTAssassin\NTAOpCode.h" />
+    <ClInclude Include="Precomp4C.Output.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,249 +1,251 @@
 #include "include\NTAssassin\NTAssassin.h"
+#include "Precomp4C.Output.h"
 
-PVOID NTAPI Hijack_LoadProcAddr_InitParamEx(PVOID Buffer, SIZE_T BufferSize, PCWSTR LibName, PCSTR ProcName, PVOID** ProcAddrPointer) {
-    SIZE_T  uSize, iCcb, uDelta;
+//  [STRING_ALIGNMENT]
+//  UINT    uSize;          // OUT The final size of stucture
+//  WCHAR   szLibName[];    // IN Terminated by '\0'
+//  WORD    wProcOrdinal;   // IN OPTIONAL, Ordinal of procedure, 0 if szProcName presents
+//  [STRING_ALIGNMENT]
+//  CHAR    szProcName[];   // IN OPTIONAL, Terminated by '\0', exists only if wProcOrdinal is 0
+                            // Could be empty string if load DLL only
+//  PVOID64 pProc;          // OUT OPTIONAL, Receive address of the procedure
+#define HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE (STRING_ALIGNMENT + sizeof(UINT) + MAX_PATH * sizeof(WCHAR) + sizeof(WORD) + STRING_ALIGNMENT + MAX_CIDENTIFIERNAME_CCH + sizeof(LPVOID))
+
+// Fixme: Patches C6101, in fact, beginning bytes unaligned will be ignored
+#pragma warning(disable: 6101)
+_Ret_notnull_
+PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE) PVOID Buffer, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _When_(ProcName != NULL, _Notnull_) PVOID64** ProcAddrPointer) {
+    SIZE_T  iCcb;
     WORD    wProcOrdinal;
-    PVOID   lpStruct, lpTemp;
-    PDWORD  lpdwSize;
-
-    lpStruct = (PVOID)BYTE_ALIGN((ULONG_PTR)Buffer, STRING_ALIGNMENT);
-    lpTemp = lpStruct;
-    uSize = BufferSize;
+    PVOID   pStruct, pTemp;
+    PDWORD  pdwSize;
+    pTemp = pStruct = (PVOID)BYTE_ALIGN((ULONG_PTR)Buffer, STRING_ALIGNMENT);
 
     // uSize
-    uDelta = sizeof(UINT);
-    if (uSize < uDelta)
-        return NULL;
-    lpdwSize = lpTemp;
-    lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
-    uSize -= uDelta;
+    pdwSize = pTemp;
+    pTemp = MOVE_PTR(pTemp, sizeof(UINT), VOID);
 
     // szLibName
-    iCcb = Str_CopyExW((PWSTR)lpTemp, uSize >> 1, LibName) << 1;
-    uDelta = iCcb + sizeof(WCHAR);
-    if (uSize < uDelta)
-        return NULL;
-    lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
-    uSize -= uDelta;
+    iCcb = Str_CopyExW((PWSTR)pTemp, MAX_PATH, LibName) << 1;
+    pTemp = MOVE_PTR(pTemp, iCcb + sizeof(WCHAR), VOID);
 
     // wProcOrdinal
-    uDelta = sizeof(WORD);
-    if (uSize < uDelta)
-        return NULL;
     wProcOrdinal = (UINT_PTR)ProcName <= MAXWORD ? LOWORD(ProcName) : 0;
-    *(LPWORD)lpTemp = wProcOrdinal;
-    lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
-    uSize -= uDelta;
+    *(PWORD)pTemp = wProcOrdinal;
+    pTemp = MOVE_PTR(pTemp, sizeof(WORD), VOID);
 
     // szProcName
     if (!wProcOrdinal) {
-        lpTemp = (PVOID)BYTE_ALIGN((ULONG_PTR)lpTemp, STRING_ALIGNMENT);
+        pTemp = (PVOID)BYTE_ALIGN((ULONG_PTR)pTemp, STRING_ALIGNMENT);
         if (ProcName) {
-            // Fixme: ProcName won't be NULL here
+            // Fixme: Patches C6387, in fact, ProcName won't be NULL here
         #pragma warning(disable: 6387)
-            iCcb = Str_CopyExA((LPSTR)lpTemp, uSize, ProcName);
+            iCcb = Str_CopyExA((PSTR)pTemp, MAX_CIDENTIFIERNAME_CCH, ProcName);
         #pragma warning(default: 6387)
         } else {
-            ((LPSTR)lpTemp)[0] = '\0';
+            ((PSTR)pTemp)[0] = '\0';
             iCcb = 0;
         }
-        uDelta = iCcb + sizeof(CHAR);
-        if (uSize < uDelta)
-            return NULL;
-        lpTemp = MOVE_PTR(lpTemp, uDelta, VOID);
-        uSize -= uDelta;
+        pTemp = MOVE_PTR(pTemp, iCcb + sizeof(CHAR), VOID);
     }
 
-    // lpProc
+    // pProc
     if (ProcName) {
-        uDelta = sizeof(LPVOID);
-        if (uSize < uDelta)
-            return NULL;
-        *(LPVOID*)lpTemp = NULL;
-        *ProcAddrPointer = (LPVOID*)lpTemp;
-        uSize -= uDelta;
+        *(PVOID64*)pTemp = NULL;
+        *ProcAddrPointer = (PVOID64*)pTemp;
+        pTemp = MOVE_PTR(pTemp, sizeof(PVOID64), VOID);
     }
 
     // Done
-    *lpdwSize = (DWORD)(BufferSize - uSize);
-    return lpStruct;
+    *pdwSize = (DWORD)((DWORD_PTR)pTemp - (DWORD_PTR)Buffer);
+    return pStruct;
 }
+#pragma warning(default: 6101)
 
-NTSTATUS NTAPI Hijack_CreateThread(HANDLE ProcessHandle, PHIJACK_CREATETHREAD HijackThread, DWORD Timeout) {
-    NTSTATUS    lStatus;
+_Success_(return != FALSE)
+BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(ShellCodeSize) PVOID ShellCode, SIZE_T ShellCodeSize, _In_reads_bytes_opt_(ParamSize) PVOID Param, SIZE_T ParamSize, _Out_opt_ PDWORD ExitCode, DWORD Timeout) {
+    BOOL        bRet = FALSE;
     RPROC_MAP   ProcMap, ParamMap;
-    PVOID       lpParam;
+    PVOID       pParam;
     HANDLE      hThread;
-    BOOL        b32Proc;
-    PVOID       pProc;
-    SIZE_T      usProcSize;
 
-    // Map code and parameter to remote
-    if (!NT_SUCCESS(RProc_IsWow64(ProcessHandle, &b32Proc)))
-        return STATUS_ACCESS_DENIED;
-    if (b32Proc) {
-        pProc = HijackThread->Proc32;
-        usProcSize = HijackThread->ProcSize32;
-    } else {
-        pProc = HijackThread->Proc64;
-        usProcSize = HijackThread->ProcSize64;
-    }
-    RProc_InitMap(&ProcMap, pProc, usProcSize, PAGE_EXECUTE_READ);
-    lStatus = RProc_MemMap(ProcessHandle, &ProcMap);
-    if (!NT_SUCCESS(lStatus))
+    // Maps shellcode and parameter
+    RProc_InitMap(&ProcMap, ShellCode, ShellCodeSize, NULL, PAGE_EXECUTE_READ);
+    if (!RProc_MemMap(ProcessHandle, &ProcMap)) {
         goto Label_0;
-    if (HijackThread->Param) {
-        RProc_InitMap(&ParamMap, HijackThread->Param, HijackThread->ParamSize, PAGE_READWRITE);
-        lStatus = RProc_MemMap(ProcessHandle, &ParamMap);
-        if (!NT_SUCCESS(lStatus))
+    }
+    if (Param) {
+        RProc_InitMap(&ParamMap, Param, ParamSize, NULL, PAGE_READWRITE);
+        if (!RProc_MemMap(ProcessHandle, &ParamMap)) {
             goto Label_1;
-        lpParam = ParamMap.Remote;
-    } else
-        lpParam = NULL;
+        }
+        pParam = ParamMap.Remote;
+    } else {
+        pParam = NULL;
+    }
 
     // Create remote thread and wait
-    lStatus = RProc_CreateThread(ProcessHandle, ProcMap.Remote, lpParam, FALSE, &hThread);
-    if (!NT_SUCCESS(lStatus))
+    if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pParam, FALSE, &hThread)) {
         goto Label_2;
-    lStatus = Proc_WaitForObject(hThread, Timeout);
-    if (!NT_SUCCESS(lStatus))
+    }
+    if (!Proc_WaitForObject(hThread, Timeout)) {
         goto Label_3;
+    }
 
     // Receive return values and parameters
-    lStatus = Proc_GetThreadExitCode(hThread, &HijackThread->ExitCode);
-    if (!NT_SUCCESS(lStatus))
-        goto Label_3;
-    if (lpParam)
-        lStatus = RProc_MemReadEx(ProcessHandle, lpParam, HijackThread->Param, HijackThread->ParamSize);
+    if (ExitCode) {
+        if (!Proc_GetThreadExitCode(hThread, ExitCode)) {
+            goto Label_3;
+        }
+    }
+    if (!pParam || RProc_ReadMemory(ProcessHandle, pParam, Param, ParamSize)) {
+        bRet = TRUE;
+    }
 
     // Cleanup and exit
 Label_3:
     NtClose(hThread);
 Label_2:
-    if (lpParam)
+    if (pParam) {
         RProc_MemUnmap(ProcessHandle, &ParamMap);
+    }
 Label_1:
     RProc_MemUnmap(ProcessHandle, &ProcMap);
 Label_0:
-    return lStatus;
+    return bRet;
 }
 
-NTSTATUS NTAPI Hijack_LoadProcAddr(HANDLE ProcessHandle, PWSTR LibName, PSTR ProcName, PVOID* ProcAddr, DWORD Timeout) {
-    NTSTATUS                lStatus;
-    BYTE                    Buffer[HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE];
-    LPVOID                  lpParam, *lpProc;
-    HIJACK_CREATETHREAD     stThread;
-
-    // Initialize parameter
-    lpParam = Hijack_LoadProcAddr_InitParam(Buffer, LibName, ProcName, &lpProc);
-    if (!lpParam)
-        return STATUS_INVALID_PARAMETER;
-
-    // Create remote thread
-    stThread.Proc32 = (LPTHREAD_START_ROUTINE)SYM_Hijack_LoadProcAddr_InjectThread_x86;
-    stThread.ProcSize32 = sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x86);
-    stThread.Proc64 = (LPTHREAD_START_ROUTINE)SYM_Hijack_LoadProcAddr_InjectThread_x64;
-    stThread.ProcSize64 = sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x64);
-    stThread.Param = lpParam;
-    stThread.ParamSize = *(PUINT)lpParam;
-    lStatus = Hijack_CreateThread(ProcessHandle, &stThread, Timeout);
-    if (NT_SUCCESS(lStatus)) {
-        lStatus = stThread.ExitCode;
-        if (NT_SUCCESS(lStatus) && ProcAddr)
-            *ProcAddr = *lpProc;
+BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _When_(ProcName != NULL, _Notnull_) PVOID64 * ProcAddr, DWORD Timeout) {
+    BYTE    Buffer[HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE];
+    LPVOID  pParam;
+    PVOID64 *pProc;
+    DWORD   ExitCode;
+    BOOL    bWow64;
+    if (RProc_IsWow64(ProcessHandle, &bWow64)) {
+        // Initialize parameter
+        pParam = Hijack_LoadProcAddr_InitParam(Buffer, LibName, ProcName, &pProc);
+        // Create remote thread and execute
+        if (Hijack_ExecShellcode(
+            ProcessHandle,
+            bWow64 ? SYM_Hijack_LoadProcAddr_InjectThread_x86 : SYM_Hijack_LoadProcAddr_InjectThread_x64,
+            bWow64 ? sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x86) : sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x64),
+            pParam,
+            *(PDWORD)pParam,
+            &ExitCode,
+            Timeout) && NT_SUCCESS(ExitCode)) {
+            if (ProcAddr) {
+                *ProcAddr = *pProc;
+            }
+            return TRUE;
+        }
     }
-    return lStatus;
+    return FALSE;
 }
 
-NTSTATUS NTAPI Hijack_CallProc(HANDLE ProcessHandle, PHIJACK_CALLPROCHEADER HijackCallProc, PHIJACK_CALLPROCPARAM HijackParams, DWORD Timeout) {
+// TODO ÖØÐ´
+BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHEADER CallProcHeader, _In_opt_ PHIJACK_CALLPROCPARAM Params, DWORD Timeout) {
+    BOOL                    bRet = FALSE;
     NTSTATUS                lStatus;
     SIZE_T                  usTotalSize, usPageSize;
     UINT                    i, uParamCount;
     HIJACK_CALLPROCHEADER   stCallProcRet;
     HIJACK_CALLPROCPARAM*   pParam, *pRemoteParam, stMemParam;
     PVOID                   pRemoteBuffer, pRemoteRandomParam, pTemp;
-    BOOL                    b32Proc;
-    LPTHREAD_START_ROUTINE  pProc;
-    SIZE_T                  usProcSize;
     RPROC_MAP               ProcMap;
     HANDLE                  hThread;
 
+    BOOL bWow64;
+    if (!RProc_IsWow64(ProcessHandle, &bWow64)) {
+        return FALSE;
+    }
+
     // Calculate size of remote buffer and allocate memory
-    uParamCount = HijackCallProc->ParamCount;
+    uParamCount = CallProcHeader->ParamCount;
     usTotalSize = sizeof(HIJACK_CALLPROCHEADER) + sizeof(HIJACK_CALLPROCPARAM) * uParamCount;
-    pParam = HijackParams;
-    for (i = 0; i < uParamCount; i++)
+    pParam = Params;
+    for (i = 0; i < uParamCount; i++) {
         usTotalSize += BYTE_ALIGN(pParam[i].Size, STRING_ALIGNMENT);
+    }
     pRemoteBuffer = NULL;
     usPageSize = usTotalSize;
     lStatus = NtAllocateVirtualMemory(ProcessHandle, &pRemoteBuffer, 0, &usPageSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if (!NT_SUCCESS(lStatus))
+    if (!NT_SUCCESS(lStatus)) {
+        NT_SetLastStatus(lStatus);
         goto Label_0;
+    }
 
     // Write buffer:
     // HIJACK_CALLPROCHEADER
     // MEMORY_RANGE_ENTRY[HIJACK_CALLPROCHEADER.ParamCount]
     // Random Parameters..., align to STRING_ALIGNMENT
-    lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteBuffer, HijackCallProc, sizeof(HIJACK_CALLPROCHEADER), NULL);
-    if (!NT_SUCCESS(lStatus))
+    lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteBuffer, CallProcHeader, sizeof(HIJACK_CALLPROCHEADER), NULL);
+    if (!NT_SUCCESS(lStatus)) {
+        NT_SetLastStatus(lStatus);
         goto Label_1;
+    }
     pRemoteParam = MOVE_PTR(pRemoteBuffer, sizeof(HIJACK_CALLPROCHEADER), HIJACK_CALLPROCPARAM);
     pTemp = pRemoteRandomParam = MOVE_PTR(pRemoteParam, sizeof(HIJACK_CALLPROCPARAM) * uParamCount, VOID);
     for (i = uParamCount; i > 0; i--) {
         stMemParam.Size = pParam[i - 1].Size;
         if (stMemParam.Size) {
             lStatus = NtWriteVirtualMemory(ProcessHandle, pTemp, (PVOID)pParam[i - 1].Address, (SIZE_T)stMemParam.Size, NULL);
-            if (!NT_SUCCESS(lStatus))
+            if (!NT_SUCCESS(lStatus)) {
+                NT_SetLastStatus(lStatus);
                 goto Label_1;
-            stMemParam.Address = (DWORD_PTR)pTemp;
+            }
+            stMemParam.Address = pTemp;
             pTemp = MOVE_PTR(pTemp, BYTE_ALIGN(stMemParam.Size, STRING_ALIGNMENT), VOID);
-        } else
+        } else {
             stMemParam.Address = pParam[i - 1].Address;
+        }
         lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteParam, &stMemParam, sizeof(stMemParam), NULL);
-        if (!NT_SUCCESS(lStatus))
+        if (!NT_SUCCESS(lStatus)) {
+            NT_SetLastStatus(lStatus);
             goto Label_1;
+        }
         pRemoteParam++;
     }
 
     // Create remote thread
-    if (!NT_SUCCESS(RProc_IsWow64(ProcessHandle, &b32Proc)))
-        return STATUS_ACCESS_DENIED;
-    if (b32Proc) {
-        pProc = (LPTHREAD_START_ROUTINE)SYM_Hijack_CallProc_InjectThread_x86;
-        usProcSize = sizeof(SYM_Hijack_CallProc_InjectThread_x86);
-    } else {
-        pProc = (LPTHREAD_START_ROUTINE)SYM_Hijack_CallProc_InjectThread_x64;
-        usProcSize = sizeof(SYM_Hijack_CallProc_InjectThread_x64);
-    }
-    RProc_InitMap(&ProcMap, pProc, usProcSize, PAGE_EXECUTE_READ);
-    lStatus = RProc_MemMap(ProcessHandle, &ProcMap);
-    if (!NT_SUCCESS(lStatus))
+    RProc_InitMap(
+        &ProcMap,
+        bWow64 ? SYM_Hijack_CallProc_InjectThread_x86 : SYM_Hijack_CallProc_InjectThread_x64,
+        bWow64 ? sizeof(SYM_Hijack_CallProc_InjectThread_x86) : sizeof(SYM_Hijack_CallProc_InjectThread_x64),
+        NULL,
+        PAGE_EXECUTE_READ);
+    if (!RProc_MemMap(ProcessHandle, &ProcMap)) {
         goto Label_1;
-    lStatus = RProc_CreateThread(ProcessHandle, ProcMap.Remote, pRemoteBuffer, FALSE, &hThread);
-    if (!NT_SUCCESS(lStatus))
+    }
+    if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pRemoteBuffer, FALSE, &hThread)) {
         goto Label_2;
-    lStatus = Proc_WaitForObject(hThread, Timeout);
-    if (!NT_SUCCESS(lStatus))
+    }
+    if (!Proc_WaitForObject(hThread, Timeout)) {
         goto Label_3;
+    }
 
     // Get return values and parameters
     lStatus = NtReadVirtualMemory(ProcessHandle, pRemoteBuffer, &stCallProcRet, sizeof(stCallProcRet), NULL);
-    if (!NT_SUCCESS(lStatus))
+    if (!NT_SUCCESS(lStatus)) {
+        NT_SetLastStatus(lStatus);
         goto Label_3;
-    HijackCallProc->RetValue = stCallProcRet.RetValue;
-    HijackCallProc->LastError = stCallProcRet.LastError;
-    HijackCallProc->LastStatus = stCallProcRet.LastStatus;
-    HijackCallProc->ExceptionCode = stCallProcRet.ExceptionCode;
+    }
+    CallProcHeader->RetValue = stCallProcRet.RetValue;
+    CallProcHeader->LastError = stCallProcRet.LastError;
+    CallProcHeader->LastStatus = stCallProcRet.LastStatus;
+    CallProcHeader->ExceptionCode = stCallProcRet.ExceptionCode;
     for (i = uParamCount; i > 0; i--) {
         if (pParam[i - 1].Size) {
             if (pParam[i - 1].Out) {
                 lStatus = NtReadVirtualMemory(ProcessHandle, pRemoteRandomParam, (PVOID)pParam[i - 1].Address, (SIZE_T)pParam[i - 1].Size, NULL);
-                if (!NT_SUCCESS(lStatus))
+                if (!NT_SUCCESS(lStatus)) {
+                    NT_SetLastStatus(lStatus);
                     goto Label_3;
+                }
             }
             pRemoteRandomParam = MOVE_PTR(pRemoteRandomParam, BYTE_ALIGN(pParam[i - 1].Size, STRING_ALIGNMENT), VOID);
         }
     }
+    bRet = TRUE;
 
 Label_3:
     NtClose(hThread);
@@ -252,5 +254,5 @@ Label_2:
 Label_1:
     NtFreeVirtualMemory(ProcessHandle, &pRemoteBuffer, &usPageSize, MEM_RELEASE);
 Label_0:
-    return lStatus;
+    return bRet;
 }

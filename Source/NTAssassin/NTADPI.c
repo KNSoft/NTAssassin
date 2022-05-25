@@ -11,23 +11,23 @@ typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
 
 PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
 
-BOOL NTAPI DPI_FromWindow(HWND Window, PUINT DPIX, PUINT DPIY) {
-    PKUSER_SHARED_DATA  pKUSD = NT_GetKUSD();
+BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY) {
+    PKUSER_SHARED_DATA pKUSD = NT_GetKUSD();
     if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3)) {
-        if (!pfnGetDpiForMonitor)
+        if (!pfnGetDpiForMonitor) {
             pfnGetDpiForMonitor = (PFNGetDpiForMonitor)Proc_GetProcAddr(Sys_LoadDll(SysDllNameShcore), "GetDpiForMonitor");
+        }
         if (pfnGetDpiForMonitor) {
             HMONITOR hMon = MonitorFromWindow(Window, MONITOR_DEFAULTTONULL);
-            if (hMon && pfnGetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, DPIX, DPIY) == S_OK)
+            if (hMon && pfnGetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, DPIX, DPIY) == S_OK) {
                 return TRUE;
+            }
         }
     }
     HDC hDC;
     hDC = GetDC(Window);
-    if (DPIX)
-        *DPIX = GetDeviceCaps(hDC, LOGPIXELSX);
-    if (DPIY)
-        *DPIY = GetDeviceCaps(hDC, LOGPIXELSY);
+    *DPIX = GetDeviceCaps(hDC, LOGPIXELSX);
+    *DPIY = GetDeviceCaps(hDC, LOGPIXELSY);
     ReleaseDC(Window, hDC);
     return FALSE;
 }
@@ -36,22 +36,23 @@ PFNIsProcessDPIAware pfnIsProcessDPIAware = NULL;
 
 BOOL NTAPI DPI_IsAware() {
     if (NT_GetKUSD()->NtMajorVersion >= 6) {
-        if (!pfnIsProcessDPIAware)
+        if (!pfnIsProcessDPIAware) {
             pfnIsProcessDPIAware = (PFNIsProcessDPIAware)Proc_GetProcAddr(Sys_LoadDll(SysDllNameUser32), "IsProcessDPIAware");
+        }
         return pfnIsProcessDPIAware ? pfnIsProcessDPIAware() : FALSE;
     } else
         return FALSE;
 }
 
-VOID NTAPI DPI_ScaleInt(PINT Value, UINT OldDPI, UINT NewDPI) {
+VOID NTAPI DPI_ScaleInt(_Inout_ PINT Value, _In_ UINT OldDPI, _In_ UINT NewDPI) {
     *Value = Math_RoundInt(*Value * ((FLOAT)NewDPI / OldDPI));
 }
 
-VOID NTAPI DPI_ScaleUInt(PUINT Value, UINT OldDPI, UINT NewDPI) {
+VOID NTAPI DPI_ScaleUInt(_Inout_ PUINT Value, _In_ UINT OldDPI, _In_ UINT NewDPI) {
     *Value = Math_RoundUInt(*Value * ((FLOAT)NewDPI / OldDPI));
 }
 
-VOID NTAPI DPI_ScaleRect(PRECT Rect, UINT OldDPIX, UINT NewDPIX, UINT OldDPIY, UINT NewDPIY) {
+VOID NTAPI DPI_ScaleRect(_Inout_ PRECT Rect, _In_ UINT OldDPIX, _In_ UINT NewDPIX, _In_ UINT OldDPIY, _In_ UINT NewDPIY) {
     DPI_ScaleInt(&Rect->left, OldDPIX, NewDPIX);
     DPI_ScaleInt(&Rect->right, OldDPIX, NewDPIX);
     DPI_ScaleInt(&Rect->top, OldDPIY, NewDPIY);
@@ -62,14 +63,29 @@ BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
     PDPI_SETAUTOADJUSTSUBCLASS_REF  pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)lParam;
     RECT                            rcWnd;
     HFONT                           hFont;
-    if (UI_GetRelativeRect(hWnd, NULL, &rcWnd)) {
-        DPI_ScaleRect(&rcWnd, pstRef->dwOldDPIX, pstRef->dwNewDPIX, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
-        UI_SetWindowRect(hWnd, &rcWnd);
-    }
+    POINT                           pt;
+    GetWindowRect(hWnd, &rcWnd);
+    pt.x = rcWnd.left;
+    pt.y = rcWnd.top;
+    ScreenToClient(GetParent(hWnd), &pt);
+    rcWnd.right = rcWnd.right - rcWnd.left + pt.x;
+    rcWnd.bottom = rcWnd.bottom - rcWnd.top + pt.y;
+    rcWnd.left = pt.x;
+    rcWnd.top = pt.y;
+    DPI_ScaleRect(&rcWnd, pstRef->dwOldDPIX, pstRef->dwNewDPIX, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
+    SetWindowPos(
+        hWnd,
+        NULL,
+        rcWnd.left,
+        rcWnd.top,
+        rcWnd.right - rcWnd.left,
+        rcWnd.bottom - rcWnd.top,
+        SWP_NOZORDER | SWP_NOACTIVATE);
     hFont = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
-    if (hFont)
+    if (hFont) {
         DeleteObject(hFont);
-    SendMessage(hWnd, WM_SETFONT, (WPARAM)pstRef->hFont, FALSE);
+        SendMessage(hWnd, WM_SETFONT, (WPARAM)pstRef->hFont, FALSE);
+    }
     UI_Redraw(hWnd);
     return TRUE;
 }
@@ -84,12 +100,12 @@ LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM 
         pstRef->dwNewDPIY = HIWORD(wParam);
         UI_SetWindowRect(hDlg, (PRECT)lParam);
         // Adjust font
-        HFONT   hFont;
         DPI_ScaleInt(&pstRef->stFont.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
-        hFont = CreateFontIndirectExW(&pstRef->stFont);
+        HFONT hFont = CreateFontIndirectExW(&pstRef->stFont);
         if (hFont) {
-            if (pstRef->hFont)
+            if (pstRef->hFont) {
                 DeleteObject(pstRef->hFont);
+            }
             pstRef->hFont = hFont;
         }
         // Apply to child windows
@@ -98,20 +114,22 @@ LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM 
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_DESTROY) {
         PDPI_SETAUTOADJUSTSUBCLASS_REF  pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)dwRefData;
-        if (pstRef->hFont)
+        if (pstRef->hFont) {
             DeleteObject(pstRef->hFont);
+        }
         Mem_Free(pstRef);
     }
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-BOOL NTAPI DPI_SetAutoAdjustSubclass(HWND Dialog, HFONT Font) {
+BOOL NTAPI DPI_SetAutoAdjustSubclass(HWND Dialog, _In_opt_ HFONT Font) {
     PDPI_SETAUTOADJUSTSUBCLASS_REF  pstRef;
     HFONT                           hFont;
     BOOL                            bRet;
     pstRef = Mem_Alloc(sizeof(DPI_SETAUTOADJUSTSUBCLASS_REF));
-    if (!pstRef)
+    if (!pstRef) {
         return FALSE;
+    }
     GDI_InitInternalFontInfo(&pstRef->stFont);
     hFont = Font;
     if (!hFont) {

@@ -1,15 +1,22 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-DWORD Con_Write(HANDLE ConHandle, PVOID Buffer, ULONG Length) {
-    IO_STATUS_BLOCK stIOStatusBlock;
-    return NT_SUCCESS(NtWriteFile(ConHandle, NULL, NULL, NULL, &stIOStatusBlock, Buffer, Length, NULL, NULL)) ? (DWORD)stIOStatusBlock.Information : 0;
+DWORD NTAPI Con_Write(HANDLE ConHandle, _In_reads_bytes_opt_(Length) PVOID Buffer, _In_ ULONG Length) {
+    IO_STATUS_BLOCK IOStatus;
+    NTSTATUS Status;
+    Status = NtWriteFile(ConHandle, NULL, NULL, NULL, &IOStatus, Buffer, Length, NULL, NULL);
+    if (NT_SUCCESS(Status)) {
+        return (DWORD)IOStatus.Information;
+    } else {
+        NT_SetLastStatus(Status);
+        return 0;
+    }
 }
 
-DWORD Con_WriteString(HANDLE ConHandle, PCSTR String) {
+DWORD Con_WriteString(HANDLE ConHandle, _In_z_ PCSTR String) {
     return Con_Write(ConHandle, (PVOID)String, (ULONG)Str_SizeA(String));
 }
 
-DWORD Con_WriteLine(HANDLE ConHandle, PCSTR String) {
+DWORD Con_WriteLine(HANDLE ConHandle, _In_z_ PCSTR String) {
     WORD dwEOL = EOLA;
     DWORD dwRet = Con_WriteString(ConHandle, String);
     if (dwRet) {

@@ -1,29 +1,29 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-// uGroupCount, uSize, lpst1, u1, lpst2, u2, ...
-PVOID WINAPIV Data_StructCombineEx(UINT GroupCount, UINT Size, ...) {
+_Check_return_ PVOID WINAPIV Data_StructCombineEx(_In_ UINT GroupCount, _In_ UINT Size, ...) {
     va_list args;
-    UINT    i, u, uStructCount = 0;
-    PVOID   lpBuffer, lpDst, lpSrc;
+    SIZE_T  i, u, uStructCount = 0;
+    PVOID   pBuffer, pDst, pSrc;
     va_start(args, Size);
     for (i = 0; i < GroupCount; i++) {
-        lpSrc = va_arg(args, PVOID);
+        pSrc = va_arg(args, PVOID);
         u = va_arg(args, UINT);
-        if (lpSrc)
+        if (pSrc) {
             uStructCount += u;
+        }
     }
-    lpBuffer = Mem_HeapAlloc(uStructCount * (SIZE_T)Size);
-    if (lpBuffer) {
-        lpDst = lpBuffer;
+    pBuffer = Mem_HeapAlloc(uStructCount * Size);
+    if (pBuffer) {
+        pDst = pBuffer;
         va_start(args, Size);
         for (i = 0; i < GroupCount; i++) {
-            lpSrc = va_arg(args, PVOID);
+            pSrc = va_arg(args, PVOID);
             uStructCount = va_arg(args, UINT);
-            if (lpSrc) {
-                RtlMoveMemory(lpDst, lpSrc, uStructCount * (SIZE_T)Size);
-                lpDst = MOVE_PTR(lpDst, uStructCount * (SIZE_T)Size, VOID);
+            if (pSrc) {
+                RtlMoveMemory(pDst, pSrc, uStructCount * Size);
+                pDst = MOVE_PTR(pDst, uStructCount * Size, VOID);
             }
         }
     }
-    return lpBuffer;
+    return pBuffer;
 }

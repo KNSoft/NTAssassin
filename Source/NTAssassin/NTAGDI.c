@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-BOOL NTAPI GDI_FillSolidRect(HDC DC, PRECT Rect, COLORREF Color) {
+BOOL NTAPI GDI_FillSolidRect(HDC DC, _In_ PRECT Rect, COLORREF Color) {
     COLORREF    crPrev = SetBkColor(DC, Color);
     BOOL        bRet = ExtTextOut(DC, 0, 0, ETO_OPAQUE, Rect, NULL, 0, NULL);
     SetBkColor(DC, crPrev);
@@ -21,11 +21,7 @@ BOOL NTAPI GDI_FrameRect(HDC DC, PRECT Rect, INT Width, DWORD ROP) {
         PatBlt(DC, Rect->left - Width, Rect->bottom + Width, Rect->right - Rect->left + Width * 2, -Width, ROP);
 }
 
-// https://docs.microsoft.com/en-US/windows/win32/gdi/storing-an-image
-// https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmap
-// https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapinfo
-// https://docs.microsoft.com/en-us/windows/win32/gdi/bitmap-storage
-UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer) {
+UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(BufferSize) PVOID Buffer, UINT BufferSize) {
     BITMAP              bmp;
     ULONG               cClrBits;
     PBITMAPFILEHEADER   pbmfh;
@@ -60,7 +56,7 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer) {
     uImageSize = BYTE_ALIGN(bmp.bmWidth * cClrBits, 32) / 8 * bmp.bmHeight;
     uFileSize = uHeadersSize + uImageSize;
     // Write bitmap
-    if (Buffer) {
+    if (Buffer && BufferSize >= uFileSize) {
         pbmfh = (PBITMAPFILEHEADER)Buffer;
         pbmfh->bfType = 'MB';
         pbmfh->bfOffBits = uHeadersSize;
@@ -83,13 +79,13 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, PVOID Buffer) {
     return uFileSize;
 }
 
-VOID NTAPI GDI_InitInternalFontInfo(PENUMLOGFONTEXDVW InternalFontInfo) {
+VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW InternalFontInfo) {
     InternalFontInfo->elfEnumLogfontEx.elfFullName[0] = InternalFontInfo->elfEnumLogfontEx.elfStyle[0] = InternalFontInfo->elfEnumLogfontEx.elfScript[0] = '\0';
     InternalFontInfo->elfDesignVector.dvReserved = STAMP_DESIGNVECTOR;
     InternalFontInfo->elfDesignVector.dvNumAxes = 0;
 }
 
-VOID NTAPI GDI_SetFontInfo(PLOGFONTW FontInfo, LONG FontSize, LONG FontWeight, PCWSTR FontName) {
+VOID NTAPI GDI_SetFontInfo(_Out_ PLOGFONTW FontInfo, LONG FontSize, LONG FontWeight, _In_opt_z_ PCWSTR FontName) {
     FontInfo->lfHeight = FontSize;
     FontInfo->lfWidth = 0;
     FontInfo->lfEscapement = 0;
@@ -109,7 +105,7 @@ VOID NTAPI GDI_SetFontInfo(PLOGFONTW FontInfo, LONG FontSize, LONG FontWeight, P
         Str_CopyW(FontInfo->lfFaceName, FontName);
 }
 
-HFONT NTAPI GDI_CreateFont(LONG FontSize, LONG FontWeight, PCWSTR FontName) {
+HFONT NTAPI GDI_CreateFont(LONG FontSize, LONG FontWeight, _In_opt_z_ PCWSTR FontName) {
     ENUMLOGFONTEXDVW stEnumLogFontExDesignVectorW;
     GDI_InitInternalFontInfo(&stEnumLogFontExDesignVectorW);
     GDI_SetFontInfo(&stEnumLogFontExDesignVectorW.elfEnumLogfontEx.elfLogFont, FontSize, FontWeight, FontName);
@@ -120,7 +116,7 @@ INT NTAPI GDI_GetFont(HFONT Font, PLOGFONTW FontInfo) {
     return GetObjectW(Font, sizeof(*FontInfo), FontInfo);
 }
 
-BOOL NTAPI GDI_DrawIcon(HDC DC, HICON Icon, INT X, INT Y, INT CX, INT CY) {
+BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY) {
     ICONINFO    stIconInfo;
     BITMAP      stBmp;
     RECT        rcDst;
@@ -169,7 +165,7 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, HICON Icon, INT X, INT Y, INT CX, INT CY) {
     return bRet;
 }
 
-BOOL NTAPI GDI_CreateSnapshot(HWND Window, PGDI_SNAPSHOT Snapshot) {
+BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot) {
     HDC     hDC;
     BOOL    bRet;
     if (Window) {
@@ -178,8 +174,9 @@ BOOL NTAPI GDI_CreateSnapshot(HWND Window, PGDI_SNAPSHOT Snapshot) {
         Snapshot->Position.x = Snapshot->Position.y = 0;
         Snapshot->Size.cx = rc.right;
         Snapshot->Size.cy = rc.bottom;
-    } else
+    } else {
         UI_GetScreenPos(&Snapshot->Position, &Snapshot->Size);
+    }
     hDC = GetDC(Window);
     Snapshot->DC = CreateCompatibleDC(hDC);
     Snapshot->Bitmap = CreateCompatibleBitmap(hDC, Snapshot->Size.cx, Snapshot->Size.cy);
@@ -189,7 +186,7 @@ BOOL NTAPI GDI_CreateSnapshot(HWND Window, PGDI_SNAPSHOT Snapshot) {
     return bRet;
 }
 
-BOOL NTAPI GDI_DeleteSnapshot(PGDI_SNAPSHOT Snapshot) {
+BOOL NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot) {
     BOOL bRet;
     bRet = DeleteDC(Snapshot->DC);
     bRet &= DeleteObject(Snapshot->Bitmap);

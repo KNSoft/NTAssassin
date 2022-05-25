@@ -1,167 +1,202 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-VOID NTAPI Data_ListInit(PDATA_LIST DataList) {
+VOID NTAPI Data_ListInit(_Out_ PDATA_LIST DataList) {
     DataList->First = DataList->Last = NULL;
     DataList->Length = 0;
-    if (DataList->Lock)
+    if (DataList->Lock) {
         RtlInitializeCriticalSection(&DataList->Reserved);
+    }
 }
 
-BOOL NTAPI Data_ListPushBack(PDATA_LIST DataList, PVOID NodeValue) {
-    PDATA_LIST_NODE lpNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
-    if (lpNode) {
-        if (DataList->Lock)
+BOOL NTAPI Data_ListPushBack(_In_ PDATA_LIST DataList, PVOID NodeValue) {
+    PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
+    if (pNode) {
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        lpNode->Flink = NULL;
-        lpNode->Blink = DataList->Last;
-        lpNode->Value = NodeValue;
-        if (DataList->Last)
-            DataList->Last->Flink = lpNode;
-        else
-            DataList->First = lpNode;
-        DataList->Last = lpNode;
+        }
+        pNode->Flink = NULL;
+        pNode->Blink = DataList->Last;
+        pNode->Value = NodeValue;
+        if (DataList->Last) {
+            DataList->Last->Flink = pNode;
+        } else {
+            DataList->First = pNode;
+        }
+        DataList->Last = pNode;
         DataList->Length++;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-BOOL NTAPI Data_ListPushFront(PDATA_LIST DataList, PVOID NodeValue) {
-    PDATA_LIST_NODE lpNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
-    if (lpNode) {
-        if (DataList->Lock)
+BOOL NTAPI Data_ListPushFront(_In_ PDATA_LIST DataList, PVOID NodeValue) {
+    PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
+    if (pNode) {
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        lpNode->Flink = DataList->First;
-        lpNode->Blink = NULL;
-        lpNode->Value = NodeValue;
-        if (DataList->First)
-            DataList->First->Blink = lpNode;
-        else
-            DataList->Last = lpNode;
-        DataList->First = lpNode;
+        }
+        pNode->Flink = DataList->First;
+        pNode->Blink = NULL;
+        pNode->Value = NodeValue;
+        if (DataList->First) {
+            DataList->First->Blink = pNode;
+        } else {
+            DataList->Last = pNode;
+        }
+        DataList->First = pNode;
         DataList->Length++;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-BOOL NTAPI Data_ListPopBack(PDATA_LIST DataList, PVOID* NodeValuePointer) {
-    PDATA_LIST_NODE lpNodeTemp;
+_Success_(return != FALSE)
+BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST DataList, _Out_opt_ PVOID * NodeValue) {
+    PDATA_LIST_NODE pNodeTemp;
     if (DataList->Last) {
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        if (NodeValuePointer)
-            *NodeValuePointer = DataList->Last->Value;
-        lpNodeTemp = DataList->Last;
-        DataList->Last = lpNodeTemp->Blink;
+        }
+        if (NodeValue) {
+            *NodeValue = DataList->Last->Value;
+        }
+        pNodeTemp = DataList->Last;
+        DataList->Last = pNodeTemp->Blink;
         DataList->Last->Flink = NULL;
-        Mem_Free(lpNodeTemp);
+        Mem_Free(pNodeTemp);
         DataList->Length--;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-BOOL NTAPI Data_ListPopFront(PDATA_LIST DataList, PVOID* NodeValuePointer) {
-    PDATA_LIST_NODE lpNodeTemp;
+_Success_(return != FALSE)
+BOOL NTAPI Data_ListPopFront(_In_ PDATA_LIST DataList, _Out_opt_ PVOID * NodeValue) {
+    PDATA_LIST_NODE pNodeTemp;
     if (DataList->First) {
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        if (NodeValuePointer)
-            *NodeValuePointer = DataList->First->Value;
-        lpNodeTemp = DataList->First;
-        DataList->First = lpNodeTemp->Flink;
+        }
+        if (NodeValue) {
+            *NodeValue = DataList->First->Value;
+        }
+        pNodeTemp = DataList->First;
+        DataList->First = pNodeTemp->Flink;
         DataList->First->Blink = NULL;
-        Mem_Free(lpNodeTemp);
+        Mem_Free(pNodeTemp);
         DataList->Length--;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-BOOL NTAPI Data_ListInsertBefore(PDATA_LIST DataList, PDATA_LIST_NODE DestNode, PVOID NodeValue) {
-    PDATA_LIST_NODE lpNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
-    if (DestNode && lpNode) {
-        if (DataList->Lock)
+BOOL NTAPI Data_ListInsertBefore(_In_ PDATA_LIST DataList, _In_ PDATA_LIST_NODE DestNode, PVOID NodeValue) {
+    PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
+    if (DestNode && pNode) {
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        lpNode->Blink = DestNode->Blink;
-        lpNode->Flink = DestNode;
-        if (lpNode->Blink)
-            lpNode->Blink->Flink = lpNode;
-        else
-            DestNode->Blink = DataList->First = lpNode;
-        DestNode->Blink = lpNode;
+        }
+        pNode->Blink = DestNode->Blink;
+        pNode->Flink = DestNode;
+        if (pNode->Blink) {
+            pNode->Blink->Flink = pNode;
+        } else {
+            DestNode->Blink = DataList->First = pNode;
+        }
+        DestNode->Blink = pNode;
         DataList->Length++;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-BOOL NTAPI Data_ListInsertAfter(PDATA_LIST DataList, PDATA_LIST_NODE DestNode, PVOID NodeValue) {
-    PDATA_LIST_NODE lpNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
-    if (DestNode && lpNode) {
-        if (DataList->Lock)
+BOOL NTAPI Data_ListInsertAfter(_In_ PDATA_LIST DataList, _In_ PDATA_LIST_NODE DestNode, PVOID NodeValue) {
+    PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
+    if (DestNode && pNode) {
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        lpNode->Blink = DestNode;
-        lpNode->Flink = DestNode->Flink;
-        if (lpNode->Flink)
-            lpNode->Flink->Blink = lpNode;
-        else
-            DestNode->Flink = DataList->Last = lpNode;
-        DestNode->Flink = lpNode;
+        }
+        pNode->Blink = DestNode;
+        pNode->Flink = DestNode->Flink;
+        if (pNode->Flink) {
+            pNode->Flink->Blink = pNode;
+        } else {
+            DestNode->Flink = DataList->Last = pNode;
+        }
+        DestNode->Flink = pNode;
         DataList->Length++;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-BOOL NTAPI Data_ListRemove(PDATA_LIST DataList, PDATA_LIST_NODE Node) {
+BOOL NTAPI Data_ListRemove(_In_ PDATA_LIST DataList, _In_ PDATA_LIST_NODE Node) {
     if (Node) {
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlEnterCriticalSection(&DataList->Reserved);
-        if (Node->Blink)
+        }
+        if (Node->Blink) {
             Node->Blink->Flink = Node->Flink;
-        else
+        } else {
             DataList->First = Node->Flink;
-        if (Node->Flink)
+        }
+        if (Node->Flink) {
             Node->Flink->Blink = Node->Blink;
-        else
+        } else {
             DataList->Last = Node->Blink;
+        }
         Mem_Free(Node);
         DataList->Length--;
-        if (DataList->Lock)
+        if (DataList->Lock) {
             RtlLeaveCriticalSection(&DataList->Reserved);
+        }
         return TRUE;
-    } else
+    } else {
         return FALSE;
+    }
 }
 
-VOID NTAPI Data_ListReset(PDATA_LIST DataList, BOOL FreeValuePtr) {
-    PDATA_LIST_NODE lpNode, lpNodeNext;
-    if (DataList->Lock)
+VOID NTAPI Data_ListReset(_In_ PDATA_LIST DataList, BOOL FreeValuePtr) {
+    PDATA_LIST_NODE pNode, pNodeNext;
+    if (DataList->Lock) {
         RtlEnterCriticalSection(&DataList->Reserved);
-    lpNode = DataList->First;
-    while (lpNode) {
-        if (FreeValuePtr && lpNode->Value)
-            Mem_Free(lpNode->Value);
-        lpNodeNext = lpNode->Flink;
-        Mem_Free(lpNode);
-        lpNode = lpNodeNext;
+    }
+    pNode = DataList->First;
+    while (pNode) {
+        if (FreeValuePtr && pNode->Value) {
+            Mem_Free(pNode->Value);
+        }
+        pNodeNext = pNode->Flink;
+        Mem_Free(pNode);
+        pNode = pNodeNext;
     }
     DataList->First = DataList->Last = NULL;
     DataList->Length = 0;
-    if (DataList->Lock)
+    if (DataList->Lock) {
         RtlLeaveCriticalSection(&DataList->Reserved);
+    }
 }

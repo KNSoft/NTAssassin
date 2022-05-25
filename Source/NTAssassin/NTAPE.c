@@ -1,6 +1,7 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-BOOL NTAPI PE_Resolve(PPE_STRUCT PEStruct, PVOID Image, BOOL OfflineMap) {
+_Success_(return != FALSE)
+BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap) {
     BOOL bRet = FALSE;
     __try {
         PIMAGE_DOS_HEADER   pDosHdr = (PIMAGE_DOS_HEADER)Image;
@@ -15,7 +16,7 @@ BOOL NTAPI PE_Resolve(PPE_STRUCT PEStruct, PVOID Image, BOOL OfflineMap) {
                 pFileHdr = (PIMAGE_FILE_HEADER)pNtSign;
                 bNTImage = FALSE;
             }
-            PIMAGE_OPTIONAL_HEADER  pOptHdr = MOVE_PTR(pFileHdr, sizeof((*pFileHdr)), VOID);
+            PIMAGE_OPTIONAL_HEADER pOptHdr = MOVE_PTR(pFileHdr, sizeof((*pFileHdr)), VOID);
             if ((bNTImage && (pOptHdr->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC || pOptHdr->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)) ||
                 (!bNTImage && pOptHdr->Magic == IMAGE_ROM_OPTIONAL_HDR_MAGIC)) {
                 PEStruct->Image = Image;
@@ -32,7 +33,7 @@ BOOL NTAPI PE_Resolve(PPE_STRUCT PEStruct, PVOID Image, BOOL OfflineMap) {
     return bRet;
 }
 
-PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(PPE_STRUCT PEStruct, UINT Index) {
+PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(_In_ PPE_STRUCT PEStruct, UINT Index) {
     PIMAGE_DATA_DIRECTORY pDataDirectory = NULL;
     __try {
         if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
@@ -44,7 +45,7 @@ PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(PPE_STRUCT PEStruct, UINT Index)
     return pDataDirectory;
 }
 
-PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(PPE_STRUCT PEStruct, DWORD RVA) {
+PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(_In_ PPE_STRUCT PEStruct, DWORD RVA) {
     USHORT u, uSections;
     PIMAGE_SECTION_HEADER pTargetSection, pSection;
     pTargetSection = NULL;
@@ -64,7 +65,7 @@ PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(PPE_STRUCT PEStruct, DWORD RVA) {
     return pTargetSection;
 }
 
-PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByOffset(PPE_STRUCT PEStruct, DWORD Offset) {
+PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByOffset(_In_ PPE_STRUCT PEStruct, DWORD Offset) {
     USHORT u, uSections;
     PIMAGE_SECTION_HEADER pTargetSection, pSection;
     pTargetSection = NULL;
@@ -84,7 +85,7 @@ PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByOffset(PPE_STRUCT PEStruct, DWORD Off
     return pTargetSection;
 }
 
-PVOID NTAPI PE_RVA2Ptr(PPE_STRUCT PEStruct, DWORD RVA) {
+PVOID NTAPI PE_RVA2Ptr(_In_ PPE_STRUCT PEStruct, DWORD RVA) {
     PVOID   Ptr = NULL;
     if (PEStruct->OfflineMap) {
         PIMAGE_SECTION_HEADER pSection = PE_GetSectionByRVA(PEStruct, RVA);
@@ -96,7 +97,8 @@ PVOID NTAPI PE_RVA2Ptr(PPE_STRUCT PEStruct, DWORD RVA) {
     return Ptr;
 }
 
-BOOL NTAPI PE_Ptr2RVA(PPE_STRUCT PEStruct, PVOID Ptr, PDWORD RVA) {
+_Success_(return != FALSE)
+BOOL NTAPI PE_Ptr2RVA(_In_ PPE_STRUCT PEStruct, _In_  PVOID Ptr, _Out_ PDWORD RVA) {
     DWORD dwDelta = (DWORD)((ULONG_PTR)Ptr - (ULONG_PTR)PEStruct->Image);
     if (PEStruct->OfflineMap) {
         PIMAGE_SECTION_HEADER pSection = PE_GetSectionByOffset(PEStruct, dwDelta);
@@ -111,7 +113,8 @@ BOOL NTAPI PE_Ptr2RVA(PPE_STRUCT PEStruct, PVOID Ptr, PDWORD RVA) {
     return TRUE;
 }
 
-BOOL NTAPI PE_Ptr2Offset(PPE_STRUCT PEStruct, PVOID Ptr, PDWORD Offset) {
+_Success_(return != FALSE)
+BOOL NTAPI PE_Ptr2Offset(_In_ PPE_STRUCT PEStruct, _In_ PVOID Ptr, _Out_ PDWORD Offset) {
     DWORD dwDelta = (DWORD)((ULONG_PTR)Ptr - (ULONG_PTR)PEStruct->Image);
     if (PEStruct->OfflineMap) {
         *Offset = dwDelta;
@@ -126,40 +129,44 @@ BOOL NTAPI PE_Ptr2Offset(PPE_STRUCT PEStruct, PVOID Ptr, PDWORD Offset) {
     return TRUE;
 }
 
-BOOL NTAPI PE_GetExportedName(PPE_STRUCT PEStruct, PVOID Function, PZPCSTR Name) {
+_Success_(return != FALSE)
+BOOL NTAPI PE_GetExportedName(_In_ PPE_STRUCT PEStruct, _In_ PVOID Function, _Out_ PZPCSTR Name) {
     BOOL bRet = FALSE;
     DWORD dwFuncRVA;
     if (PE_Ptr2RVA(PEStruct, Function, &dwFuncRVA)) {
-        PIMAGE_DATA_DIRECTORY pExportDir = PE_GetDataDirectory(PEStruct, IMAGE_DIRECTORY_ENTRY_EXPORT);
-        if (pExportDir) {
-            PIMAGE_EXPORT_DIRECTORY pExportTable = PE_RVA2Ptr(PEStruct, pExportDir->VirtualAddress);
-            if (pExportTable) {
-                UINT uFuncIndex;
-                PDWORD padwFuncRVAs = PE_RVA2Ptr(PEStruct, pExportTable->AddressOfFunctions);
-                for (uFuncIndex = 0; uFuncIndex < pExportTable->NumberOfFunctions; uFuncIndex++, padwFuncRVAs++) {
-                    if (*padwFuncRVAs == dwFuncRVA) {
-                        break;
-                    }
-                }
-                if (uFuncIndex < pExportTable->NumberOfFunctions) {
-                    PCSTR pszName = NULL;
-                    UINT uNameIndex;
-                    PWORD pawNameOrds = PE_RVA2Ptr(PEStruct, pExportTable->AddressOfNameOrdinals);
-                    for (uNameIndex = 0; uNameIndex < pExportTable->NumberOfNames; uNameIndex++, pawNameOrds++) {
-                        if (*pawNameOrds == (WORD)uFuncIndex) {
+        __try {
+            PIMAGE_DATA_DIRECTORY pExportDir = PE_GetDataDirectory(PEStruct, IMAGE_DIRECTORY_ENTRY_EXPORT);
+            if (pExportDir) {
+                PIMAGE_EXPORT_DIRECTORY pExportTable = PE_RVA2Ptr(PEStruct, pExportDir->VirtualAddress);
+                if (pExportTable) {
+                    UINT uFuncIndex;
+                    PDWORD padwFuncRVAs = PE_RVA2Ptr(PEStruct, pExportTable->AddressOfFunctions);
+                    for (uFuncIndex = 0; uFuncIndex < pExportTable->NumberOfFunctions; uFuncIndex++, padwFuncRVAs++) {
+                        if (*padwFuncRVAs == dwFuncRVA) {
                             break;
                         }
                     }
-                    if (uNameIndex < pExportTable->NumberOfNames) {
-                        PDWORD padwNameRVAs = PE_RVA2Ptr(PEStruct, pExportTable->AddressOfNames);
-                        if (padwNameRVAs) {
-                            pszName = PE_RVA2Ptr(PEStruct, padwNameRVAs[uNameIndex]);
+                    if (uFuncIndex < pExportTable->NumberOfFunctions) {
+                        PCSTR pszName = NULL;
+                        UINT uNameIndex;
+                        PWORD pawNameOrds = PE_RVA2Ptr(PEStruct, pExportTable->AddressOfNameOrdinals);
+                        for (uNameIndex = 0; uNameIndex < pExportTable->NumberOfNames; uNameIndex++, pawNameOrds++) {
+                            if (*pawNameOrds == (WORD)uFuncIndex) {
+                                break;
+                            }
                         }
+                        if (uNameIndex < pExportTable->NumberOfNames) {
+                            PDWORD padwNameRVAs = PE_RVA2Ptr(PEStruct, pExportTable->AddressOfNames);
+                            if (padwNameRVAs) {
+                                pszName = PE_RVA2Ptr(PEStruct, padwNameRVAs[uNameIndex]);
+                            }
+                        }
+                        *Name = IF_NULL(pszName, (PCSTR)(DWORD_PTR)(uFuncIndex + (DWORD_PTR)pExportTable->Base));
+                        bRet = TRUE;
                     }
-                    *Name = IF_NULL(pszName, (PCSTR)(DWORD_PTR)(uFuncIndex + (DWORD_PTR)pExportTable->Base));
-                    bRet = TRUE;
                 }
             }
+        } __except (EXCEPTION_EXECUTE_HANDLER) {
         }
     }
     return bRet;

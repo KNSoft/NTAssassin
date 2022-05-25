@@ -30,7 +30,7 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR Lan
         pszLangName = LangName;
         iCchName = MAX_LOCALENAME_CCH;
     } else {
-        iCchName = GetLocaleInfoEx(LOCALE_NAME_SYSTEM_DEFAULT, LOCALE_SNAME, wcName, ARRAYSIZE(wcName));
+        iCchName = GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, LOCALE_SNAME, wcName, ARRAYSIZE(wcName));
         if (iCchName == 0 || wcName[0] == '\0')
             return Langs[0];
         pszLangName = wcName;

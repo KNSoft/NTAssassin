@@ -1,34 +1,49 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-HMENU NTAPI Ctl_CreateMenuEx(CTL_MENU Menus[], UINT Count, HMENU Parent) {
-    HMENU       hMenu = Parent ? Parent : CreateMenu();
-    UINT        i, uFlags;
-    LPCWSTR     lpszText;
-    UINT_PTR    uIDNewItem;
-    for (i = 0; i < Count; i++) {
-        lpszText = Menus[i].Text;
-        if (IS_INTRESOURCE(lpszText))
-            lpszText = I18N_GetString((DWORD_PTR)Menus[i].Text);
-        if (Menus[i].SubMenuCount) {
-            Menus[i].Handle = CreatePopupMenu();
-            uIDNewItem = (UINT_PTR)Ctl_CreateMenuEx(Menus[i].SubMenu, Menus[i].SubMenuCount, Menus[i].Handle);
-            uFlags = Menus[i].Flags | MF_POPUP;
-        } else {
-            Menus[i].Handle = NULL;
-            uIDNewItem = Menus[i].ID;
-            uFlags = Menus[i].Flags;
+HMENU NTAPI Ctl_CreateMenuEx(_Inout_ PCTL_MENU Menus, _In_ UINT Count, _In_opt_ HMENU Parent) {
+    HMENU hMenu = Parent ? Parent : CreateMenu();
+    if (hMenu) {
+        UINT        i, uFlags;
+        PCWSTR      pszText;
+        UINT_PTR    uIDNewItem;
+        for (i = 0; i < Count; i++) {
+            pszText = Menus[i].Text;
+            if (IS_INTRESOURCE(pszText))
+                pszText = I18N_GetString((DWORD_PTR)Menus[i].Text);
+            if (Menus[i].SubMenuCount) {
+                if ((Menus[i].Handle = CreatePopupMenu()) != NULL &&
+                    (uIDNewItem = (UINT_PTR)Ctl_CreateMenuEx(Menus[i].SubMenu, Menus[i].SubMenuCount, Menus[i].Handle)) != 0) {
+                    uFlags = Menus[i].Flags | MF_POPUP;
+                } else {
+                    break;
+                }
+            } else {
+                Menus[i].Handle = NULL;
+                uIDNewItem = Menus[i].ID;
+                uFlags = Menus[i].Flags;
+            }
+            if (!AppendMenuW(hMenu, uFlags, uIDNewItem, pszText)) {
+                break;
+            }
         }
-        AppendMenuW(hMenu, uFlags, uIDNewItem, lpszText);
+        if (i < Count) {
+            DWORD dwError = NT_GetLastError();
+            Ctl_DestroyMenuEx(Menus, Count, hMenu);
+            NT_SetLastError(dwError);
+            hMenu = NULL;
+        }
     }
     return hMenu;
 }
 
-VOID NTAPI Ctl_DestroyMenuEx(PCTL_MENU Menus, UINT Count, HMENU Menu) {
+VOID NTAPI Ctl_DestroyMenuEx(_In_ PCTL_MENU Menus, _In_ UINT Count, HMENU Menu) {
     UINT i;
-    if (Menu)
+    if (Menu) {
         DestroyMenu(Menu);
-    for (i = 0; i < Count; i++)
+    }
+    for (i = 0; i < Count; i++) {
         Ctl_DestroyMenuEx(Menus[i].SubMenu, Menus[i].SubMenuCount, Menus[i].Handle);
+    }
 }
 
 LRESULT NTAPI Ctl_PropertySheetPageDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
@@ -37,10 +52,13 @@ LRESULT NTAPI Ctl_PropertySheetPageDialogProc(HWND hDlg, UINT uMsg, WPARAM wPara
         return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
     } else if (uMsg == WM_CTLCOLORSTATIC) {
         SetBkMode((HDC)wParam, TRANSPARENT);
-        if (GetClassName((HWND)lParam, szClassName, ARRAYSIZE(szClassName)))
-            if (Str_EqualW(szClassName, WC_EDITW))
-                if (GetWindowLongPtr((HWND)lParam, GWL_STYLE) & ES_READONLY)
+        if (GetClassName((HWND)lParam, szClassName, ARRAYSIZE(szClassName))) {
+            if (Str_EqualW(szClassName, WC_EDITW)) {
+                if (GetWindowLongPtr((HWND)lParam, GWL_STYLE) & ES_READONLY) {
                     return (LRESULT)GetSysColorBrush(COLOR_BTNFACE);
+                }
+            }  
+        } 
         return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
     }
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
@@ -58,9 +76,9 @@ LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, L
                 if (iSelected != -1) {
                     stTCI.mask = TCIF_PARAM;
                     if (SendMessage(lpnmhdr->hwndFrom, TCM_GETITEMW, iSelected, (LPARAM)&stTCI)) {
-                        if (lpnmhdr->code == TCN_SELCHANGING)
+                        if (lpnmhdr->code == TCN_SELCHANGING) {
                             ShowWindow((HWND)stTCI.lParam, SW_HIDE);
-                        else {
+                        } else {
                             UI_GetRelativeRect(lpnmhdr->hwndFrom, hDlg, &rcTab);
                             SendMessage(lpnmhdr->hwndFrom, TCM_ADJUSTRECT, FALSE, (LPARAM)&rcTab);
                             SetWindowPos((HWND)stTCI.lParam, NULL, rcTab.left, rcTab.top, rcTab.right - rcTab.left, rcTab.bottom - rcTab.top, SWP_NOZORDER | SWP_SHOWWINDOW);
@@ -73,7 +91,8 @@ LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, L
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-VOID NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, CTL_PROPSHEETPAGE Sheets[], UINT SheetCount, LPARAM Param) {
+BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEETPAGE Sheets, _In_ UINT SheetCount, LPARAM Param) {
+    BOOL    bRet = TRUE;
     HWND    hTab = GetDlgItem(Dialog, TabCtlID);
     UINT    i;
     TCITEM  stTCI;
@@ -82,52 +101,75 @@ VOID NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, CTL_PROPSHEETPAGE S
     SendMessage(hTab, TCM_DELETEALLITEMS, 0, 0);
     for (i = 0; i < SheetCount; i++) {
         Sheets[i].Handle = CreateDialogParam(Sheets[i].Instance, MAKEINTRESOURCE(Sheets[i].DlgResID), Dialog, Sheets[i].DlgProc, Param);
-        SetWindowSubclass(Sheets[i].Handle, Ctl_PropertySheetPageDialogProc, 0, 0);
-        stTCI.pszText = (LPTSTR)(IS_INTRESOURCE(Sheets[i].Title) ? I18N_GetString((DWORD_PTR)Sheets[i].Title) : Sheets[i].Title);
-        stTCI.lParam = (LPARAM)Sheets[i].Handle;
-        SendMessage(hTab, TCM_INSERTITEM, i, (LPARAM)&stTCI);
+        if (Sheets[i].Handle &&
+            SetWindowSubclass(Sheets[i].Handle, Ctl_PropertySheetPageDialogProc, 0, 0)) {
+            stTCI.pszText = (LPTSTR)(IS_INTRESOURCE(Sheets[i].Title) ? I18N_GetString((DWORD_PTR)Sheets[i].Title) : Sheets[i].Title);
+            stTCI.lParam = (LPARAM)Sheets[i].Handle;
+            SendMessage(hTab, TCM_INSERTITEM, i, (LPARAM)&stTCI);
+        } else {
+            bRet = FALSE;
+            break;
+        }
     }
-    SetWindowSubclass(Dialog, Ctl_PropertySheetDialogProc, 0, TabCtlID);
+    if (bRet) {
+        bRet = SetWindowSubclass(Dialog, Ctl_PropertySheetDialogProc, 0, TabCtlID);
+    }
     stnmhdr.hwndFrom = hTab;
     stnmhdr.idFrom = TabCtlID;
     stnmhdr.code = TCN_SELCHANGE;
     SendMessage(Dialog, WM_NOTIFY, TabCtlID, (LPARAM)&stnmhdr);
+    return bRet;
 }
 
-VOID NTAPI Ctl_InitListCtlEx(HWND List, CTL_LISTCTL_COLUME Cols[], UINT ColCount, LONG_PTR ExStyle) {
+BOOL NTAPI Ctl_InitListCtlEx(HWND List, _In_ PCTL_LISTCTL_COLUME Cols, _In_ UINT ColCount, LONG_PTR ExStyle) {
+    BOOL        bRet = TRUE;
     UINT        i;
     LVCOLUMN    stLVCol = { LVCF_TEXT | LVCF_WIDTH };
-    if (ExStyle)
+    if (ExStyle) {
         SendMessage(List, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ExStyle);
+    }
     for (i = 0; i < ColCount; i++) {
         stLVCol.cx = Cols[i].Width;
         stLVCol.pszText = (LPTSTR)(IS_INTRESOURCE(Cols[i].Title) ? I18N_GetString((UINT_PTR)Cols[i].Title) : Cols[i].Title);
-        SendMessage(List, LVM_INSERTCOLUMN, i, (LPARAM)&stLVCol);
+        if (SendMessage(List, LVM_INSERTCOLUMN, i, (LPARAM)&stLVCol) == -1) {
+            bRet = FALSE;
+            break;
+        }
     }
     UI_SetTheme(List);
+    return bRet;
 }
 
-VOID NTAPI Ctl_InitComboBoxEx(HWND ComboBox, PCTL_COMBOBOXCTL_ITEM Items, UINT ItemCount, BOOL SetParam) {
-    LPCTSTR lpsz;
-    UINT    u;
-    INT     i;
+BOOL NTAPI Ctl_InitComboBoxEx(HWND ComboBox, _In_ PCTL_COMBOBOXCTL_ITEM Items, _In_ UINT ItemCount, BOOL SetParam) {
+    PCTSTR      psz;
+    UINT        u;
+    LONG_PTR    i;
     for (u = 0; u < ItemCount; u++) {
-        lpsz = Items[u].String;
-        if (IS_INTRESOURCE(lpsz))
-            lpsz = I18N_GetString((UINT_PTR)lpsz);
-        i = (INT)SendMessage(ComboBox, CB_ADDSTRING, 0, (LPARAM)lpsz);
-        if (i >= 0 && SetParam)
-            SendMessage(ComboBox, CB_SETITEMDATA, i, Items[u].Param);
+        psz = Items[u].String;
+        if (IS_INTRESOURCE(psz)) {
+            psz = I18N_GetString((UINT_PTR)psz);
+        }
+        i = SendMessage(ComboBox, CB_ADDSTRING, 0, (LPARAM)psz);
+        if (i >= 0) {
+            if (SetParam) {
+                SendMessage(ComboBox, CB_SETITEMDATA, i, Items[u].Param);
+            }
+        } else {
+            // CB_ERR or CB_ERRSPACE...
+            break;
+        }
     }
+    return !(u < ItemCount);
 }
 
-HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param) {
+HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param) {
     UINT        uDepth = 0;
     HTREEITEM   hItem, hItemTemp;
     hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_ROOT, 0);
     do {
-        if (!TreeItemEnumProc(TreeView, hItem, uDepth, Param))
+        if (!TreeItemEnumProc(TreeView, hItem, uDepth, Param)) {
             return hItem;
+        }
         hItemTemp = hItem;
         hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_CHILD, (LPARAM)hItemTemp);
         if (hItem) {

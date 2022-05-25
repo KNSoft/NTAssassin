@@ -46,6 +46,15 @@ _At_buffer_(
     _In_                          size_t _Size
     );
 
+typedef _Success_(return == 0)
+_Check_return_opt_
+errno_t(__CRTDECL * PFNmemcpy_s)(
+    _Out_writes_bytes_to_opt_(_DestinationSize, _SourceSize) void*       const _Destination,
+    _In_                                                     rsize_t     const _DestinationSize,
+    _In_reads_bytes_opt_(_SourceSize)                        void const* const _Source,
+    _In_                                                     rsize_t     const _SourceSize
+    );
+
 HMODULE hNtDLL = NULL;
 PIMAGE_DATA_DIRECTORY pExportDir = NULL;
 PIMAGE_EXPORT_DIRECTORY pExportTable = NULL;
@@ -143,6 +152,20 @@ _At_buffer_(
     if (!pfnmemset)
         pfnmemset = (PFNmemset)UCRT_GetProcAddr("memset");
     return pfnmemset(_Dst, _Val, _Size);
+}
+
+PFNmemcpy_s pfnmemcpy_s = NULL;
+_Success_(return == 0)
+_Check_return_opt_
+errno_t __CRTDECL UCRT_memcpy_s(
+    _Out_writes_bytes_to_opt_(_DestinationSize, _SourceSize) void*       const _Destination,
+    _In_                                                     rsize_t     const _DestinationSize,
+    _In_reads_bytes_opt_(_SourceSize)                        void const* const _Source,
+    _In_                                                     rsize_t     const _SourceSize
+) {
+    if (!pfnmemcpy_s)
+        pfnmemcpy_s = (PFNmemcpy_s)UCRT_GetProcAddr("memcpy_s");
+    return pfnmemcpy_s(_Destination, _DestinationSize, _Source, _SourceSize);
 }
 
 #pragma warning(default: 6001)

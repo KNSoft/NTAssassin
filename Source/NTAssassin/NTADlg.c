@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
+LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(_Out_ PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
     Template->wMenu = Template->wClass = Template->wTitle = Template->Template.cdit = 0;
     Template->Template.style = Style;
     Template->Template.dwExtendedStyle = ExtendedStyle;
@@ -11,12 +11,12 @@ LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(PDLG_TEMPLATE Template, DWORD Style, DWORD
     return &Template->Template;
 }
 
-BOOL NTAPI Dlg_GetOpenFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD MaxFile, PCWSTR DefExt) {
+BOOL NTAPI Dlg_GetOpenFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD CchFile, PCWSTR DefExt) {
     OPENFILENAMEW   stOpenOFNW = { sizeof(OPENFILENAMEW) };
     stOpenOFNW.hwndOwner = Owner;
     stOpenOFNW.lpstrFilter = Filter;
     stOpenOFNW.lpstrFile = File;
-    stOpenOFNW.nMaxFile = MaxFile;
+    stOpenOFNW.nMaxFile = CchFile;
     stOpenOFNW.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
     stOpenOFNW.lpstrDefExt = DefExt;
     return GetOpenFileNameW(&stOpenOFNW);
@@ -33,8 +33,8 @@ BOOL NTAPI Dlg_GetSaveFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD Ma
     return GetSaveFileNameW(&stSaveOFNW);
 }
 
-BOOL NTAPI Dlg_ChooseColor(HWND Owner, LPCOLORREF ColorPointer) {
-    COLORREF    acrCustClr[16] = {
+BOOL NTAPI Dlg_ChooseColor(HWND Owner, _Inout_ LPCOLORREF Color) {
+    COLORREF acrCustClr[16] = {
         RGB(255, 255, 255),
         RGB(255, 255, 255),
         RGB(255, 255, 255),
@@ -55,30 +55,30 @@ BOOL NTAPI Dlg_ChooseColor(HWND Owner, LPCOLORREF ColorPointer) {
     CHOOSECOLOR stChooseColor = { sizeof(CHOOSECOLOR), NULL, NULL, RGB(0, 0, 0), acrCustClr, CC_ANYCOLOR | CC_FULLOPEN | CC_RGBINIT };
     BOOL        bRet;
     stChooseColor.hwndOwner = Owner;
-    stChooseColor.rgbResult = *ColorPointer;
+    stChooseColor.rgbResult = *Color;
     bRet = ChooseColor(&stChooseColor);
     if (bRet)
-        *ColorPointer = stChooseColor.rgbResult;
+        *Color = stChooseColor.rgbResult;
     return bRet;
 }
 
-BOOL NTAPI Dlg_ChooseFont(HWND Owner, PLOGFONTW FontPointer, LPCOLORREF ColorPointer) {
+BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Out_ PLOGFONTW Font, _Inout_opt_ LPCOLORREF Color) {
     CHOOSEFONTW stChooseFontW = { sizeof(CHOOSEFONTW) };
     BOOL        bRet;
     stChooseFontW.hwndOwner = Owner;
-    if (ColorPointer) {
+    if (Color) {
         stChooseFontW.Flags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_EFFECTS;
-        stChooseFontW.rgbColors = *ColorPointer;
+        stChooseFontW.rgbColors = *Color;
     } else
         stChooseFontW.Flags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST;
-    stChooseFontW.lpLogFont = FontPointer;
+    stChooseFontW.lpLogFont = Font;
     bRet = ChooseFontW(&stChooseFontW);
-    if (bRet && ColorPointer)
-        *ColorPointer = stChooseFontW.rgbColors;
+    if (bRet && Color)
+        *Color = stChooseFontW.rgbColors;
     return bRet;
 }
 
-BOOL NTAPI Dlg_ScreenSnapshot(PDLG_SCREENSNAPSHOT ScreenSnapshot) {
+BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot) {
     WNDCLASSEXW stWndClsExCaptureW = { sizeof(WNDCLASSEXW), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, L"NTAssassin.Dlg.ScreenSnapshotClass", NULL };
     ATOM        atomClass;
     HWND        hWnd;
@@ -105,7 +105,7 @@ BOOL NTAPI Dlg_ScreenSnapshot(PDLG_SCREENSNAPSHOT ScreenSnapshot) {
                 NULL,
                 ScreenSnapshot->hInstance,
                 ScreenSnapshot->lParam);
-            bRet = hWnd && UI_MessageLoop(hWnd);
+            bRet = hWnd && UI_MessageLoop(NULL);
             GDI_DeleteSnapshot(&ScreenSnapshot->Snapshot);
         }
         UnregisterClassW(MAKEINTRESOURCEW(atomClass), stWndClsExCaptureW.hInstance);
@@ -135,11 +135,11 @@ LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wP
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_SIZING) {
         PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
-        PRECT lpRect = (RECT*)lParam;
-        if (pstRef->lMinWidth && lpRect->right < lpRect->left + pstRef->lMinWidth)
-            lpRect->right = lpRect->left + pstRef->lMinWidth;
-        if (pstRef->lMinHeight && lpRect->bottom < lpRect->top + pstRef->lMinHeight)
-            lpRect->bottom = lpRect->top + pstRef->lMinHeight;
+        PRECT pRect = (RECT*)lParam;
+        if (pstRef->lMinWidth && pRect->right < pRect->left + pstRef->lMinWidth)
+            pRect->right = pRect->left + pstRef->lMinWidth;
+        if (pstRef->lMinHeight && pRect->bottom < pRect->top + pstRef->lMinHeight)
+            pRect->bottom = pRect->top + pstRef->lMinHeight;
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
     } else if (uMsg == WM_SIZE) {
         if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED) {
@@ -162,7 +162,7 @@ LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wP
 }
 
 BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, LONG MinWidth, LONG MinHeight, DLG_RESIZEDPROC ResizedProc) {
-    PDLG_SETRESIZINGSUBCLASS_REF    pstRef;
+    PDLG_SETRESIZINGSUBCLASS_REF pstRef;
     pstRef = Mem_Alloc(sizeof(DLG_SETRESIZINGSUBCLASS_REF));
     if (!pstRef)
         return FALSE;

@@ -16,14 +16,16 @@ PCWSTR  pszSysDllNames[] = {
 
 HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll) {
     if (SysDll >= 0 && SysDll < SysDllNameMax) {
-        if (!hSysDlls[SysDll])
+        if (!hSysDlls[SysDll]) {
             hSysDlls[SysDll] = SysDll == SysDllNameNTDll ? Proc_GetNtdllHandle() : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
+        }
         return hSysDlls[SysDll];
-    } else
+    } else {
         return NULL;
+    }
 }
 
-PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, PCSTR APIName) {
+PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, _In_z_ PCSTR APIName) {
     HMODULE hDll = Sys_LoadDll(SysDll);
     return hDll ? Proc_GetProcAddr(hDll, APIName) : NULL;
 }
@@ -141,8 +143,9 @@ BOOL NTAPI Sys_RegDriver(PCWSTR Name, PCWSTR ImagePath, BOOL Volatile) {
         if (NT_SUCCESS(lStatus)) {
             Str_InitW(&strKeyName, (PWSTR)L"ImagePath");
             lStatus = NtSetValueKey(hKey, &strKeyName, 0, REG_EXPAND_SZ, (PVOID)ImagePath, (ULONG)(Str_SizeW(ImagePath) + sizeof(WCHAR)));
-            if (!NT_SUCCESS(lStatus))
+            if (!NT_SUCCESS(lStatus)) {
                 goto Label_1;
+            }
             Str_InitW(&strKeyName, L"Type");
             DWORD dwType = SERVICE_KERNEL_DRIVER;
             lStatus = NtSetValueKey(hKey, &strKeyName, 0, REG_DWORD, &dwType, sizeof(dwType));

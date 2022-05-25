@@ -18,9 +18,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NTABitmap.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NTACon.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,9 +34,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAI18N.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NTAImage.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAIO.c">
@@ -84,9 +78,6 @@
     <ClCompile Include="NTAHijack.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NTA_NAC_Output.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NTADlg_ValueEditor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -109,6 +100,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAHook.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAShell.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Precomp4C.Output.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -150,9 +147,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTAI18N.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\NTAssassin\NTAImage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTAIO.h">
@@ -219,6 +213,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTAOpCode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAShell.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Precomp4C.Output.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

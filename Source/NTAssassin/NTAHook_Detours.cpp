@@ -1,4 +1,6 @@
-﻿#define GetCurrentProcess MS_GetCurrentProcess
+﻿// Use native instructions and system calls instead
+
+#define GetCurrentProcess MS_GetCurrentProcess
 #define GetCurrentThreadId MS_GetCurrentThreadId
 #define VirtualAlloc MS_VirtualAlloc
 #define VirtualQuery MS_VirtualQuery

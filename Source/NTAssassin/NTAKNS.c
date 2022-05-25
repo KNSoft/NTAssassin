@@ -181,8 +181,20 @@ VOID NTAPI KNS_ErrorMsgBox(HWND Owner, DWORD Error) {
     Sys_ErrorMsgBox(Owner, lpKNSInfo->Name, Error);
 }
 
+VOID NTAPI KNS_StatusMsgBox(HWND Owner, NTSTATUS Status) {
+    Sys_StatusMsgBox(Owner, lpKNSInfo->Name, Status);
+}
+
+VOID NTAPI KNS_LastErrorMsgBox(HWND Owner) {
+    Sys_LastErrorMsgBox(Owner, lpKNSInfo->Name);
+}
+
+VOID NTAPI KNS_LastStatusMsgBox(HWND Owner) {
+    Sys_LastStatusMsgBox(Owner, lpKNSInfo->Name);
+}
+
 VOID NTAPI KNS_OpenHomePage() {
-    UI_ShellExec(lpKNSInfo->OnlineService.HomePage, NULL, UIShellExecOpen, SW_SHOWNORMAL, NULL);
+    Shell_Exec(lpKNSInfo->OnlineService.HomePage, NULL, ShellExecOpen, SW_SHOWNORMAL, NULL);
 }
 
 #define PADDING_X   14

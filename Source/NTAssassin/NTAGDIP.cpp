@@ -109,16 +109,6 @@ PGDIP_IMAGE NTAPI GDIP_LoadImageFromBitmap(HBITMAP Bitmap) {
     return GdipCreateBitmapFromHBITMAP(Bitmap, NULL, &pBitmap) == Ok ? (GpImage*)pBitmap : NULL;
 }
 
-PGDIP_IMAGE NTAPI GDIP_LoadImageFromBuffer(PVOID Buffer, UINT Size) {
-    GpImage* pImage = NULL;
-    IStream* Stream = SHCreateMemStream((const BYTE*)Buffer, Size);
-    if (Stream) {
-        GdipLoadImageFromStream(Stream, &pImage);
-        Stream->Release();
-    }
-    return pImage;
-}
-
 BOOL NTAPI GDIP_DisposeImage(PGDIP_IMAGE Image) {
     return GdipDisposeImage((GpImage*)Image) == Ok;
 }
@@ -140,6 +130,16 @@ BOOL GDIP_FindCodecEnumProc(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param
     return bRet;
 }
 
+PGDIP_IMAGE NTAPI GDIP_LoadImageFromBuffer(_In_reads_bytes_(Size) PVOID Buffer, _In_ UINT Size) {
+    GpImage* pImage = NULL;
+    IStream* Stream = SHCreateMemStream((const BYTE*)Buffer, Size);
+    if (Stream) {
+        GdipLoadImageFromStream(Stream, &pImage);
+        Stream->Release();
+    }
+    return pImage;
+}
+
 BOOL NTAPI GDIP_SaveImageToFileEx(PGDIP_IMAGE Image, PCWSTR FileName, REFCLSID FormatID, GDIPCONST Gdiplus::EncoderParameters* EncParams) {
     BOOL bRet = FALSE;
     CLSID Encoder;
@@ -150,19 +150,19 @@ BOOL NTAPI GDIP_SaveImageToFileEx(PGDIP_IMAGE Image, PCWSTR FileName, REFCLSID F
     return bRet;
 }
 
-BOOL NTAPI GDIP_SaveImageToBMPFile(PGDIP_IMAGE Image, PCWSTR FileName) {
+BOOL NTAPI GDIP_SaveImageToBMPFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName) {
     return GDIP_SaveImageToFileEx(Image, FileName, Gdiplus::ImageFormatBMP, NULL);
 }
 
-BOOL NTAPI GDIP_SaveImageToGIFFile(PGDIP_IMAGE Image, PCWSTR FileName) {
+BOOL NTAPI GDIP_SaveImageToGIFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName) {
     return GDIP_SaveImageToFileEx(Image, FileName, Gdiplus::ImageFormatGIF, NULL);
 }
 
-BOOL NTAPI GDIP_SaveImageToPNGFile(PGDIP_IMAGE Image, PCWSTR FileName) {
+BOOL NTAPI GDIP_SaveImageToPNGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName) {
     return GDIP_SaveImageToFileEx(Image, FileName, Gdiplus::ImageFormatPNG, NULL);
 }
 
-BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, PCWSTR FileName, INT Quality) {
+BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, INT Quality) {
     UINT ubQuality = 0;
     if (Quality >= 0 && Quality <= 100) {
         ubQuality++;
@@ -189,7 +189,7 @@ BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, PCWSTR FileName, INT Qual
     return bRet;
 }
 
-BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, PCWSTR FileName, GDIP_TIFFENCODER_PARAMVALUE Compression, INT ColorDepth) {
+BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, GDIP_TIFFENCODER_PARAMVALUE Compression, INT ColorDepth) {
     UINT ubCompression = 0, ubColorDepth = 0, uIndex = 0, uCount;
     if (Compression > TIFF_ParamValue_CompressionUnused && Compression < TIFF_ParamValue_CompressionMax) {
         ubCompression++;

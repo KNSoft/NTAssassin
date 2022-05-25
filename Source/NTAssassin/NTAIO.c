@@ -1,28 +1,35 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-NTSTATUS NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, PVOID Buffer, ULONG Length) {
-    IO_STATUS_BLOCK stIOStatusBlock;
+BOOL NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, _In_reads_bytes_(Length) PVOID Buffer, ULONG Length) {
+    IO_STATUS_BLOCK stIOStatus;
     LARGE_INTEGER   stLIOffset;
+    NTSTATUS        lStatus;
     stLIOffset.QuadPart = ByteOffset;
-    return NtWriteFile(FileHandle, NULL, NULL, NULL, &stIOStatusBlock, Buffer, Length, &stLIOffset, NULL);
+    lStatus = NtWriteFile(FileHandle, NULL, NULL, NULL, &stIOStatus, Buffer, Length, &stLIOffset, NULL);
+    if (NT_SUCCESS(lStatus)) {
+        return TRUE;
+    } else {
+        NT_SetLastStatus(lStatus);
+        return FALSE;
+    }
 }
 
-NTSTATUS NTAPI IO_WriteStringW(HANDLE FileHandle, PWSTR String) {
-    return IO_Write(FileHandle, 0, String, (ULONG)Str_SizeW(String));
+BOOL NTAPI IO_WriteStringW(HANDLE FileHandle, _In_z_ PCWSTR String) {
+    return IO_Write(FileHandle, 0, (PVOID)String, (ULONG)Str_SizeW(String));
 }
 
-NTSTATUS NTAPI IO_WriteStringA(HANDLE FileHandle, PSTR String) {
-    return IO_Write(FileHandle, 0, String, (ULONG)Str_SizeA(String));
+BOOL NTAPI IO_WriteStringA(HANDLE FileHandle, _In_z_ PCSTR String) {
+    return IO_Write(FileHandle, 0, (PVOID)String, (ULONG)Str_SizeA(String));
 }
 
-NTSTATUS NTAPI IO_WriteLineW(HANDLE FileHandle, PWSTR String) {
+BOOL NTAPI IO_WriteLineW(HANDLE FileHandle, _In_z_ PCWSTR String) {
     DWORD dwEOL = EOLW;
-    NTSTATUS Status = IO_WriteStringW(FileHandle, String);
-    return NT_SUCCESS(Status) ? IO_Write(FileHandle, 0, &dwEOL, sizeof(dwEOL)) : Status;
+    BOOL bRet = IO_WriteStringW(FileHandle, String);
+    return bRet ? IO_Write(FileHandle, 0, &dwEOL, sizeof(dwEOL)) : FALSE;
 }
 
-NTSTATUS NTAPI IO_WriteLineA(HANDLE FileHandle, PSTR String) {
+BOOL NTAPI IO_WriteLineA(HANDLE FileHandle, _In_z_ PCSTR String) {
     WORD dwEOL = EOLA;
-    NTSTATUS Status = IO_WriteStringA(FileHandle, String);
-    return NT_SUCCESS(Status) ? IO_Write(FileHandle, 0, &dwEOL, sizeof(dwEOL)) : Status;
+    BOOL bRet = IO_WriteStringA(FileHandle, String);
+    return bRet ? IO_Write(FileHandle, 0, &dwEOL, sizeof(dwEOL)) : FALSE;
 }

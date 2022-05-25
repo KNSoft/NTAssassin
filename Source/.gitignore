@@ -1,4 +1,3 @@
-.vs
 /Win32
 /x64
 /Example/Win32
@@ -9,10 +8,7 @@
 /NativeASM/Hijack_x86/Release
 /NTAssassin/Win32
 /NTAssassin/x64
-/UnitTest/Win32
-/UnitTest/x64
-/NAC/bin
-/NAC/obj
+/NTAssassin/3rdParty/bin/Precomp4C/Precomp4C.pdb
 *.user
 *.aps
 /NTAssassin/Resource/*.fla

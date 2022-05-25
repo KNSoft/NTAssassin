@@ -18,7 +18,9 @@
 // NTA_CUSTOMENTRY
 #ifdef NTA_CUSTOMENTRY
 #pragma comment(linker, "/ENTRY:" NTA_CUSTOMENTRY)
+#endif
 
+#if defined(NTA_CUSTOMENTRY) || (NTA_DLL && NTA_EXPORTS)
 #if _DEBUG
 #if _DLL
 #pragma comment(lib, "msvcrtd.lib")
@@ -40,13 +42,14 @@
 #pragma comment(lib, "libucrt.lib")
 #endif
 #endif
-
 #endif
 
 #define OEMRESOURCE
 #define STRICT_TYPED_ITEMIDS
 
 // Replaces definations to redefine them
+
+#define WIN32_NO_STATUS
 
 #define _LDR_DATA_TABLE_ENTRY _MS_LDR_DATA_TABLE_ENTRY
 #define LDR_DATA_TABLE_ENTRY MS_LDR_DATA_TABLE_ENTRY
@@ -101,18 +104,27 @@
 #include <WindowsX.h>
 #include <CommCtrl.h>
 #include <Shlobj.h>
+#include <Shlwapi.h>
 #include <shellscalingapi.h>
 #include <dwmapi.h>
 #include <Tpcshrd.h>
+#include <dwmapi.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+EXTERN_C_START
 
 // NTAssassin dependencies
 #pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "Kernel32.lib")
+#pragma comment(lib, "User32.Lib")
+#pragma comment(lib, "gdi32.Lib")
+#pragma comment(lib, "Comdlg32.lib")
 #pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(lib, "Shell32.lib")
 #pragma comment(lib, "gdiplus.lib")
+#pragma comment(lib, "Ole32.lib")
+#pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "Dwmapi.lib")
+#pragma comment(lib, "UxTheme.lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -131,9 +143,9 @@ extern "C" {
 #endif
 
 // Uses an alter value instead if the value is NULL
-#define IF_NULL(val, alt_val) (val ? val : alt_val)
+#define IF_NULL(val, alt_val) ((val) ? (val) : (alt_val))
 // Uses an alter value instead if the value is not NULL
-#define IF_NOTNULL(val, alt_val) (val ? alt_val : val)
+#define IF_NOTNULL(val, alt_val) ((val) ? (alt_val) : (val))
 
 // Applies different expression depends on 32-bit or 64-bit architecture
 #define IF_ARCH32OR64(expr64, expr32) (_WIN64 ? (expr64) : (expr32))
@@ -158,13 +170,15 @@ extern "C" {
 #define PURGE_HWND(hWnd) (hWnd)
 #endif
 
+#define WIN32_FROM_HRESULT(hr) ((hr & 0xFFFF0000) == MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, 0) || hr == S_OK ? HRESULT_CODE(hr) : ERROR_CAN_NOT_COMPLETE)
+
 // Gets equality of two value after masked
 #define IS_EQUAL_MASKED(val1, val2, mask) (!(((val1) ^ (val2)) & (mask)))
 // Sets or removes a flag from a combination value
 #define COMBINE_FLAGS(val, uflag, bEnable) ((bEnable) ? ((val) | (uflag)) : ((val) & ~(uflag)))
 
-#define BYTE_ALIGN(val, ali) ((val + ali - 1) & (~(ali - 1)))
-#define IS_BYTE_ALIGNED(val, ali) (!(val & (ali - 1)))
+#define BYTE_ALIGN(val, ali) (((val) + (ali) - 1) & (~((ali) - 1)))
+#define IS_BYTE_ALIGNED(val, ali) (!((val) & ((ali) - 1)))
 
 // Gets is the value is within the valid range of an atom
 #define IS_ATOM(val) (((ULONG_PTR)(val) & 0xFFFF) > 0 && ((ULONG_PTR)(val) & 0xFFFF) < MAXINTATOM)
@@ -192,6 +206,8 @@ extern "C" {
 #define CURRENT_PROCESS_TOKEN_HANDLE            ((HANDLE)-4)
 #define CURRENT_THREAD_TOKEN_HANDLE             ((HANDLE)-5)
 #define CURRENT_THREAD_EFFECTIVETOKEN_HANDLE    ((HANDLE)-6)
+#define CURRENT_PROCESS_ID                      (NT_GetTEBMemberDWORD(ClientId.UniqueProcess))
+#define CURRENT_THREAD_ID                       (NT_GetTEBMemberDWORD(ClientId.UniqueThread))
 #define FIXED_IMAGE_BASE32                      ((HINSTANCE)0x00400000)
 #define FIXED_IMAGE_BASE64                      ((HINSTANCE)0x0000000140000000)
 
@@ -209,10 +225,7 @@ extern "C" {
 #include "NTStruct.h"
 #include "NTAPI.h"
 
-#ifdef NTA_EXPORTS
-#include "..\NTA_NAC_Output.h"
-#endif
-
+#include "NTAOpCode.h"
 #include "NTAUCRT.h"
 #include "NTANT.h"
 #include "NTAData.h"
@@ -233,13 +246,12 @@ extern "C" {
 #include "NTAKNS.h"
 #include "NTAFile.h"
 #include "NTAIO.h"
-#include "NTAImage.h"
 #include "NTATime.h"
 #include "NTASys.h"
 #include "NTAHijack.h"
 #include "NTADPI.h"
 #include "NTAGDIP.h"
+#include "NTAHook.h"
+#include "NTAShell.h"
 
-#ifdef __cplusplus
-}
-#endif
+EXTERN_C_END

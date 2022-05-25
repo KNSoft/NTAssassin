@@ -10,51 +10,64 @@
 #define IDC_RESETBTN    1003
 #define IDC_OKBTN       1004
 
-INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR lpstDVE, LPWSTR lpszBuff, INT iCchBuff, QWORD qwValue) {
-    INT     iTemp;
-    if (lpstDVE->Flags & DVE_VALUE_HEXQWORD)
-        iTemp = Str_PrintfExW(lpszBuff, iCchBuff, L"0x%016llX", qwValue);
-    else
-        iTemp = Str_PrintfExW(lpszBuff, iCchBuff, L"0x%08X", (DWORD)qwValue);
+typedef struct _DLG_VALUEEDITOR {
+    HWND                    Owner;
+    DWORD                   Flags;
+    PCWSTR*                 Texts;      // ["Title", "Reset", "OK", "Member", "Value", "Info", "Unknow"]
+    PDLG_VALUEEDITOR_CONST  Consts;
+    UINT                    NumOfConsts;
+    QWORD                   Value;
+    QWORD                   Reserved;   // Reserved, do not use
+} DLG_VALUEEDITOR, *PDLG_VALUEEDITOR;
+
+INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR pstDVE, PWSTR pszBuff, INT iCchBuff, QWORD qwValue) {
+    INT iTemp;
+    if (pstDVE->Flags & DVE_VALUE_HEXQWORD) {
+        iTemp = Str_PrintfExW(pszBuff, iCchBuff, L"0x%016llX", qwValue);
+    } else if (pstDVE->Flags & DVE_VALUE_HEXDWORD) {
+        iTemp = Str_PrintfExW(pszBuff, iCchBuff, L"0x%08X", (DWORD)qwValue);
+    } else {
+        iTemp = 0;
+    }
     return iTemp;
 }
 
-#define Dlg_ValueEditor_FormatValue(lpstDVE, lpszBuff, qwValue) Dlg_ValueEditor_FormatValueEx(lpstDVE, lpszBuff, ARRAYSIZE(lpszBuff), qwValue)
+#define Dlg_ValueEditor_FormatValue(pstDVE, pszBuff, qwValue) Dlg_ValueEditor_FormatValueEx(pstDVE, pszBuff, ARRAYSIZE(pszBuff), qwValue)
 
-VOID Dlg_ValueEditor_SetValue(PDLG_VALUEEDITOR lpstDVE, HWND hDlg, QWORD qwValue) {
-    WCHAR   szValue[MAX_QWORD_IN_HEX_CCH + 2];
+VOID Dlg_ValueEditor_SetValue(PDLG_VALUEEDITOR pstDVE, HWND hDlg, QWORD qwValue) {
+    WCHAR szValue[MAX_QWORD_IN_HEX_CCH + 2];
     UI_SetDlgItemText(
         hDlg,
         IDC_EDIT,
-        Dlg_ValueEditor_FormatValue(lpstDVE, szValue, qwValue) ? szValue : NULL);
-    lpstDVE->Reserved = qwValue;
+        Dlg_ValueEditor_FormatValue(pstDVE, szValue, qwValue) ? szValue : NULL);
+    pstDVE->Reserved = qwValue;
 }
 
-VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR lpstDVE) {
+VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE) {
     LVITEMW stLVI;
     WCHAR   szValue[MAX_QWORD_IN_HEX_CCH + 2];
-    QWORD   qwTemp = lpstDVE->qwValue;
+    QWORD   qwTemp = pstDVE->Value;
     UINT    u;
     INT     i;
     stLVI.iItem = MAXINT;
-    for (u = 0; u < lpstDVE->uConsts; u++) {
+    for (u = 0; u < pstDVE->NumOfConsts; u++) {
         stLVI.iSubItem = 0;
         stLVI.mask = LVIF_TEXT | LVIF_PARAM;
-        stLVI.lParam = (LPARAM)&lpstDVE->lpstConsts[u];
-        stLVI.pszText = (LPWSTR)lpstDVE->lpstConsts[u].Name;
+        stLVI.lParam = (LPARAM)&pstDVE->Consts[u];
+        stLVI.pszText = (PWSTR)pstDVE->Consts[u].Name;
         stLVI.iItem = (INT)SendMessageW(hListView, LVM_INSERTITEMW, 0, (LPARAM)&stLVI);
         if (stLVI.iItem != -1) {
             stLVI.mask = LVIF_TEXT;
-            if ((qwTemp & lpstDVE->lpstConsts[u].Value) == lpstDVE->lpstConsts[u].Value) {
+            if ((qwTemp & pstDVE->Consts[u].Value) == pstDVE->Consts[u].Value) {
                 ListView_SetCheckState(hListView, stLVI.iItem, TRUE);
-                qwTemp &= ~lpstDVE->lpstConsts[u].Value;
+                qwTemp &= ~pstDVE->Consts[u].Value;
             }
             stLVI.iSubItem++;
-            i = Dlg_ValueEditor_FormatValue(lpstDVE, szValue, lpstDVE->lpstConsts[u].Value);
+            i = Dlg_ValueEditor_FormatValue(pstDVE, szValue, pstDVE->Consts[u].Value);
             stLVI.pszText = i ? szValue : NULL;
             SendMessageW(hListView, LVM_SETITEMW, 0, (LPARAM)&stLVI);
             stLVI.iSubItem++;
-            stLVI.pszText = (LPWSTR)lpstDVE->lpstConsts[u].Info;
+            stLVI.pszText = (LPWSTR)pstDVE->Consts[u].Info;
             SendMessageW(hListView, LVM_SETITEMW, 0, (LPARAM)&stLVI);
         }
         stLVI.iItem++;
@@ -63,12 +76,12 @@ VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR lpstDVE) {
         stLVI.mask = LVIF_TEXT | LVIF_PARAM;
         stLVI.iSubItem = 0;
         stLVI.lParam = 0;
-        stLVI.pszText = (LPWSTR)(lpstDVE->lpstr[6] ? lpstDVE->lpstr[6] : L"(Unknow)");
+        stLVI.pszText = (LPWSTR)(pstDVE->Texts[6] ? pstDVE->Texts[6] : L"(Unknow)");
         if (SendMessageW(hListView, LVM_INSERTITEMW, 0, (LPARAM)&stLVI) != -1) {
             ListView_SetCheckState(hListView, stLVI.iItem, TRUE);
             stLVI.mask = LVIF_TEXT;
             stLVI.iSubItem++;
-            i = Dlg_ValueEditor_FormatValue(lpstDVE, szValue, qwTemp);
+            i = Dlg_ValueEditor_FormatValue(pstDVE, szValue, qwTemp);
             stLVI.pszText = i ? szValue : NULL;
             SendMessageW(hListView, LVM_SETITEMW, 0, (LPARAM)&stLVI);
         }
@@ -85,8 +98,8 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
 
         // Initialize
         lpstDVE = (PDLG_VALUEEDITOR)lParam;
-        lpstDVE->Reserved = lpstDVE->qwValue;
-        lpsz = lpstDVE->lpstr[0] ? lpstDVE->lpstr[0] : (lpstDVE->Flags & DVE_TYPE_COMBINATION ? L"Combined Value Editor" : L"Value Editor");
+        lpstDVE->Reserved = lpstDVE->Value;
+        lpsz = lpstDVE->Texts[0] ? lpstDVE->Texts[0] : (lpstDVE->Flags & DVE_TYPE_COMBINATION ? L"Combined Value Editor" : L"Value Editor");
         SendMessageW(hDlg, WM_SETTEXT, 0, (LPARAM)lpsz);
         SetWindowLongPtr(hDlg, DWLP_USER, lParam);
 
@@ -107,7 +120,7 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
             (HMENU)IDC_EDIT,
             NULL,
             0);
-        Dlg_ValueEditor_SetValue(lpstDVE, hDlg, lpstDVE->qwValue);
+        Dlg_ValueEditor_SetValue(lpstDVE, hDlg, lpstDVE->Value);
 
         // Create Buttons
         iX = rcClient.right - 2 * (PADDING_X + BUTTON_W);
@@ -125,7 +138,7 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
             (HMENU)IDC_RESETBTN,
             NULL,
             0);
-        lpsz = lpstDVE->lpstr[1] ? lpstDVE->lpstr[1] : L"Reset";
+        lpsz = lpstDVE->Texts[1] ? lpstDVE->Texts[1] : L"Reset";
         SendMessageW(hBtnReset, WM_SETTEXT, 0, (LPARAM)lpsz);
 
         iX += PADDING_X + BUTTON_W;
@@ -142,7 +155,7 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
             (HMENU)IDC_OKBTN,
             NULL,
             0);
-        lpsz = lpstDVE->lpstr[2] ? lpstDVE->lpstr[2] : L"OK";
+        lpsz = lpstDVE->Texts[2] ? lpstDVE->Texts[2] : L"OK";
         SendMessageW(hBtnOK, WM_SETTEXT, 0, (LPARAM)lpsz);
 
         // Create View
@@ -159,10 +172,12 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
             (HMENU)IDC_LISTVIEW,
             NULL,
             0);
+
+        // Fixme: Width of colume not scaled according to DPI
         CTL_LISTCTL_COLUME aListCol[] = {
-            { (UINT_PTR)(lpstDVE->lpstr[3] ? lpstDVE->lpstr[3] : L"Member"), 200 },
-            { (UINT_PTR)(lpstDVE->lpstr[4] ? lpstDVE->lpstr[4] : L"Value"), 210 },
-            { (UINT_PTR)(lpstDVE->lpstr[5] ? lpstDVE->lpstr[5] : L"Info"), 540 }
+            { (UINT_PTR)(lpstDVE->Texts[3] ? lpstDVE->Texts[3] : L"Member"), 200 },
+            { (UINT_PTR)(lpstDVE->Texts[4] ? lpstDVE->Texts[4] : L"Value"), 210 },
+            { (UINT_PTR)(lpstDVE->Texts[5] ? lpstDVE->Texts[5] : L"Info"), 540 }
         };
         Ctl_InitListCtl(hListView, aListCol, LVS_EX_DOUBLEBUFFER | LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES);
         Dlg_ValueEditor_AddItems(hListView, lpstDVE);
@@ -203,13 +218,13 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
                 stLVI.iItem = lpnmlv->iItem;
                 stLVI.iSubItem = 0;
                 if (SendMessageW(lpnmlv->hdr.hwndFrom, LVM_GETITEMW, 0, (LPARAM)&stLVI) && stLVI.lParam) {
-                    PDLG_VALUEEDITOR_CONST  lpstConst = (PDLG_VALUEEDITOR_CONST)stLVI.lParam;
-                    PDLG_VALUEEDITOR        lpstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
+                    PDLG_VALUEEDITOR_CONST  pstConst = (PDLG_VALUEEDITOR_CONST)stLVI.lParam;
+                    PDLG_VALUEEDITOR        pstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
                     BOOL                    bNewChecked = (lpnmlv->uNewState & LVIS_STATEIMAGEMASK) >> 12 == 2;
                     BOOL                    bOldChecked = (lpnmlv->uOldState & LVIS_STATEIMAGEMASK) >> 12 == 2;
                     if (bNewChecked != bOldChecked) {
-                        lpstDVE->Reserved = COMBINE_FLAGS(lpstDVE->Reserved, lpstConst->Value, bNewChecked);
-                        Dlg_ValueEditor_SetValue(lpstDVE, hDlg, lpstDVE->Reserved);
+                        pstDVE->Reserved = COMBINE_FLAGS(pstDVE->Reserved, pstConst->Value, bNewChecked);
+                        Dlg_ValueEditor_SetValue(pstDVE, hDlg, pstDVE->Reserved);
                     }
                 }
             }
@@ -220,10 +235,10 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
             PDLG_VALUEEDITOR    lpstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
             SendMessage(hListView, LVM_DELETEALLITEMS, 0, 0);
             Dlg_ValueEditor_AddItems(hListView, lpstDVE);
-            lpstDVE->Reserved = lpstDVE->qwValue;
+            lpstDVE->Reserved = lpstDVE->Value;
         } else if (wParam == MAKEWPARAM(IDC_OKBTN, 0)) {
-            PDLG_VALUEEDITOR    lpstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
-            lpstDVE->qwValue = lpstDVE->Reserved;
+            PDLG_VALUEEDITOR pstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
+            pstDVE->Value = pstDVE->Reserved;
             EndDialog(hDlg, TRUE);
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
@@ -234,8 +249,8 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
     return 0;
 }
 
-BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, DWORD Flags, PCWSTR *Strings, PQWORD ValuePointer, PDLG_VALUEEDITOR_CONST Consts, UINT ConstCount) {
-    DLG_VALUEEDITOR stDVE = { Owner, Flags, Strings, Consts, ConstCount, *ValuePointer, *ValuePointer };
+BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Strings, _Inout_ PQWORD Value, _In_ PDLG_VALUEEDITOR_CONST Consts, _In_ UINT ConstCount) {
+    DLG_VALUEEDITOR stDVE = { Owner, Flags, Strings, Consts, ConstCount, *Value, *Value };
     BOOL            bSucc;
     DLG_TEMPLATE    stDlgTemplate;
     bSucc = DialogBoxIndirectParamW(
@@ -252,7 +267,8 @@ BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, DWORD Flags, PCWSTR *Strings, PQWORD Va
         Dlg_ValueEditor_DlgProc,
         (LPARAM)&stDVE
     ) == TRUE;
-    if (bSucc)
-        *ValuePointer = stDVE.qwValue;
+    if (bSucc) {
+        *Value = stDVE.Value;
+    }
     return bSucc;
 }

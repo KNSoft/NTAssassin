@@ -1,7 +1,7 @@
 #include "include\NTAssassin\NTAssassin.h"
 
 #define DRE_MAX_NUM_CCH 16
-#define DRE_ITEM_W 64
+#define DRE_ITEM_W      64
 
 #define IDC_STATIC_POS  1001
 #define IDC_TEXT_LEFT   1002
@@ -20,13 +20,19 @@
 #define IDC_RESETBTN    1014
 #define IDC_OKBTN       1015
 
+typedef struct _DLG_RECTEDITOR {
+    HWND    Owner;
+    PCWSTR* Texts;  // ["Title", "Reset", "OK", "Left", "Top", "Right", "Bottom", "Width", "Height"]
+    PRECT   Rect;
+} DLG_RECTEDITOR, *PDLG_RECTEDITOR;
+
 BOOL Dlg_RectEditor_GetValue(HWND hDlg, INT iCtlID, PINT pValue) {
-    WCHAR   szNum[DRE_MAX_NUM_CCH];
+    WCHAR szNum[DRE_MAX_NUM_CCH];
     return UI_GetDlgItemText(hDlg, iCtlID, szNum) && Str_ToIntW(szNum, pValue);
 }
 
 VOID Dlg_RectEditor_SetValue(HWND hCtl, INT iNum) {
-    WCHAR           szNum[DRE_MAX_NUM_CCH];
+    WCHAR szNum[DRE_MAX_NUM_CCH];
     BOOL bSucc = Str_DecFromInt(iNum, szNum);
     UI_SendMsg(hCtl, WM_SETTEXT, 0, bSucc ? szNum : NULL);
 }
@@ -76,7 +82,7 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
 
         // Initialize
         lpstDRE = (PDLG_RECTEDITOR)lParam;
-        lpsz = lpstDRE->lpstr[0] ? lpstDRE->lpstr[0] : L"Rectangle Editor";
+        lpsz = lpstDRE->Texts[0] ? lpstDRE->Texts[0] : L"Rectangle Editor";
         SendMessageW(hDlg, WM_SETTEXT, 0, (LPARAM)lpsz);
         SetWindowLongPtr(hDlg, DWLP_USER, lParam);
 
@@ -91,40 +97,40 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
             hDlg,
             IDC_TEXT_LEFT,
             IDC_EDIT_LEFT,
-            lpsz = lpstDRE->lpstr[3] ? lpstDRE->lpstr[3] : L"Left",
+            lpsz = lpstDRE->Texts[3] ? lpstDRE->Texts[3] : L"Left",
             DLG_PADDING_X,
             iY,
-            lpstDRE->lprc->left
+            lpstDRE->Rect->left
         );
 
         Dlg_RectEditor_CreateCtl(
             hDlg,
             IDC_TEXT_TOP,
             IDC_EDIT_TOP,
-            lpstDRE->lpstr[4] ? lpstDRE->lpstr[4] : L"Top",
+            lpstDRE->Texts[4] ? lpstDRE->Texts[4] : L"Top",
             iX,
             DLG_PADDING_Y,
-            lpstDRE->lprc->top
+            lpstDRE->Rect->top
         );
 
         Dlg_RectEditor_CreateCtl(
             hDlg,
             IDC_TEXT_RIGHT,
             IDC_EDIT_RIGHT,
-            lpsz = lpstDRE->lpstr[5] ? lpstDRE->lpstr[5] : L"Right",
+            lpsz = lpstDRE->Texts[5] ? lpstDRE->Texts[5] : L"Right",
             rcClient.right - 2 * (DLG_PADDING_X + DRE_ITEM_W),
             iY,
-            lpstDRE->lprc->right
+            lpstDRE->Rect->right
         );
 
         Dlg_RectEditor_CreateCtl(
             hDlg,
             IDC_TEXT_BOTTOM,
             IDC_EDIT_BOTTOM,
-            lpsz = lpstDRE->lpstr[6] ? lpstDRE->lpstr[6] : L"Bottom",
+            lpsz = lpstDRE->Texts[6] ? lpstDRE->Texts[6] : L"Bottom",
             iX,
             rcClient.bottom - 2 * (DLG_PADDING_Y + DLG_CONTROL_H),
-            lpstDRE->lprc->bottom
+            lpstDRE->Rect->bottom
         );
 
         // Create Buttons
@@ -143,7 +149,7 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
             (HMENU)IDC_RESETBTN,
             NULL,
             0);
-        lpsz = lpstDRE->lpstr[1] ? lpstDRE->lpstr[1] : L"Reset";
+        lpsz = lpstDRE->Texts[1] ? lpstDRE->Texts[1] : L"Reset";
         SendMessageW(hBtnReset, WM_SETTEXT, 0, (LPARAM)lpsz);
 
         iX += DLG_PADDING_X + DLG_BUTTON_W;
@@ -159,21 +165,22 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
             (HMENU)IDC_OKBTN,
             NULL,
             0);
-        lpsz = lpstDRE->lpstr[2] ? lpstDRE->lpstr[2] : L"OK";
+        lpsz = lpstDRE->Texts[2] ? lpstDRE->Texts[2] : L"OK";
         SendMessageW(hBtnOK, WM_SETTEXT, 0, (LPARAM)lpsz);
 
         // DPI Aware
-        if (DPI_IsAware())
+        if (DPI_IsAware()) {
             DPI_SetAutoAdjustSubclass(hDlg, NULL);
+        }
 
         return FALSE;
     } else if (uMsg == WM_COMMAND) {
         if (wParam == MAKEWPARAM(IDC_RESETBTN, 0)) {
             PDLG_RECTEDITOR lpstDRE = (PDLG_RECTEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
-            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_LEFT), lpstDRE->lprc->left);
-            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_TOP), lpstDRE->lprc->top);
-            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_RIGHT), lpstDRE->lprc->right);
-            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_BOTTOM), lpstDRE->lprc->bottom);
+            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_LEFT), lpstDRE->Rect->left);
+            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_TOP), lpstDRE->Rect->top);
+            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_RIGHT), lpstDRE->Rect->right);
+            Dlg_RectEditor_SetValue(GetDlgItem(hDlg, IDC_EDIT_BOTTOM), lpstDRE->Rect->bottom);
         } else if (wParam == MAKEWPARAM(IDC_OKBTN, 0)) {
             PDLG_RECTEDITOR lpstDRE = (PDLG_RECTEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
             RECT            rc;
@@ -183,13 +190,14 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
                 Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_RIGHT, &rc.right) &&
                 Dlg_RectEditor_GetValue(hDlg, IDC_EDIT_BOTTOM, &rc.bottom) &&
                 rc.left <= rc.right && rc.top <= rc.bottom) {
-                lpstDRE->lprc->left = rc.left;
-                lpstDRE->lprc->top = rc.top;
-                lpstDRE->lprc->right = rc.right;
-                lpstDRE->lprc->bottom = rc.bottom;
+                lpstDRE->Rect->left = rc.left;
+                lpstDRE->Rect->top = rc.top;
+                lpstDRE->Rect->right = rc.right;
+                lpstDRE->Rect->bottom = rc.bottom;
                 EndDialog(hDlg, TRUE);
-            } else
-                Sys_ErrorMsgBox(hDlg, lpstDRE->lpstr[0] ? lpstDRE->lpstr[0] : L"Rectangle Editor", ERROR_INVALID_PARAMETER);
+            } else {
+                Sys_ErrorMsgBox(hDlg, lpstDRE->Texts[0] ? lpstDRE->Texts[0] : L"Rectangle Editor", ERROR_INVALID_PARAMETER);
+            }
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_CLOSE) {
@@ -199,7 +207,7 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
     return 0;
 }
 
-BOOL NTAPI Dlg_RectEditor(HWND Owner, PCWSTR *Strings, PRECT Rect) {
+BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR* Strings, _Inout_ PRECT Rect) {
     DLG_RECTEDITOR  stDRD = { Owner, Strings, Rect };
     DLG_TEMPLATE    stDlgTemplate;
     return DialogBoxIndirectParam(

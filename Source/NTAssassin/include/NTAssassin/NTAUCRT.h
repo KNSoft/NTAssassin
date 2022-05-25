@@ -1,4 +1,6 @@
-﻿#pragma once
+﻿// UCRT functions exported in ntdll.dll
+
+#pragma once
 
 #include "NTAssassin.h"
 
@@ -32,4 +34,13 @@ _At_buffer_(
     _Out_writes_bytes_all_(_Size) void*  _Dst,
     _In_                          int    _Val,
     _In_                          size_t _Size
+);
+
+NTA_API _Success_(return == 0)
+_Check_return_opt_
+errno_t __CRTDECL UCRT_memcpy_s(
+    _Out_writes_bytes_to_opt_(_DestinationSize, _SourceSize) void*       const _Destination,
+    _In_                                                     rsize_t     const _DestinationSize,
+    _In_reads_bytes_opt_(_SourceSize)                        void const* const _Source,
+    _In_                                                     rsize_t     const _SourceSize
 );

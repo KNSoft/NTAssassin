@@ -5,7 +5,11 @@
 typedef PVOID PGDIP_IMAGE, PGDIP_GRAPHICS, PGDIP_BRUSH, PGDIP_PATH;
 
 typedef DWORD ARGB;
+
+// Makes ARGB value (AARRGGBB)
 #define MAKE_ARGB(a, r, g, b) ((ARGB) (b) <<  0) | ((ARGB)(g) << 8) | ((ARGB)(r) << 16) | ((ARGB)(a) << 24)
+
+#pragma region C-style wrappers of Gdiplus.h
 
 typedef enum _GDIP_TIFFENCODER_PARAMVALUE {
     TIFF_ParamValue_CompressionUnused,
@@ -43,10 +47,26 @@ NTA_API PGDIP_PATH NTAPI GDIP_CreatePath();
 
 NTA_API PGDIP_IMAGE NTAPI GDIP_LoadImageFromFile(PCWSTR FileName);
 NTA_API PGDIP_IMAGE NTAPI GDIP_LoadImageFromBitmap(HBITMAP Bitmap);
-NTA_API PGDIP_IMAGE NTAPI GDIP_LoadImageFromBuffer(PVOID Buffer, UINT Size);
 NTA_API BOOL NTAPI GDIP_DisposeImage(PGDIP_IMAGE Image);
-NTA_API BOOL NTAPI GDIP_SaveImageToBMPFile(PGDIP_IMAGE Image, PCWSTR FileName);
-NTA_API BOOL NTAPI GDIP_SaveImageToGIFFile(PGDIP_IMAGE Image, PCWSTR FileName);
-NTA_API BOOL NTAPI GDIP_SaveImageToPNGFile(PGDIP_IMAGE Image, PCWSTR FileName);
-NTA_API BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, PCWSTR FileName, INT Quality);
-NTA_API BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, PCWSTR FileName, GDIP_TIFFENCODER_PARAMVALUE Compression, INT ColorDepth);
+
+#pragma endregion
+
+/// <summary>
+/// Loads an image file from buffer
+/// </summary>
+/// <param name="Buffer">Buffer to the image file data</param>
+/// <param name="Size">Size of buffer</param>
+/// <returns>Pointer to the image created, or NULL if failed</returns>
+NTA_API PGDIP_IMAGE NTAPI GDIP_LoadImageFromBuffer(_In_reads_bytes_(Size) PVOID Buffer, _In_ UINT Size);
+
+/// <summary>
+/// Saves image to file in different format
+/// </summary>
+/// <param name="Image">Pointer to the image</param>
+/// <param name="FilePath">Path save to</param>
+/// <returns>TRUE if succeeded, or FALSE if failed</returns>
+NTA_API BOOL NTAPI GDIP_SaveImageToBMPFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FilePath);
+NTA_API BOOL NTAPI GDIP_SaveImageToGIFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FilePath);
+NTA_API BOOL NTAPI GDIP_SaveImageToPNGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FilePath);
+NTA_API BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FilePath, INT Quality);
+NTA_API BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FilePath, GDIP_TIFFENCODER_PARAMVALUE Compression, INT ColorDepth);
