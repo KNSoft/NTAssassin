@@ -1,31 +1,45 @@
 #include "include\NTAssassin\NTAssassin.h"
 
 _Success_(return != FALSE)
-BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap) {
+BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap, SIZE_T OfflineMapFileSize) {
     BOOL bRet = FALSE;
     __try {
         PIMAGE_DOS_HEADER   pDosHdr = (PIMAGE_DOS_HEADER)Image;
         if (pDosHdr->e_magic == IMAGE_DOS_SIGNATURE) {
             PDWORD              pNtSign = MOVE_PTR(pDosHdr, pDosHdr->e_lfanew, DWORD);
             PIMAGE_FILE_HEADER  pFileHdr;
-            BOOL                bNTImage;
             if (*pNtSign == IMAGE_NT_SIGNATURE) {
                 pFileHdr = MOVE_PTR(pNtSign, sizeof((*pNtSign)), IMAGE_FILE_HEADER);
-                bNTImage = TRUE;
-            } else {
-                pFileHdr = (PIMAGE_FILE_HEADER)pNtSign;
-                bNTImage = FALSE;
-            }
-            PIMAGE_OPTIONAL_HEADER pOptHdr = MOVE_PTR(pFileHdr, sizeof((*pFileHdr)), VOID);
-            if ((bNTImage && (pOptHdr->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC || pOptHdr->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)) ||
-                (!bNTImage && pOptHdr->Magic == IMAGE_ROM_OPTIONAL_HDR_MAGIC)) {
-                PEStruct->Image = Image;
-                PEStruct->OfflineMap = OfflineMap;
-                PEStruct->FileHeader = pFileHdr;
-                PEStruct->OptionalHeader = pOptHdr;
-                PEStruct->SectionHeader = MOVE_PTR(pOptHdr, pFileHdr->SizeOfOptionalHeader, IMAGE_SECTION_HEADER);
-                PEStruct->OverlayData = NULL;
-                bRet = TRUE;
+                PIMAGE_OPTIONAL_HEADER pOptHdr = MOVE_PTR(pFileHdr, sizeof((*pFileHdr)), VOID);
+                if (pOptHdr->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC || pOptHdr->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+                    PIMAGE_SECTION_HEADER pSection = MOVE_PTR(pOptHdr, pFileHdr->SizeOfOptionalHeader, IMAGE_SECTION_HEADER);
+                    PEStruct->Image = Image;
+                    PEStruct->OfflineMap = OfflineMap;
+                    PEStruct->FileHeader = pFileHdr;
+                    PEStruct->OptionalHeader = pOptHdr;
+                    PEStruct->SectionHeader = pSection;
+                    if (OfflineMap && OfflineMapFileSize) {
+                        USHORT u, uSections;
+                        SIZE_T sFile = 0;
+                        uSections = PEStruct->FileHeader->NumberOfSections;
+                        pSection = PEStruct->SectionHeader;
+                        for (u = 0; u < uSections; u++) {
+                            SIZE_T sEndOfSec = (SIZE_T)pSection->PointerToRawData + pSection->SizeOfRawData;
+                            if (sEndOfSec > sFile) {
+                                sFile = sEndOfSec;
+                            }
+                            pSection++;
+                        }
+                        if (OfflineMapFileSize > sFile) {
+                            PEStruct->OverlayData = MOVE_PTR(Image, sFile, VOID);
+                            PEStruct->OverlayDataSize = OfflineMapFileSize - sFile;
+                        }
+                    } else {
+                        PEStruct->OverlayData = NULL;
+                        PEStruct->OverlayDataSize = 0;
+                    }
+                    bRet = TRUE;
+                }
             }
         }
     } __except (EXCEPTION_EXECUTE_HANDLER) {

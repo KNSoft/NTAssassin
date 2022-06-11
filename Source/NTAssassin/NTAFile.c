@@ -16,7 +16,22 @@ HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MA
     return hFile;
 }
 
-ULONG NTAPI File_Read(HANDLE FileHandle, _In_ PVOID Buffer, ULONG BytesToRead, PLARGE_INTEGER ByteOffset) {
+_Success_(return != FALSE)
+BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size) {
+    IO_STATUS_BLOCK stIOStatus;
+    FILE_STANDARD_INFORMATION fsi;
+    NTSTATUS        lStatus;
+    lStatus = NtQueryInformationFile(FileHandle, &stIOStatus, &fsi, sizeof(fsi), FileStandardInformation);
+    if (NT_SUCCESS(lStatus)) {
+        *Size = (SIZE_T)fsi.EndOfFile.QuadPart;
+        return TRUE;
+    } else {
+        NT_SetLastStatus(lStatus);
+        return FALSE;
+    }
+}
+
+ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _In_ PVOID Buffer, ULONG BytesToRead, PLARGE_INTEGER ByteOffset) {
     IO_STATUS_BLOCK stIOStatus;
     NTSTATUS        lStatus;
     lStatus = NtReadFile(FileHandle, NULL, NULL, NULL, &stIOStatus, Buffer, BytesToRead, ByteOffset, NULL);
@@ -28,7 +43,7 @@ ULONG NTAPI File_Read(HANDLE FileHandle, _In_ PVOID Buffer, ULONG BytesToRead, P
     }
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI File_IsDirectory(_In_z_ PCWSTR FilePath, _Out_ PBOOL Result) {
     UNICODE_STRING                  stString;
     OBJECT_ATTRIBUTES               stObjectAttr;
@@ -95,7 +110,77 @@ BOOL NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize) {
     }
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
+BOOL NTAPI File_ReadOnlyMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap) {
+    BOOL bRet = FALSE;
+    HANDLE hFile, hSection;
+    SIZE_T sFileSize;
+    hFile = File_Create(FileName, RootDirectory, FILE_GENERIC_READ, FILE_SHARE_READ, FILE_OPEN, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT);
+    if (hFile) {
+        if (File_GetSize(hFile, &sFileSize)) {
+            NTSTATUS lStatus;
+            lStatus = NtCreateSection(&hSection, SECTION_MAP_READ, NULL, NULL, PAGE_READONLY, SEC_COMMIT, hFile);
+            if (NT_SUCCESS(lStatus)) {
+                PVOID BaseAddress = NULL;
+                SIZE_T sPageSize = sFileSize;
+                lStatus = NtMapViewOfSection(hSection, CURRENT_PROCESS_HANDLE, &BaseAddress, 0, 0, 0, &sPageSize, ViewUnmap, 0, PAGE_READONLY);
+                if (NT_SUCCESS(lStatus)) {
+                    FileMap->FileHandle = hFile;
+                    FileMap->SectionHandle = hSection;
+                    FileMap->FileSize = sFileSize;
+                    FileMap->Map = BaseAddress;
+                    FileMap->MapSize = sPageSize;
+                    return TRUE;
+                }
+                NtClose(hSection);
+            }
+            NT_SetLastStatus(lStatus);
+        }
+        NtClose(hFile);
+    }
+    return bRet;
+}
+
+_Success_(return != FALSE)
+BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, BOOL UseCache, SIZE_T MaximumSize) {
+    BOOL bRet = FALSE;
+    HANDLE hFile, hSection;
+    SIZE_T sFileSize;
+    hFile = File_Create(FileName, RootDirectory, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_OPEN, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | (UseCache ? 0 : FILE_NO_INTERMEDIATE_BUFFERING));
+    if (hFile) {
+        if (File_GetSize(hFile, &sFileSize)) {
+            NTSTATUS lStatus;
+            LARGE_INTEGER liMaximumSize;
+            lStatus = NtCreateSection(
+                &hSection,
+                SECTION_MAP_WRITE,
+                NULL,
+                MaximumSize ? (liMaximumSize.QuadPart = MaximumSize, &liMaximumSize) : NULL,
+                PAGE_READONLY,
+                SEC_COMMIT | (UseCache ? 0 : SEC_NOCACHE),
+                hFile);
+            if (NT_SUCCESS(lStatus)) {
+                PVOID BaseAddress = NULL;
+                SIZE_T sPageSize = MaximumSize ? MaximumSize : sFileSize;
+                lStatus = NtMapViewOfSection(hSection, CURRENT_PROCESS_HANDLE, &BaseAddress, 0, 0, 0, &sPageSize, ViewUnmap, 0, PAGE_READWRITE);
+                if (NT_SUCCESS(lStatus)) {
+                    FileMap->FileHandle = hFile;
+                    FileMap->SectionHandle = hSection;
+                    FileMap->FileSize = sFileSize;
+                    FileMap->Map = BaseAddress;
+                    FileMap->MapSize = sPageSize;
+                    return TRUE;
+                }
+                NtClose(hSection);
+            }
+            NT_SetLastStatus(lStatus);
+        }
+        NtClose(hFile);
+    }
+    return bRet;
+}
+
+_Success_(return != FALSE)
 BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, ULONGLONG MaximumSize, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, BOOL NoCache, SECTION_INHERIT InheritDisposition) {
     ULONG           CreateOptions;
     HANDLE          hFile;
@@ -116,11 +201,10 @@ BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MA
             BaseAddress = NULL;
             lStatus = NtMapViewOfSection(hSection, CURRENT_PROCESS_HANDLE, &BaseAddress, 0, 0, 0, (PSIZE_T)&stMaxSize.QuadPart, InheritDisposition, 0, PageProtection);
             if (NT_SUCCESS(lStatus)) {
-                FileMap->DesiredAccess = DesiredAccess;
                 FileMap->FileHandle = hFile;
                 FileMap->SectionHandle = hSection;
-                FileMap->Mem.VirtualAddress = BaseAddress;
-                FileMap->Mem.NumberOfBytes = (SIZE_T)stMaxSize.QuadPart;
+                FileMap->Map = BaseAddress;
+                FileMap->MapSize = (SIZE_T)stMaxSize.QuadPart;
             } else {
                 NtClose(hSection);
                 NtClose(hFile);
@@ -138,14 +222,8 @@ BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MA
     }
 }
 
-BOOL NTAPI File_Unmap(_In_ PFILE_MAP FileMap) {
-    NTSTATUS lStatus = NtUnmapViewOfSection(CURRENT_PROCESS_HANDLE, FileMap->Mem.VirtualAddress);
-    if (NT_SUCCESS(lStatus)) {
-        NtClose(FileMap->SectionHandle);
-        NtClose(FileMap->FileHandle);
-        return TRUE;
-    } else {
-        NT_SetLastStatus(lStatus);
-        return FALSE;
-    }
+VOID NTAPI File_Unmap(_In_ PFILE_MAP FileMap) {
+    NTSTATUS lStatus = NtUnmapViewOfSection(CURRENT_PROCESS_HANDLE, FileMap->Map);
+    NtClose(FileMap->SectionHandle);
+    NtClose(FileMap->FileHandle);
 }

@@ -585,7 +585,7 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
     while (TRUE) {
         UINT64 i = uTotal / uDivisor;
         uTotal = uTotal % uDivisor;
-        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < (ULONG_PTR)DestCchSize - 1) {
+        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < ((ULONG_PTR)DestCchSize - 1) * sizeof(WCHAR)) {
             if (i != 0 || (bNegative ? psz != StrValue + 1 : psz != StrValue))
                 *psz++ = (WCHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
         } else {
@@ -594,7 +594,7 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
         }
         if (uDivisor == Base) {
             i = uTotal;
-            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < (ULONG_PTR)DestCchSize - 1) {
+            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < ((ULONG_PTR)DestCchSize - 1) * sizeof(WCHAR)) {
                 *psz++ = (WCHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
             } else {
                 bRet = FALSE;

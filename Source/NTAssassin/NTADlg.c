@@ -121,7 +121,7 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     DWORD           dwOldDPIX;
     DWORD           dwOldDPIY;
     DLG_RESIZEDPROC pfnResizedProc;
-} DLG_SETRESIZINGSUBCLASS_REF, * PDLG_SETRESIZINGSUBCLASS_REF;
+} DLG_SETRESIZINGSUBCLASS_REF, *PDLG_SETRESIZINGSUBCLASS_REF;
 
 LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_DPICHANGED) {
@@ -164,8 +164,9 @@ LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wP
 BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, LONG MinWidth, LONG MinHeight, DLG_RESIZEDPROC ResizedProc) {
     PDLG_SETRESIZINGSUBCLASS_REF pstRef;
     pstRef = Mem_Alloc(sizeof(DLG_SETRESIZINGSUBCLASS_REF));
-    if (!pstRef)
+    if (!pstRef) {
         return FALSE;
+    }
     pstRef->lMinWidth = MinWidth;
     pstRef->lMinHeight = MinHeight;
     DPI_FromWindow(Dialog, &pstRef->dwOldDPIX, &pstRef->dwOldDPIY);
@@ -173,4 +174,75 @@ BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, LONG MinWidth, LONG MinHeight, D
     pstRef->dwNewDPIY = pstRef->dwOldDPIY;
     pstRef->pfnResizedProc = ResizedProc;
     return SetWindowSubclass(Dialog, Dlg_SetResizingSubclass_DlgProc, 0, (DWORD_PTR)pstRef);
+}
+
+typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF {
+    HWND                        Dialog;
+    HWND                        TreeView;
+    RECT                        SheetRect;
+    PDLG_TREEVIEWPROPSHEETPAGE  Sheets;
+    UINT                        Count;
+} DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF, *PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF;
+
+LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+    if (uMsg == WM_NOTIFY) {
+        PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef = (PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF)dwRefData;
+        LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)lParam;
+        if (pnmtv->hdr.hwndFrom == pstRef->TreeView &&
+            pnmtv->hdr.code == TVN_SELCHANGED) {
+            ShowWindow((HWND)pnmtv->itemOld.lParam, SW_HIDE);
+            ShowWindow((HWND)pnmtv->itemNew.lParam, SW_SHOW);
+        }
+    } else if (uMsg == WM_DESTROY) {
+        Mem_Free((PVOID)dwRefData);
+    }
+    return DefSubclassProc(hDlg, uMsg, wParam, lParam);
+}
+
+VOID Dlg_SetTreeViewPropertySheetSubclass_InitSheet(PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef, HTREEITEM TreeItem, PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count) {
+    TVINSERTSTRUCT stTVIInsert = { 0, TVI_LAST, { TVIF_TEXT | TVIF_PARAM } };
+    UINT i;
+    for (i = 0; i < Count; i++) {
+        Sheets[i].Handle = CreateDialogParam(Sheets[i].Instance, MAKEINTRESOURCE(Sheets[i].DlgResID), pstRef->Dialog, Sheets[i].DlgProc, Sheets[i].Param);
+        if (Sheets[i].Handle) {
+            stTVIInsert.hParent = TreeItem;
+            stTVIInsert.item.pszText = Sheets[i].DisplayName;
+            stTVIInsert.item.lParam = (LPARAM)Sheets[i].Handle;
+            Sheets[i].TreeItem = (HTREEITEM)SendMessage(pstRef->TreeView, TVM_INSERTITEM, 0, (LPARAM)&stTVIInsert);
+            if (Sheets[i].TreeItem) {
+                SetWindowPos(
+                    Sheets[i].Handle,
+                    NULL,
+                    pstRef->SheetRect.left,
+                    pstRef->SheetRect.top,
+                    pstRef->SheetRect.right - pstRef->SheetRect.left,
+                    pstRef->SheetRect.bottom - pstRef->SheetRect.top,
+                    SWP_NOZORDER | SWP_HIDEWINDOW);
+                if (Sheets[i].Count) {
+                    Dlg_SetTreeViewPropertySheetSubclass_InitSheet(pstRef, Sheets[i].TreeItem, Sheets[i].SubItems, Sheets[i].Count);
+                }
+            } else {
+                EndDialog(Sheets[i].Handle, -1);
+                Sheets[i].Handle = NULL;
+            }
+        }
+    }
+}
+
+BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PRECT SheetRect, _In_ PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count) {
+    PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef;
+    pstRef = Mem_Alloc(sizeof(DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF));
+    if (!pstRef) {
+        return FALSE;
+    }
+    pstRef->Dialog = Dialog;
+    pstRef->TreeView = TreeView;
+    pstRef->SheetRect.left = SheetRect->left;
+    pstRef->SheetRect.top = SheetRect->top;
+    pstRef->SheetRect.right = SheetRect->right;
+    pstRef->SheetRect.bottom = SheetRect->bottom;
+    pstRef->Sheets = Sheets;
+    pstRef->Count = Count;
+    Dlg_SetTreeViewPropertySheetSubclass_InitSheet(pstRef, (HTREEITEM)TVI_ROOT, Sheets, Count);
+    return SetWindowSubclass(Dialog, Dlg_SetTreeViewPropertySheetSubclass_DlgProc, 0, (DWORD_PTR)pstRef);
 }
