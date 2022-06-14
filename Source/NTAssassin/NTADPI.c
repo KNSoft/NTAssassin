@@ -98,7 +98,18 @@ LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM 
         pstRef->dwOldDPIY = pstRef->dwNewDPIY;
         pstRef->dwNewDPIX = LOWORD(wParam);
         pstRef->dwNewDPIY = HIWORD(wParam);
-        UI_SetWindowRect(hDlg, (PRECT)lParam);
+        // System suggested RECT in lParam includes DWM shadow area,
+        // so we had to calculate new RECT on our own
+        RECT rcClient, rcOrg;
+        GetClientRect(hDlg, &rcClient);
+        rcClient.right = Math_RoundInt((rcClient.right * (FLOAT)pstRef->dwNewDPIX / pstRef->dwOldDPIX - rcClient.right) / 2);
+        rcClient.bottom = Math_RoundInt((rcClient.bottom * (FLOAT)pstRef->dwNewDPIY / pstRef->dwOldDPIY - rcClient.bottom) / 2);
+        UI_GetWindowRect(hDlg, &rcOrg);
+        rcOrg.top -= rcClient.bottom;
+        rcOrg.bottom += rcClient.bottom;
+        rcOrg.left -= rcClient.right;
+        rcOrg.right += rcClient.right;
+        UI_SetWindowRect(hDlg, &rcOrg);
         // Adjust font
         DPI_ScaleInt(&pstRef->stFont.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
         HFONT hFont = CreateFontIndirectExW(&pstRef->stFont);
