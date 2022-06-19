@@ -59,6 +59,58 @@ PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(_In_ PPE_STRUCT PEStruct, UINT I
     return pDataDirectory;
 }
 
+PCWSTR PE_GetMachineName(_In_ PPE_STRUCT PEStruct) {
+    PCWSTR psz = NULL;
+    WORD wMachine = PEStruct->FileHeader->Machine;
+    if (wMachine == IMAGE_FILE_MACHINE_I386) {
+        psz = L"Intel 386";
+    } else if (wMachine == IMAGE_FILE_MACHINE_AMD64) {
+        psz = L"AMD64 (K8)";
+    } else if (wMachine == IMAGE_FILE_MACHINE_IA64) {
+        psz = L"Intel 64";
+    } else if (wMachine == IMAGE_FILE_MACHINE_ARM) {
+        psz = L"ARM";
+    } else if (wMachine == IMAGE_FILE_MACHINE_ARM64) {
+        psz = L"ARM64";
+    }
+    return psz;
+}
+
+PCWSTR PE_GetSubsystemName(_In_ PPE_STRUCT PEStruct) {
+    WORD wSubsystem;
+    if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
+        wSubsystem = PEStruct->OptionalHeader32->Subsystem;
+    } else if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC) {
+        wSubsystem = PEStruct->OptionalHeader64->Subsystem;
+    } else {
+        return NULL;
+    }
+
+    PCWSTR psz = NULL;
+    if (wSubsystem == IMAGE_SUBSYSTEM_NATIVE) {
+        psz = L"WinNT Native";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI) {
+        psz = L"WinNT GUI";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
+        psz = L"WinNT CUI";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_NATIVE_WINDOWS) {
+        psz = L"Win9x Native";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_WINDOWS_CE_GUI) {
+        psz = L"WinCE GUI";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_EFI_APPLICATION) {
+        psz = L"EFI Application";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
+        psz = L"EFI Boot Service Driver";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER) {
+        psz = L"EFI Runtime Driver";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_EFI_ROM) {
+        psz = L"EFI ROM";
+    } else if (wSubsystem == IMAGE_SUBSYSTEM_WINDOWS_BOOT_APPLICATION) {
+        psz = L"WinNT Boot Application";
+    }
+    return psz;
+}
+
 PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(_In_ PPE_STRUCT PEStruct, DWORD RVA) {
     USHORT u, uSections;
     PIMAGE_SECTION_HEADER pTargetSection, pSection;

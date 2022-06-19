@@ -35,3 +35,5 @@ NTA_API ULONG NTAPI Math_RangedRandom(ULONG Min, ULONG Max);
 /// Gets the absolute difference between two numbers
 /// </summary>
 #define Math_AbsDiff(v1, v2) ((v1) > (v2) ? (v1) - (v2) : (v2) - (v1))
+
+NTA_API DOUBLE NTAPI Math_SimplifySize(UINT64 Size, PCHAR Unit);

@@ -279,7 +279,7 @@ VOID NTAPI Str_InitA(_Out_ PSTRING NTString, _In_ PSTR String) {
 }
 
 // String Convert
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_writes_bytes_(ValueSize) PVOID Value, _In_ SIZE_T ValueSize) {
     PCWSTR  psz = StrValue;
     UINT64  uTotal;
@@ -415,7 +415,7 @@ Label_Output:
     return TRUE;
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writes_bytes_(ValueSize) PVOID Value, _In_ SIZE_T ValueSize) {
     PCSTR  psz = StrValue;
 
@@ -547,7 +547,7 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
     return TRUE;
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(DestCchSize) PWSTR StrValue, _In_ ULONG DestCchSize) {
     PWSTR psz = StrValue;
     UINT64  uTotal, uDivisor, uPowerFlag;
@@ -608,7 +608,7 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
     return bRet;
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(DestCchSize) PSTR StrValue, _In_ ULONG DestCchSize) {
     PSTR psz = StrValue;
     UINT64  uTotal, uDivisor, uPowerFlag;

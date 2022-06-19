@@ -84,3 +84,6 @@ _Success_(return != FALSE) NTA_API BOOL NTAPI PE_Ptr2Offset(_In_ PPE_STRUCT PESt
 /// <param name="Name">Pointer to a PCSTR variable to receive the exported name of the function</param>
 /// <returns>TRUE if succeeded, or FALSE if failed</returns>
 _Success_(return != FALSE) NTA_API BOOL NTAPI PE_GetExportedName(_In_ PPE_STRUCT PEStruct, _In_ PVOID Function, _Out_ PZPCSTR Name);
+
+NTA_API PCWSTR PE_GetMachineName(_In_ PPE_STRUCT PEStruct);
+NTA_API PCWSTR PE_GetSubsystemName(_In_ PPE_STRUCT PEStruct);

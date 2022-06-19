@@ -759,6 +759,9 @@ typedef struct _KUSER_SHARED_DATA {
     LARGE_INTEGER                 TimeZoneBiasEffectiveStart;
     LARGE_INTEGER                 TimeZoneBiasEffectiveEnd;
     XSTATE_CONFIGURATION          XState;
+    KSYSTEM_TIME                  FeatureConfigurationChangeStamp;
+    ULONG                         Spare;
+    ULONG64                       UserPointerAuthMask;
 } KUSER_SHARED_DATA, *PKUSER_SHARED_DATA;
 
 typedef struct _RTLP_CURDIR_REF {

@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-BOOL NTAPI Shell_Exec(PCWSTR File, PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle) {
+BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle) {
     SHELLEXECUTEINFOW   stSEIW = { sizeof(SHELLEXECUTEINFOW) };
     BOOL                bRet;
     if (Verb == ShellExecExplore) {
@@ -59,6 +59,26 @@ BOOL NTAPI Shell_Exec(PCWSTR File, PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowC
     bRet = ShellExecuteExW(&stSEIW);
     if (ProcessHandle && bRet) {
         *ProcessHandle = stSEIW.hProcess;
+    }
+    return bRet;
+}
+
+BOOL NTAPI Shell_GetLinkPath(_In_ PCWSTR LinkFile, _Out_writes_(PathCchSize) PWSTR Path, _In_ INT PathCchSize) {
+    BOOL bRet = FALSE;
+    IShellLink* psl;
+    HRESULT hr = CoCreateInstance(&CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, &IID_IShellLinkW, &psl);
+    if (SUCCEEDED(hr)) {
+        IPersistFile* ppf;
+        hr = psl->lpVtbl->QueryInterface(psl, &IID_IPersistFile, &ppf);
+        if (SUCCEEDED(hr)) {
+            hr = ppf->lpVtbl->Load(ppf, LinkFile, STGM_READ);
+            if (SUCCEEDED(hr)) {
+                hr = psl->lpVtbl->GetPath(psl, Path, PathCchSize, NULL, 0);
+                bRet = SUCCEEDED(hr);
+            }
+            ppf->lpVtbl->Release(ppf);
+        }
+        psl->lpVtbl->Release(psl);
     }
     return bRet;
 }
