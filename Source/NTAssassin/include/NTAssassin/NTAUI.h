@@ -106,7 +106,7 @@ NTA_API BOOL NTAPI UI_SetTheme(HWND Window);
 /// Invalidates and updates the whole window immediately
 /// </summary>
 /// <seealso cref="RedrawWindow"/>
-#define UI_Redraw(Window) RedrawWindow(Window, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW)
+#define UI_Redraw(Window) RedrawWindow(Window, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_UPDATENOW)
 
 /// <summary>
 /// Enables or disables specified style or extended style for a widnow

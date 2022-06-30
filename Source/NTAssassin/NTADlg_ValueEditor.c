@@ -184,8 +184,9 @@ INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LP
         SetFocus(hListView);
 
         // DPI Aware
-        if (DPI_IsAware())
+        if (IsProcessDPIAware()) {
             DPI_SetAutoAdjustSubclass(hDlg, NULL);
+        }
 
         return FALSE;
     } else if (uMsg == WM_NOTIFY) {

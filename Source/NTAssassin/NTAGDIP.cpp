@@ -43,7 +43,7 @@ BOOL NTAPI GDIP_GetImageDimension(PGDIP_IMAGE Image, PUINT Width, PUINT Height) 
         GdipGetImageHeight((GpImage*)Image, Height) == Ok;
 }
 
-PGDIP_BRUSH NTAPI GDIP_CreateSolidBrush(ARGB Color) {
+PGDIP_BRUSH NTAPI GDIP_CreateSolidBrush(::ARGB Color) {
     GpSolidFill* pBrush;
     return GdipCreateSolidFill(Color, &pBrush) == Ok ? (GpBrush*)pBrush : NULL;
 }

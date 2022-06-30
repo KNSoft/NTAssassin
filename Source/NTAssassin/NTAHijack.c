@@ -88,7 +88,9 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
     if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pParam, FALSE, &hThread)) {
         goto Label_2;
     }
-    if (!Proc_WaitForObject(hThread, Timeout)) {
+    NTSTATUS lStatus = Proc_WaitForObject(hThread, Timeout);
+    if (lStatus != STATUS_SUCCESS) {
+        NT_SetLastStatus(lStatus);
         goto Label_3;
     }
 
@@ -219,7 +221,9 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pRemoteBuffer, FALSE, &hThread)) {
         goto Label_2;
     }
-    if (!Proc_WaitForObject(hThread, Timeout)) {
+    lStatus = Proc_WaitForObject(hThread, Timeout);
+    if (lStatus != STATUS_SUCCESS) {
+        NT_SetLastStatus(lStatus);
         goto Label_3;
     }
 

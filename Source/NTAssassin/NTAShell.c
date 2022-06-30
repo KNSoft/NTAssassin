@@ -65,7 +65,7 @@ BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB V
 
 BOOL NTAPI Shell_GetLinkPath(_In_ PCWSTR LinkFile, _Out_writes_(PathCchSize) PWSTR Path, _In_ INT PathCchSize) {
     BOOL bRet = FALSE;
-    IShellLink* psl;
+    IShellLinkW* psl;
     HRESULT hr = CoCreateInstance(&CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, &IID_IShellLinkW, &psl);
     if (SUCCEEDED(hr)) {
         IPersistFile* ppf;
@@ -79,6 +79,9 @@ BOOL NTAPI Shell_GetLinkPath(_In_ PCWSTR LinkFile, _Out_writes_(PathCchSize) PWS
             ppf->lpVtbl->Release(ppf);
         }
         psl->lpVtbl->Release(psl);
+    }
+    if (!bRet) {
+        NT_SetLastError(WIN32_FROM_HRESULT(hr));
     }
     return bRet;
 }

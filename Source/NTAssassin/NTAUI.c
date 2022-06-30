@@ -148,7 +148,16 @@ _Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLo
     // GetWindowLongPtr may crash in some cases
     __try {
         NT_ClearLastError();
-        lResult = ClassLong ? (LONG_PTR)GetClassLongPtr(Window, Index) : GetWindowLongPtr(Window, Index);
+        BOOL bUnicode = IsWindowUnicode(Window);
+        if (bUnicode && !ClassLong) {
+            lResult = GetWindowLongPtrW(Window, Index);
+        } else if (bUnicode && ClassLong) {
+            lResult = GetClassLongPtrW(Window, Index);
+        } else if (!bUnicode && !ClassLong) {
+            lResult = GetWindowLongPtrA(Window, Index);
+        } else {
+            lResult = GetClassLongPtrA(Window, Index);
+        }
         bRet = lResult ? TRUE : (NT_GetLastError() == ERROR_SUCCESS);
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         lResult = 0;

@@ -86,15 +86,9 @@ PVOID NTAPI Proc_LoadProcAddr(_In_z_ PCWSTR LibName, _In_z_ PCSTR ProcName) {
     return hDll ? Proc_GetProcAddr(hDll, ProcName) : NULL;
 }
 
-BOOL NTAPI Proc_WaitForObject(HANDLE Object, DWORD Milliseconds) {
+NTSTATUS NTAPI Proc_WaitForObject(HANDLE Object, DWORD Milliseconds) {
     LARGE_INTEGER stLI;
-    NTSTATUS lStatus = NtWaitForSingleObject(Object, FALSE, Milliseconds == INFINITE ? NULL : (stLI.QuadPart = Milliseconds * -10000LL, &stLI));
-    if (NT_SUCCESS(lStatus)) {
-        return TRUE;
-    } else {
-        NT_SetLastStatus(lStatus);
-        return FALSE;
-    }
+    return NtWaitForSingleObject(Object, FALSE, Milliseconds == INFINITE ? NULL : (stLI.QuadPart = Milliseconds * -10000LL, &stLI));
 }
 
 VOID NTAPI Proc_DelayExec(DWORD Milliseconds) {

@@ -169,7 +169,7 @@ INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPA
         SendMessageW(hBtnOK, WM_SETTEXT, 0, (LPARAM)lpsz);
 
         // DPI Aware
-        if (DPI_IsAware()) {
+        if (IsProcessDPIAware()) {
             DPI_SetAutoAdjustSubclass(hDlg, NULL);
         }
 

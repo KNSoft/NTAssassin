@@ -73,47 +73,62 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(Buffer
         pbmi->bmiHeader.biCompression = BI_RGB;
         pbmi->bmiHeader.biXPelsPerMeter = pbmi->bmiHeader.biYPelsPerMeter = pbmi->bmiHeader.biClrImportant = 0;
         pBits = MOVE_PTR(pbmi, pbmi->bmiHeader.biSize + (DWORD_PTR)dwClrSize, VOID);
-        if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBits, pbmi, DIB_RGB_COLORS))
+        if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBits, pbmi, DIB_RGB_COLORS)) {
             return 0;
+        }
     }
     return uFileSize;
 }
 
-VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW InternalFontInfo) {
-    InternalFontInfo->elfEnumLogfontEx.elfFullName[0] = InternalFontInfo->elfEnumLogfontEx.elfStyle[0] = InternalFontInfo->elfEnumLogfontEx.elfScript[0] = '\0';
-    InternalFontInfo->elfDesignVector.dvReserved = STAMP_DESIGNVECTOR;
-    InternalFontInfo->elfDesignVector.dvNumAxes = 0;
+VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW FontInfo) {
+    FontInfo->elfEnumLogfontEx.elfFullName[0] = FontInfo->elfEnumLogfontEx.elfStyle[0] = FontInfo->elfEnumLogfontEx.elfScript[0] = '\0';
+    FontInfo->elfDesignVector.dvReserved = STAMP_DESIGNVECTOR;
+    FontInfo->elfDesignVector.dvNumAxes = 0;
 }
 
-VOID NTAPI GDI_SetFontInfo(_Out_ PLOGFONTW FontInfo, LONG FontSize, LONG FontWeight, _In_opt_z_ PCWSTR FontName) {
-    FontInfo->lfHeight = FontSize;
-    FontInfo->lfWidth = 0;
-    FontInfo->lfEscapement = 0;
-    FontInfo->lfOrientation = 0;
-    FontInfo->lfWeight = FontWeight;
-    FontInfo->lfItalic = FALSE;
-    FontInfo->lfUnderline = FALSE;
-    FontInfo->lfStrikeOut = FALSE;
-    FontInfo->lfCharSet = DEFAULT_CHARSET;
-    FontInfo->lfOutPrecision = OUT_TT_PRECIS;
-    FontInfo->lfClipPrecision = CLIP_DEFAULT_PRECIS;
-    FontInfo->lfQuality = CLEARTYPE_QUALITY;
-    FontInfo->lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-    if (FontName == NULL)
-        FontInfo->lfFaceName[0] = '\0';
-    else
-        Str_CopyW(FontInfo->lfFaceName, FontName);
+VOID NTAPI GDI_InitFontInfoEx(
+    _Out_ PENUMLOGFONTEXDVW FontInfo,
+    LONG Height,
+    LONG Width,
+    LONG Escapement,
+    LONG Orientation,
+    LONG Weight,
+    BOOL Italic,
+    BOOL Underline,
+    BOOL StrikeOut,
+    BYTE CharSet,
+    BYTE OutPrecision,
+    BYTE ClipPrecision,
+    BYTE Quality,
+    BYTE PitchAndFamily,
+    _In_opt_z_ PCWSTR Name) {
+    GDI_InitInternalFontInfo(FontInfo);
+    PLOGFONTW pFontInfo = &FontInfo->elfEnumLogfontEx.elfLogFont;
+    pFontInfo->lfHeight = Height;
+    pFontInfo->lfWidth = Width;
+    pFontInfo->lfEscapement = Escapement;
+    pFontInfo->lfOrientation = Orientation;
+    pFontInfo->lfWeight = Weight;
+    pFontInfo->lfItalic = Italic;
+    pFontInfo->lfUnderline = Underline;
+    pFontInfo->lfStrikeOut = StrikeOut;
+    pFontInfo->lfCharSet = CharSet;
+    pFontInfo->lfOutPrecision = OutPrecision;
+    pFontInfo->lfClipPrecision = ClipPrecision;
+    pFontInfo->lfQuality = Quality;
+    pFontInfo->lfPitchAndFamily = PitchAndFamily;
+    if (Name == NULL) {
+        pFontInfo->lfFaceName[0] = '\0';
+    } else {
+        Str_CopyW(pFontInfo->lfFaceName, Name);
+    }
 }
 
-HFONT NTAPI GDI_CreateFont(LONG FontSize, LONG FontWeight, _In_opt_z_ PCWSTR FontName) {
-    ENUMLOGFONTEXDVW stEnumLogFontExDesignVectorW;
-    GDI_InitInternalFontInfo(&stEnumLogFontExDesignVectorW);
-    GDI_SetFontInfo(&stEnumLogFontExDesignVectorW.elfEnumLogfontEx.elfLogFont, FontSize, FontWeight, FontName);
-    return CreateFontIndirectExW(&stEnumLogFontExDesignVectorW);
-}
-
-INT NTAPI GDI_GetFont(HFONT Font, PLOGFONTW FontInfo) {
-    return GetObjectW(Font, sizeof(*FontInfo), FontInfo);
+INT NTAPI GDI_GetFont(HFONT Font, PENUMLOGFONTEXDVW FontInfo) {
+    GDI_InitInternalFontInfo(FontInfo);
+    INT i = GetObjectW(Font, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont), &FontInfo->elfEnumLogfontEx.elfLogFont);
+    i = i > 0 ? sizeof(*FontInfo) : 0;
+    return i;
 }
 
 BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY) {

@@ -114,10 +114,14 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
     if (bRet) {
         bRet = SetWindowSubclass(Dialog, Ctl_PropertySheetDialogProc, 0, TabCtlID);
     }
-    stnmhdr.hwndFrom = hTab;
-    stnmhdr.idFrom = TabCtlID;
-    stnmhdr.code = TCN_SELCHANGE;
-    SendMessage(Dialog, WM_NOTIFY, TabCtlID, (LPARAM)&stnmhdr);
+    if (SheetCount) {
+        SendMessage(hTab, TCM_SETCURSEL, 0, 0);
+        stnmhdr.hwndFrom = hTab;
+        stnmhdr.idFrom = TabCtlID;
+        stnmhdr.code = TCN_SELCHANGE;
+        SendMessage(Dialog, WM_NOTIFY, TabCtlID, (LPARAM)&stnmhdr);
+    }
+    
     return bRet;
 }
 
