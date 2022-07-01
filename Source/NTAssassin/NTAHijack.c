@@ -88,19 +88,27 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
     if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pParam, FALSE, &hThread)) {
         goto Label_2;
     }
-    NTSTATUS lStatus = Proc_WaitForObject(hThread, Timeout);
-    if (lStatus != STATUS_SUCCESS) {
-        NT_SetLastStatus(lStatus);
-        goto Label_3;
-    }
-
-    // Receive return values and parameters
-    if (ExitCode) {
-        if (!Proc_GetThreadExitCode(hThread, ExitCode)) {
+    if (Timeout) {
+        NTSTATUS lStatus = Proc_WaitForObject(hThread, Timeout);
+        if (lStatus != STATUS_SUCCESS) {
+            NT_SetLastStatus(lStatus);
             goto Label_3;
         }
-    }
-    if (!pParam || RProc_ReadMemory(ProcessHandle, pParam, Param, ParamSize)) {
+
+        // Receive return values and parameters
+        if (ExitCode) {
+            if (!Proc_GetThreadExitCode(hThread, ExitCode)) {
+                goto Label_3;
+            }
+        }
+
+        if (!pParam || RProc_ReadMemory(ProcessHandle, pParam, Param, ParamSize)) {
+            bRet = TRUE;
+        }
+    } else {
+        if (ExitCode) {
+            *ExitCode = STILL_ACTIVE;
+        }
         bRet = TRUE;
     }
 
@@ -134,11 +142,15 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
             pParam,
             *(PDWORD)pParam,
             &ExitCode,
-            Timeout) && NT_SUCCESS(ExitCode)) {
-            if (ProcAddr) {
-                *ProcAddr = *pProc;
+            Timeout)) {
+            if (NT_SUCCESS(ExitCode)) {
+                if (ProcAddr) {
+                    *ProcAddr = *pProc;
+                }
+                return TRUE;
+            } else {
+                NT_SetLastStatus(ExitCode);
             }
-            return TRUE;
         }
     }
     return FALSE;

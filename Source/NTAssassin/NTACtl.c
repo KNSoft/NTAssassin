@@ -81,7 +81,7 @@ LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, L
                         } else {
                             UI_GetRelativeRect(lpnmhdr->hwndFrom, hDlg, &rcTab);
                             SendMessage(lpnmhdr->hwndFrom, TCM_ADJUSTRECT, FALSE, (LPARAM)&rcTab);
-                            SetWindowPos((HWND)stTCI.lParam, NULL, rcTab.left, rcTab.top, rcTab.right - rcTab.left, rcTab.bottom - rcTab.top, SWP_NOZORDER | SWP_SHOWWINDOW);
+                            SetWindowPos((HWND)stTCI.lParam, NULL, rcTab.left + 1, rcTab.top + 1, rcTab.right - rcTab.left - 2, rcTab.bottom - rcTab.top - 2, SWP_NOZORDER | SWP_SHOWWINDOW);
                         }
                     }
                 }
