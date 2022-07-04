@@ -274,3 +274,5 @@ NTA_API DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorith
 #else
 #define Str_Hash Str_HashA
 #endif
+
+PWSTR NTAPI Str_NameOfPath(_In_ PWSTR Path, _In_opt_ ULONG LengthOfPath);

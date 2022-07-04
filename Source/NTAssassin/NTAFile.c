@@ -31,7 +31,8 @@ BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size) {
     }
 }
 
-ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _In_ PVOID Buffer, ULONG BytesToRead, PLARGE_INTEGER ByteOffset) {
+_Success_(return > 0)
+ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PVOID Buffer, _In_ ULONG BytesToRead, PLARGE_INTEGER ByteOffset) {
     IO_STATUS_BLOCK stIOStatus;
     NTSTATUS        lStatus;
     lStatus = NtReadFile(FileHandle, NULL, NULL, NULL, &stIOStatus, Buffer, BytesToRead, ByteOffset, NULL);

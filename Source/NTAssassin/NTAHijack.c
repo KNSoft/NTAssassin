@@ -68,6 +68,7 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
     RPROC_MAP   ProcMap, ParamMap;
     PVOID       pParam;
     HANDLE      hThread;
+    BOOL        bKeepMem = FALSE;
 
     // Maps shellcode and parameter
     RProc_InitMap(&ProcMap, ShellCode, ShellCodeSize, NULL, PAGE_EXECUTE_READ);
@@ -88,10 +89,13 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
     if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pParam, FALSE, &hThread)) {
         goto Label_2;
     }
+
     if (Timeout) {
         NTSTATUS lStatus = Proc_WaitForObject(hThread, Timeout);
         if (lStatus != STATUS_SUCCESS) {
+            // Keep remote memory due to the thread still running
             NT_SetLastStatus(lStatus);
+            bKeepMem = TRUE;
             goto Label_3;
         }
 
@@ -116,11 +120,13 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
 Label_3:
     NtClose(hThread);
 Label_2:
-    if (pParam) {
+    if (!bKeepMem && pParam) {
         RProc_MemUnmap(ProcessHandle, &ParamMap);
     }
 Label_1:
-    RProc_MemUnmap(ProcessHandle, &ProcMap);
+    if (!bKeepMem) {
+        RProc_MemUnmap(ProcessHandle, &ProcMap);
+    }
 Label_0:
     return bRet;
 }

@@ -816,3 +816,9 @@ DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
     }
     return dwHash;
 }
+
+PWSTR NTAPI Str_NameOfPath(_In_ PWSTR Path, _In_opt_ ULONG LengthOfPath) {
+    ULONG ulLen = LengthOfPath ? LengthOfPath : (ULONG)Str_LenW(Path);
+    while (ulLen && Path[--ulLen] != L'\\');
+    return ulLen ? Path + ulLen + 1 : NULL;
+}

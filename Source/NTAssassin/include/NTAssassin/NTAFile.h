@@ -30,7 +30,7 @@ NTA_API _Success_(return != FALSE) BOOL NTAPI File_GetSize(_In_ HANDLE FileHandl
 /// </summary>
 /// <seealso cref="NtReadFile"/>
 /// <returns>Number of bytes read</returns>
-NTA_API ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _In_ PVOID Buffer, ULONG BytesToRead, PLARGE_INTEGER ByteOffset);
+NTA_API _Success_(return > 0) ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PVOID Buffer, _In_ ULONG BytesToRead, PLARGE_INTEGER ByteOffset);
 
 /// <summary>
 /// Verifies that a path is a valid directory
