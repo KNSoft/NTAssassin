@@ -136,27 +136,32 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
     LPVOID  pParam;
     PVOID64 *pProc;
     DWORD   ExitCode;
-    BOOL    bWow64;
-    if (RProc_IsWow64(ProcessHandle, &bWow64)) {
-        // Initialize parameter
-        pParam = Hijack_LoadProcAddr_InitParam(Buffer, LibName, ProcName, &pProc);
-        // Create remote thread and execute
-        if (Hijack_ExecShellcode(
-            ProcessHandle,
-            bWow64 ? SYM_Hijack_LoadProcAddr_InjectThread_x86 : SYM_Hijack_LoadProcAddr_InjectThread_x64,
-            bWow64 ? sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x86) : sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x64),
-            pParam,
-            *(PDWORD)pParam,
-            &ExitCode,
-            Timeout)) {
-            if (NT_SUCCESS(ExitCode)) {
-                if (ProcAddr) {
-                    *ProcAddr = *pProc;
-                }
-                return TRUE;
-            } else {
-                NT_SetLastStatus(ExitCode);
+    BOOL    b32Proc;
+#ifdef _WIN64
+    if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
+        return FALSE;
+    }
+#else
+    b32Proc = TRUE;
+#endif
+    // Initialize parameter
+    pParam = Hijack_LoadProcAddr_InitParam(Buffer, LibName, ProcName, &pProc);
+    // Create remote thread and execute
+    if (Hijack_ExecShellcode(
+        ProcessHandle,
+        b32Proc ? SYM_Hijack_LoadProcAddr_InjectThread_x86 : SYM_Hijack_LoadProcAddr_InjectThread_x64,
+        b32Proc ? sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x86) : sizeof(SYM_Hijack_LoadProcAddr_InjectThread_x64),
+        pParam,
+        *(PDWORD)pParam,
+        &ExitCode,
+        Timeout)) {
+        if (NT_SUCCESS(ExitCode)) {
+            if (ProcAddr) {
+                *ProcAddr = *pProc;
             }
+            return TRUE;
+        } else {
+            NT_SetLastStatus(ExitCode);
         }
     }
     return FALSE;
@@ -173,12 +178,14 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     PVOID                   pRemoteBuffer, pRemoteRandomParam, pTemp;
     RPROC_MAP               ProcMap;
     HANDLE                  hThread;
-
-    BOOL bWow64;
-    if (!RProc_IsWow64(ProcessHandle, &bWow64)) {
+    BOOL                    b32Proc;
+#ifdef _WIN64
+    if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
         return FALSE;
     }
-
+#else
+    b32Proc = TRUE;
+#endif
     // Calculate size of remote buffer and allocate memory
     uParamCount = CallProcHeader->ParamCount;
     usTotalSize = sizeof(HIJACK_CALLPROCHEADER) + sizeof(HIJACK_CALLPROCPARAM) * uParamCount;
@@ -229,8 +236,8 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     // Create remote thread
     RProc_InitMap(
         &ProcMap,
-        bWow64 ? SYM_Hijack_CallProc_InjectThread_x86 : SYM_Hijack_CallProc_InjectThread_x64,
-        bWow64 ? sizeof(SYM_Hijack_CallProc_InjectThread_x86) : sizeof(SYM_Hijack_CallProc_InjectThread_x64),
+        b32Proc ? SYM_Hijack_CallProc_InjectThread_x86 : SYM_Hijack_CallProc_InjectThread_x64,
+        b32Proc ? sizeof(SYM_Hijack_CallProc_InjectThread_x86) : sizeof(SYM_Hijack_CallProc_InjectThread_x64),
         NULL,
         PAGE_EXECUTE_READ);
     if (!RProc_MemMap(ProcessHandle, &ProcMap)) {

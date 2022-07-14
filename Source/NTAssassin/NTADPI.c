@@ -106,7 +106,7 @@ LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM 
         pstRef->dwNewDPIY = HIWORD(wParam);
 
         // Adjust rectangle if this is top-level window
-        if (!GetParent(hDlg)) {
+        if (!(GetWindowLongPtr(hDlg, GWL_STYLE) & WS_CHILD)) {
             // System suggested RECT in lParam includes DWM shadow area,
             // so we had to calculate new RECT on our own
             RECT rcWnd;

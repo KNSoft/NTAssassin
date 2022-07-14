@@ -125,7 +125,7 @@ UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, _Out_writes_z_(FilePat
     NTSTATUS lStatus = NtQueryInformationProcess(ProcessHandle, ProcessImageFileNameWin32, &stString, sizeof(stString), NULL);
     if (NT_SUCCESS(lStatus)) {
         USHORT usLen = ((PUNICODE_STRING)stString)->Length;
-        if (usLen < FilePathCch) {
+        if (usLen < FilePathCch * sizeof(WCHAR)) {
             RtlMoveMemory(FilePath, ((PUNICODE_STRING)stString)->Buffer, usLen);
             usLen >>= 1;
             FilePath[usLen] = L'\0';
