@@ -1,11 +1,11 @@
 #include "include\NTAssassin\NTAssassin.h"
 
 typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
-    DWORD               dwNewDPIX;
-    DWORD               dwNewDPIY;
-    DWORD               dwOldDPIX;
-    DWORD               dwOldDPIY;
-    HFONT               hFont;
+    DWORD   dwNewDPIX;
+    DWORD   dwNewDPIY;
+    DWORD   dwOldDPIX;
+    DWORD   dwOldDPIY;
+    HFONT   hFont;
 } DPI_SETAUTOADJUSTSUBCLASS_REF, *PDPI_SETAUTOADJUSTSUBCLASS_REF;
 
 typedef struct _DPI_APPLYTOCHILD_REF {
@@ -93,7 +93,7 @@ BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
     if (bNeedsRedraw) {
         UI_Redraw(hWnd);
     }
-    
+
     return TRUE;
 }
 
@@ -182,12 +182,11 @@ BOOL NTAPI DPI_SetAutoAdjustSubclass(HWND Dialog, _In_opt_ HFONT Font) {
     pstRef->hFont = Font;
     if (SetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (DWORD_PTR)pstRef)) {
         UINT DPIX, DPIY;
-        if (DPI_FromWindow(Dialog, &DPIX, &DPIY)) {
-            RECT rcDlg;
-            UI_GetWindowRect(Dialog, &rcDlg);
-            DPI_ScaleRect(&rcDlg, USER_DEFAULT_SCREEN_DPI, DPIX, USER_DEFAULT_SCREEN_DPI, DPIY);
-            SendMessage(Dialog, WM_DPICHANGED, MAKEDWORD(DPIX, DPIY), (LPARAM)&rcDlg);
-        }
+        DPI_FromWindow(Dialog, &DPIX, &DPIY);
+        RECT rcDlg;
+        UI_GetWindowRect(Dialog, &rcDlg);
+        DPI_ScaleRect(&rcDlg, USER_DEFAULT_SCREEN_DPI, DPIX, USER_DEFAULT_SCREEN_DPI, DPIY);
+        SendMessage(Dialog, WM_DPICHANGED, MAKEDWORD(DPIX, DPIY), (LPARAM)&rcDlg);
         return TRUE;
     }
     Mem_Free(pstRef);

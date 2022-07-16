@@ -3,6 +3,9 @@ include HijackASM.inc
 .code
 
 Hijack_CallProc_InjectThread_x64 PROC USES rbx rdi rsi
+    ; Shadow space for x64
+    sub     rsp, 40
+
     ; rdi point to HIJACK_CALLPROCHEADER
     mov     rdi, rcx
     ; Support stdcall(CC_STDCALL) only
@@ -105,6 +108,7 @@ LN_CALLPROC:
     mov     [rdi + 28], eax ; [rdi].ExceptionCode
     ; Return
     xor     eax, eax
+    add     rsp, 40
     ret
 Hijack_CallProc_InjectThread_x64 ENDP
 
