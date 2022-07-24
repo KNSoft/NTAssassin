@@ -262,6 +262,18 @@ Label_0:
     return FALSE;
 }
 
+BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap) {
+    PVOID       pBase = RemoteMemMap->Remote;
+    SIZE_T      uSize = 0;
+    NTSTATUS    lStatus = NtFreeVirtualMemory(ProcessHandle, &pBase, &uSize, MEM_RELEASE);
+    if (NT_SUCCESS(lStatus)) {
+        return TRUE;
+    } else {
+        NT_SetLastStatus(lStatus);
+        return FALSE;
+    }
+}
+
 _Success_(return != FALSE)
 BOOL NTAPI RProc_IsWow64(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process) {
     ULONG_PTR pwi;

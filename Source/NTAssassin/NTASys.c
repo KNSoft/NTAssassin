@@ -94,7 +94,7 @@ VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status) {
     );
 }
 
-PSYSTEM_PROCESS_INFORMATION Sys_GetProcessInfo() {
+PSYSTEM_PROCESS_INFORMATION NTAPI Sys_GetProcessInfo() {
     ULONG ulSize = 0;
     PSYSTEM_PROCESS_INFORMATION pSPI = NULL;
     NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &ulSize);
@@ -108,18 +108,59 @@ PSYSTEM_PROCESS_INFORMATION Sys_GetProcessInfo() {
     return pSPI;
 }
 
-BOOL Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2) {
+BOOL NTAPI Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2) {
     return GUID1->Data1 == GUID2->Data1 &&
         GUID1->Data2 == GUID2->Data2 &&
         GUID1->Data3 == GUID2->Data3 &&
         *(PQWORD)(GUID1->Data4) == *(PQWORD)(GUID2->Data4);
 }
 
-VOID Sys_CopyGUID(LPGUID Dest, REFGUID Src) {
+VOID NTAPI Sys_CopyGUID(LPGUID Dest, REFGUID Src) {
     Dest->Data1 = Src->Data1;
     Dest->Data2 = Src->Data2;
     Dest->Data3 = Src->Data3;
     *(PQWORD)(Dest->Data4) = *(PQWORD)(Src->Data4);
+}
+
+BOOL NTAPI Sys_GetActiveSession(PDWORD SessionId) {
+    PSESSIONIDW pBuffer = NULL, pSessionInfo;
+    DWORD dwCount;
+    BOOL bRet = FALSE;
+    if (WinStationEnumerateW(NULL, &pBuffer, &dwCount) && pBuffer) {
+        pSessionInfo = pBuffer;
+        while (dwCount--) {
+            if (pSessionInfo->State == State_Active) {
+                *SessionId = pSessionInfo->SessionId;
+                bRet = TRUE;
+                break;
+            }
+            pSessionInfo++;
+        }
+        WinStationFreeMemory(pBuffer);
+    }
+    return bRet;
+}
+
+DWORD NTAPI Sys_HRESULTToWin32(HRESULT hr) {
+    DWORD dwError = HRESULT_CODE(hr);
+    if (hr != MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, dwError)) {
+        if (!IS_ERROR(hr)) {
+            dwError = ERROR_SUCCESS;
+        } else if ((DWORD)hr & FACILITY_NT_BIT) {
+            dwError = RtlNtStatusToDosError(hr & (~FACILITY_NT_BIT));
+        } else {
+            if (hr == E_NOINTERFACE) {
+                dwError = ERROR_INVALID_FUNCTION;
+            } else if (hr == E_NOTIMPL) {
+                dwError = ERROR_CALL_NOT_IMPLEMENTED;
+            } else if (hr == E_UNEXPECTED) {
+                dwError = ERROR_INVALID_DATA;
+            } else {
+                dwError = hr;
+            }
+        }
+    }
+    return dwError;
 }
 
 #define SYS_REG_SERVICES_PATH L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Services"

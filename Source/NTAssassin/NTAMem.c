@@ -13,7 +13,7 @@ PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect) {
     }
 }
 
-BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect, _In_ PULONG OldProtect) {
+BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect, _Out_ PULONG OldProtect) {
     PVOID       pBase = BaseAddress;
     SIZE_T      sSize = Size;
     NTSTATUS    lStatus = NtProtectVirtualMemory(CURRENT_PROCESS_HANDLE, &pBase, &sSize, Protect, OldProtect);

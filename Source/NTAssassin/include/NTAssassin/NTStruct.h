@@ -1432,3 +1432,23 @@ typedef enum _MEMORY_INFORMATION_CLASS {
     MemoryWorkingSetExList
 } MEMORY_INFORMATION_CLASS, *PMEMORY_INFORMATION_CLASS;
 
+typedef WCHAR WINSTATIONNAME[WINSTATIONNAME_LENGTH + 1];
+
+typedef enum _WINSTATIONSTATECLASS {
+    State_Active = 0,
+    State_Connected = 1,
+    State_ConnectQuery = 2,
+    State_Shadow = 3,
+    State_Disconnected = 4,
+    State_Idle = 5,
+    State_Listen = 6,
+    State_Reset = 7,
+    State_Down = 8,
+    State_Init = 9
+} WINSTATIONSTATECLASS, *PWINSTATIONSTATECLASS;
+
+typedef struct _SESSIONIDW {
+    DWORD SessionId;
+    WINSTATIONNAME WinStationName;
+    WINSTATIONSTATECLASS State;
+} SESSIONIDW, *PSESSIONIDW;

@@ -154,8 +154,8 @@ _Success_(return != FALSE) NTA_API BOOL NTAPI RProc_MemMap(HANDLE ProcessHandle,
 /// </summary>
 /// <param name="ProcessHandle">Handle to the remote process</param>
 /// <param name="RemoteMemMap">Pointer to the RPROC_MAP structure</param>
-/// <returns>NTSTATUS</returns>
-#define RProc_MemUnmap(ProcessHandle, RemoteMemMap) NtFreeVirtualMemory(ProcessHandle, &(RemoteMemMap)->Remote, &(RemoteMemMap)->RemoteSize, MEM_DECOMMIT)
+/// <returns>TRUE if succeeded, or FALSE if failed, error code storaged in last STATUS</returns>
+NTA_API BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap);
 
 /// <seealso cref="IsWow64Process"/>
 _Success_(return != FALSE) NTA_API BOOL NTAPI RProc_IsWow64(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process);

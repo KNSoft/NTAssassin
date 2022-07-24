@@ -27,7 +27,7 @@ NTA_API _Ret_maybenull_ _Post_writable_byte_size_(Size) _Check_return_ PVOID NTA
 /// </summary>
 /// <seealso cref="VirtualProtect"/>
 /// <return>Error code storaged in last STATUS</return>
-NTA_API BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect, _In_ PULONG OldProtect);
+NTA_API BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect, _Out_ PULONG OldProtect);
 
 /// <summary>
 /// Frees memory pages

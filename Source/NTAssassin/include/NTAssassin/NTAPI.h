@@ -220,7 +220,7 @@ NtProtectVirtualMemory(
     _Inout_ _At_(*BaseAddress, _Readable_bytes_(*RegionSize) _Writable_bytes_(*RegionSize) _Post_readable_byte_size_(*RegionSize)) PVOID* BaseAddress,
     _Inout_ PSIZE_T RegionSize,
     _In_ ULONG Protect,
-    _In_ PULONG OldProtect
+    _Out_ PULONG OldProtect
 );
 
 NTSYSAPI
@@ -556,4 +556,22 @@ EndTask(
     HWND hWnd,
     BOOL fShutDown,
     BOOL fForce
+);
+
+// WinStation
+
+NTSYSAPI
+BOOL
+NTAPI
+WinStationEnumerateW(
+    HANDLE ServerHandle,
+    PSESSIONIDW *SessionIds,
+    PULONG Count
+);
+
+NTSYSAPI
+BOOL
+NTAPI
+WinStationFreeMemory(
+    PVOID Buffer
 );

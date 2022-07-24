@@ -28,7 +28,7 @@ BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB V
                 }
                 CoTaskMemFree(pidlDir);
             }
-            dwError = WIN32_FROM_HRESULT(hr);
+            dwError = Sys_HRESULTToWin32(hr);
         } else {
             dwError = ERROR_BAD_PATHNAME;
         }
@@ -81,7 +81,7 @@ BOOL NTAPI Shell_GetLinkPath(_In_ PCWSTR LinkFile, _In_ PWSTR Path, _In_ INT Pat
         psl->lpVtbl->Release(psl);
     }
     if (!bRet) {
-        NT_SetLastError(WIN32_FROM_HRESULT(hr));
+        NT_SetLastError(Sys_HRESULTToWin32(hr));
     }
     return bRet;
 }

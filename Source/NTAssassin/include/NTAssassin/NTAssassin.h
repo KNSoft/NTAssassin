@@ -15,12 +15,12 @@
 
 // NTAssassin Options
 
-// NTA_CUSTOMENTRY
+// NTA_CUSTOMENTRY / NTA_NOENTRY
 #ifdef NTA_CUSTOMENTRY
 #pragma comment(linker, "/ENTRY:" NTA_CUSTOMENTRY)
 #endif
 
-#if defined(NTA_CUSTOMENTRY) || (NTA_DLL && NTA_EXPORTS)
+#if defined(NTA_CUSTOMENTRY) || defined(NTA_NOENTRY) || (NTA_DLL && NTA_EXPORTS)
 #if _DEBUG
 #if _DLL
 #pragma comment(lib, "msvcrtd.lib")
@@ -114,7 +114,7 @@
 #include <shellscalingapi.h>
 #include <dwmapi.h>
 #include <Tpcshrd.h>
-#include <dwmapi.h>
+#include <wtsapi32.h>
 
 EXTERN_C_START
 
@@ -131,6 +131,7 @@ EXTERN_C_START
 #pragma comment(lib, "Shlwapi.lib")
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(lib, "UxTheme.lib")
+#pragma comment(lib, "winsta.lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -175,8 +176,6 @@ EXTERN_C_START
 #else
 #define PURGE_HWND(hWnd) (hWnd)
 #endif
-
-#define WIN32_FROM_HRESULT(hr) ((hr & 0xFFFF0000) == MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, 0) || hr == S_OK ? HRESULT_CODE(hr) : ERROR_CAN_NOT_COMPLETE)
 
 // Gets equality of two value after masked
 #define IS_EQUAL_MASKED(val1, val2, mask) (!(((val1) ^ (val2)) & (mask)))
