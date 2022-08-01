@@ -2,7 +2,7 @@
 
 #define CTL_COLORPICKER_COLOR TEXT("NTAssassin.Ctl.ColorPicker")
 
-LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_PAINT && IsWindowEnabled(hWnd)) {
         UI_WINDBPAINT   ps;
         TCHAR           szColor[HEXRGB_CCH];

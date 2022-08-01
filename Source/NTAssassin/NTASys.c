@@ -1,7 +1,7 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-HMODULE hSysDlls[SysDllNameMax] = { NULL };
-PCWSTR  pszSysDllNames[] = {
+static HMODULE hSysDlls[SysDllNameMax] = { NULL };
+static PCWSTR  pszSysDllNames[] = {
     // ntdll.dll always is the first module initialized
     L"kernel32.dll",
     L"user32.dll",

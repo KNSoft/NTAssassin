@@ -123,7 +123,7 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     DLG_RESIZEDPROC pfnResizedProc;
 } DLG_SETRESIZINGSUBCLASS_REF, *PDLG_SETRESIZINGSUBCLASS_REF;
 
-LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_DPICHANGED) {
         PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;
@@ -184,7 +184,7 @@ typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF {
     UINT                        Count;
 } DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF, *PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF;
 
-LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_NOTIFY) {
         PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef = (PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF)dwRefData;
         LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)lParam;

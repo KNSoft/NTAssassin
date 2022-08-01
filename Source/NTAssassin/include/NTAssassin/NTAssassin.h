@@ -101,6 +101,7 @@
 #define SystemLookasideInformation MS_SystemLookasideInformation
 #define SystemCodeIntegrityInformation MS_SystemCodeIntegrityInformation
 #define SystemPolicyInformation MS_SystemPolicyInformation
+#define _OBJECT_INFORMATION_CLASS _MS_OBJECT_INFORMATION_CLASS
 #define OBJECT_INFORMATION_CLASS MS_OBJECT_INFORMATION_CLASS
 #define ObjectBasicInformation MS_ObjectBasicInformation
 #define ObjectTypeInformation MS_ObjectTypeInformation

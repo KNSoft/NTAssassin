@@ -13,7 +13,7 @@ PLDR_DATA_TABLE_ENTRY NTAPI Proc_EnumDlls(_In_ PROC_DLLENUMPROC DllEnumProc, LPA
     return pNode;
 }
 
-BOOL CALLBACK Proc_GetDllByName_EnumDllProc(PLDR_DATA_TABLE_ENTRY pstDll, LPARAM lParam) {
+static BOOL CALLBACK Proc_GetDllByName_EnumDllProc(PLDR_DATA_TABLE_ENTRY pstDll, LPARAM lParam) {
     PUNICODE_STRING pstDllName = (PUNICODE_STRING)lParam;
     return !(
         pstDll->DllBase &&
@@ -29,7 +29,7 @@ PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByName(_In_z_ PCWSTR DllName) {
     return Proc_EnumDlls(Proc_GetDllByName_EnumDllProc, (LPARAM)&stDllName);
 }
 
-BOOL CALLBACK Proc_GetDllByHandle_EnumDllProc(PLDR_DATA_TABLE_ENTRY pstDll, LPARAM lParam) {
+static BOOL CALLBACK Proc_GetDllByHandle_EnumDllProc(PLDR_DATA_TABLE_ENTRY pstDll, LPARAM lParam) {
     return pstDll->DllBase != (HMODULE)lParam;
 }
 
@@ -37,7 +37,7 @@ PLDR_DATA_TABLE_ENTRY NTAPI Proc_GetDllByHandle(_In_ HMODULE DllHandle) {
     return Proc_EnumDlls(Proc_GetDllByHandle_EnumDllProc, (LPARAM)DllHandle);
 }
 
-BOOL CALLBACK Proc_GetDllByAddr_EnumDllProc(PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPARAM Param) {
+static BOOL CALLBACK Proc_GetDllByAddr_EnumDllProc(PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPARAM Param) {
     UINT_PTR Address = Param;
     return !(
         DllLdrEntry->DllBase &&

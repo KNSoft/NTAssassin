@@ -55,12 +55,12 @@ errno_t(__CRTDECL * PFNmemcpy_s)(
     _In_                                                     rsize_t     const _SourceSize
     );
 
-HMODULE hNtDLL = NULL;
-PIMAGE_DATA_DIRECTORY pExportDir = NULL;
-PIMAGE_EXPORT_DIRECTORY pExportTable = NULL;
-PDWORD padwNamesRVA = NULL;
+static HMODULE hNtDLL = NULL;
+static PIMAGE_DATA_DIRECTORY pExportDir = NULL;
+static PIMAGE_EXPORT_DIRECTORY pExportTable = NULL;
+static PDWORD padwNamesRVA = NULL;
 
-PVOID UCRT_GetProcAddr(_In_z_ PCSTR ProcName) {
+static PVOID UCRT_GetProcAddr(_In_z_ PCSTR ProcName) {
     PVOID pFunc = NULL;
     if (!hNtDLL) {
         hNtDLL = Proc_GetNtdllHandle();
@@ -85,35 +85,35 @@ PVOID UCRT_GetProcAddr(_In_z_ PCSTR ProcName) {
     return pFunc;
 }
 
-PFNwcslen pfnwcslen = NULL;
+static PFNwcslen pfnwcslen = NULL;
 _Check_return_ size_t __cdecl UCRT_wcslen(_In_z_ wchar_t const* _String) {
     if (!pfnwcslen)
         pfnwcslen = (PFNwcslen)UCRT_GetProcAddr("wcslen");
     return pfnwcslen(_String);
 }
 
-PFNstrlen pfnstrlen = NULL;
+static PFNstrlen pfnstrlen = NULL;
 _Check_return_ size_t __cdecl UCRT_strlen(_In_z_ char const* _Str) {
     if (!pfnstrlen)
         pfnstrlen = (PFNstrlen)UCRT_GetProcAddr("strlen");
     return pfnstrlen(_Str);
 }
 
-PFNwcscmp pfnwcscmp = NULL;
+static PFNwcscmp pfnwcscmp = NULL;
 _Check_return_ int __cdecl UCRT_wcscmp(_In_z_ wchar_t const* _String1, _In_z_ wchar_t const* _String2) {
     if (!pfnwcscmp)
         pfnwcscmp = (PFNwcscmp)UCRT_GetProcAddr("wcscmp");
     return pfnwcscmp(_String1, _String2);
 }
 
-PFNstrcmp pfnstrcmp = NULL;
+static PFNstrcmp pfnstrcmp = NULL;
 _Check_return_ int __cdecl UCRT_strcmp(_In_z_ char const* _Str1, _In_z_ char const* _Str2) {
     if (!pfnstrcmp)
         pfnstrcmp = (PFNstrcmp)UCRT_GetProcAddr("strcmp");
     return pfnstrcmp(_Str1, _Str2);
 }
 
-PFNvswprintf_s pfnvswprintf_s = NULL;
+static PFNvswprintf_s pfnvswprintf_s = NULL;
 _Success_(return >= 0) int __CRTDECL UCRT_vswprintf_s(
     _Out_writes_(_BufferCount) _Always_(_Post_z_) wchar_t* const _Buffer,
     _In_                                          size_t         const _BufferCount,
@@ -125,7 +125,7 @@ _Success_(return >= 0) int __CRTDECL UCRT_vswprintf_s(
     return pfnvswprintf_s(_Buffer, _BufferCount, _Format, _ArgList);
 }
 
-PFN_vsnprintf pfn_vsnprintf = NULL;
+static PFN_vsnprintf pfn_vsnprintf = NULL;
 _Success_(return >= 0) _Check_return_opt_ int __CRTDECL UCRT__vsnprintf(
     _Out_writes_opt_(_BufferCount) _Post_maybez_ char*       const _Buffer,
     _In_                                        size_t      const _BufferCount,
@@ -137,7 +137,7 @@ _Success_(return >= 0) _Check_return_opt_ int __CRTDECL UCRT__vsnprintf(
     return pfn_vsnprintf(_Buffer, _BufferCount, _Format, _ArgList);
 }
 
-PFNmemset pfnmemset = NULL;
+static PFNmemset pfnmemset = NULL;
 _Post_equal_to_(_Dst)
 _At_buffer_(
     (unsigned char*)_Dst,
@@ -154,7 +154,7 @@ _At_buffer_(
     return pfnmemset(_Dst, _Val, _Size);
 }
 
-PFNmemcpy_s pfnmemcpy_s = NULL;
+static PFNmemcpy_s pfnmemcpy_s = NULL;
 _Success_(return == 0)
 _Check_return_opt_
 errno_t __CRTDECL UCRT_memcpy_s(

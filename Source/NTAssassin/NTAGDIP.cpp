@@ -61,7 +61,7 @@ PGDIP_PATH NTAPI GDIP_CreatePath() {
     return GdipCreatePath(FillModeAlternate, &pPath) == Ok ? (PGDIP_PATH)pPath : NULL;
 }
 
-BOOL NTAPI GDIP_EnumImageEncoders(GDIP_IMGCODECENUMPROC ImgEncEnumProc, LPARAM Param) {
+static BOOL NTAPI GDIP_EnumImageEncoders(GDIP_IMGCODECENUMPROC ImgEncEnumProc, LPARAM Param) {
     BOOL bRet = FALSE;
     UINT uNum, uSize;
     if (GdipGetImageEncodersSize(&uNum, &uSize) == Ok && uNum && uSize) {
@@ -80,7 +80,7 @@ BOOL NTAPI GDIP_EnumImageEncoders(GDIP_IMGCODECENUMPROC ImgEncEnumProc, LPARAM P
     return bRet;
 }
 
-BOOL NTAPI GDIP_EnumImageDecoders(GDIP_IMGCODECENUMPROC ImgDecEnumProc, LPARAM Param) {
+static BOOL NTAPI GDIP_EnumImageDecoders(GDIP_IMGCODECENUMPROC ImgDecEnumProc, LPARAM Param) {
     BOOL bRet = FALSE;
     UINT uNum, uSize;
     if (GdipGetImageDecodersSize(&uNum, &uSize) == Ok && uNum && uSize) {
@@ -119,7 +119,7 @@ typedef struct _GDIP_IMGCODECENUMPARAM {
     BOOL        Found;
 } GDIP_IMGCODECENUMPARAM, *PGDIP_IMGCODECENUMPARAM;
 
-BOOL GDIP_FindCodecEnumProc(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param) {
+static BOOL GDIP_FindCodecEnumProc(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param) {
     PGDIP_IMGCODECENUMPARAM pParam = reinterpret_cast<PGDIP_IMGCODECENUMPARAM>(Param);
     BOOL bRet = TRUE;
     if (Sys_EqualGUID(ImageCodecInfo.FormatID, pParam->FormatCLSID)) {

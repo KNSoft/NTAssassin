@@ -3,16 +3,16 @@
 #define KNS_MAX_VER_CCH 48
 #define KNS_DEFAULT_DLGFONTSIZE 20
 
-PKNS_INFO   lpKNSInfo;
+static PKNS_INFO   lpKNSInfo;
 
-DLGPROC     lpfnMainDlgProc;
-HWND        hMainDlg;
+static DLGPROC     lpfnMainDlgProc;
+static HWND        hMainDlg;
 
-HBRUSH      hbrMainColor;
-HFONT       hFontBig, hFontSmall;
-HCURSOR     hCurArrow, hCurPointer;
-HICON       hIconDefault = NULL;
-WCHAR       szVersion[KNS_MAX_VER_CCH];
+static HBRUSH      hbrMainColor;
+static HFONT       hFontBig, hFontSmall;
+static HCURSOR     hCurArrow, hCurPointer;
+static HICON       hIconDefault = NULL;
+static WCHAR       szVersion[KNS_MAX_VER_CCH];
 
 BOOL NTAPI KNS_GetVersionStringEx(PWSTR StrVersion, UINT ChCount) {
     PKNS_VERSION_INFO   lpstVer = &lpKNSInfo->Version;
@@ -48,7 +48,7 @@ typedef struct _KNS_SETBANNERSUBCLASS_REF {
     LPCWSTR     lpszComment;
 } KNS_SETBANNERSUBCLASS_REF, * PKNS_SETBANNERSUBCLASS_REF;
 
-LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     PKNS_SETBANNERSUBCLASS_REF  pstRef = (PKNS_SETBANNERSUBCLASS_REF)dwRefData;
     RECT                        rcText;
     if (uMsg == WM_PAINT) {
@@ -130,7 +130,7 @@ VOID KNS_SetBannerSubclass(HWND hBanner) {
     UI_Redraw(hBanner);
 }
 
-INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (uMsg == WM_INITDIALOG) {
         hMainDlg = hDlg;
         hbrMainColor = CreateSolidBrush(lpKNSInfo->UI.MainColor);
@@ -200,9 +200,9 @@ VOID NTAPI KNS_OpenHomePage() {
 #define PADDING_X   14
 #define PADDING_Y   20
 
-RECT    rcDlgAbout, rcHomePage;
+static RECT rcDlgAbout, rcHomePage;
 
-INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (uMsg == WM_INITDIALOG) {
         GetClientRect(hDlg, &rcDlgAbout);
         rcHomePage.left = PADDING_X;

@@ -145,7 +145,7 @@ typedef struct _RPROC_TRANSLATEADDRESS {
     UINT    CchOutput;
 } RPROC_TRANSLATEADDRESS, *PRPROC_TRANSLATEADDRESS;
 
-BOOL CALLBACK RProc_TranslateAddress_EnumDllProc(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPARAM Param) {
+static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPARAM Param) {
     PRPROC_TRANSLATEADDRESS pst = (PRPROC_TRANSLATEADDRESS)Param;
     WCHAR                   szDllName[MAX_PATH];
     SIZE_T                  sNameBytes, sReadBytes;

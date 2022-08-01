@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-ULONG ulRandSeed = 0;
+static ULONG ulRandSeed = 0;
 
 ULONG NTAPI Math_Random() {
     return ulRandSeed = RtlRandomEx(&ulRandSeed);

@@ -46,7 +46,7 @@ VOID NTAPI Ctl_DestroyMenuEx(_In_ PCTL_MENU Menus, _In_ UINT Count, HMENU Menu) 
     }
 }
 
-LRESULT NTAPI Ctl_PropertySheetPageDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT NTAPI Ctl_PropertySheetPageDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     TCHAR   szClassName[MAX_CLASSNAME_CCH];
     if (uMsg == WM_CTLCOLORDLG) {
         return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
@@ -64,7 +64,7 @@ LRESULT NTAPI Ctl_PropertySheetPageDialogProc(HWND hDlg, UINT uMsg, WPARAM wPara
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_NOTIFY) {
         LPNMHDR lpnmhdr = (LPNMHDR)lParam;
         INT     iSelected;

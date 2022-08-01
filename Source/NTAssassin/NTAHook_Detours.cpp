@@ -47,7 +47,7 @@
 #define GetModuleHandleW(NULL) IMAGE_BASE
 
 _Ret_maybenull_ _Post_writable_byte_size_(dwSize)
-LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD flAllocationType, _In_ DWORD flProtect) {
+static LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD flAllocationType, _In_ DWORD flProtect) {
     NTSTATUS lStatus = NtAllocateVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, 0, &dwSize, flAllocationType, flProtect);
     if (!NT_SUCCESS(lStatus)) {
         NT_SetLastNTError(lStatus);
@@ -56,7 +56,7 @@ LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dw
     return lpAddress;
 }
 
-SIZE_T WINAPI NTAHookIntl_VirtualQuery(_In_opt_ LPCVOID lpAddress, _Out_writes_bytes_to_(dwLength, return) PMEMORY_BASIC_INFORMATION lpBuffer, _In_ SIZE_T dwLength) {
+static SIZE_T WINAPI NTAHookIntl_VirtualQuery(_In_opt_ LPCVOID lpAddress, _Out_writes_bytes_to_(dwLength, return) PMEMORY_BASIC_INFORMATION lpBuffer, _In_ SIZE_T dwLength) {
     NTSTATUS lStatus;
     SIZE_T ResultLength = 0;
     lStatus = NtQueryVirtualMemory(CURRENT_PROCESS_HANDLE, (LPVOID)lpAddress, MemoryBasicInformation, lpBuffer, dwLength, &ResultLength);
@@ -67,7 +67,7 @@ SIZE_T WINAPI NTAHookIntl_VirtualQuery(_In_opt_ LPCVOID lpAddress, _Out_writes_b
 }
 
 _Success_(return != FALSE)
-BOOL WINAPI NTAHookIntl_VirtualProtect(_In_ LPVOID lpAddress, _In_  SIZE_T dwSize, _In_  DWORD flNewProtect, PDWORD lpflOldProtect) {
+static BOOL WINAPI NTAHookIntl_VirtualProtect(_In_ LPVOID lpAddress, _In_  SIZE_T dwSize, _In_  DWORD flNewProtect, PDWORD lpflOldProtect) {
     NTSTATUS lStatus = NtProtectVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, &dwSize, flNewProtect, lpflOldProtect);
     if (!NT_SUCCESS(lStatus)) {
         NT_SetLastNTError(lStatus);
@@ -83,7 +83,7 @@ _When_(((dwFreeType & (MEM_RELEASE | MEM_DECOMMIT))) == (MEM_RELEASE | MEM_DECOM
     _When_(((dwFreeType & MEM_RELEASE)) != 0 && dwSize != 0,
         __drv_reportError("Passing MEM_RELEASE and a non-zero dwSize parameter to VirtualFree is not allowed. This results in the failure of this call"))
     _Success_(return != FALSE)
-    BOOL WINAPI NTAHookIntl_VirtualFree(LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD dwFreeType) {
+    static BOOL WINAPI NTAHookIntl_VirtualFree(LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD dwFreeType) {
     NTSTATUS lStatus;
     if (!(dwSize) || !(dwFreeType & MEM_RELEASE)) {
         lStatus = NtFreeVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, &dwSize, dwFreeType);
@@ -97,7 +97,7 @@ _When_(((dwFreeType & (MEM_RELEASE | MEM_DECOMMIT))) == (MEM_RELEASE | MEM_DECOM
     return FALSE;
 }
 
-BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_reads_bytes_opt_(dwSize) LPCVOID lpBaseAddress, _In_ SIZE_T dwSize) {
+static BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_reads_bytes_opt_(dwSize) LPCVOID lpBaseAddress, _In_ SIZE_T dwSize) {
     NTSTATUS lStatus = NtFlushInstructionCache(hProcess, (PVOID)lpBaseAddress, dwSize);
     if (!NT_SUCCESS(lStatus)) {
         NT_SetLastNTError(lStatus);
@@ -106,7 +106,7 @@ BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_reads_by
     return TRUE;
 }
 
-BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPCONTEXT lpContext) {
+static BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPCONTEXT lpContext) {
     NTSTATUS lStatus = NtGetContextThread(hThread, lpContext);
     if (!NT_SUCCESS(lStatus)) {
         NT_SetLastNTError(lStatus);
@@ -115,7 +115,7 @@ BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPCONTEXT 
     return TRUE;
 }
 
-BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST CONTEXT* lpContext) {
+static BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST CONTEXT* lpContext) {
     NTSTATUS lStatus = NtSetContextThread(hThread, (PCONTEXT)lpContext);
     if (!NT_SUCCESS(lStatus)) {
         NT_SetLastNTError(lStatus);
@@ -124,7 +124,7 @@ BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST CONTEXT
     return TRUE;
 }
 
-DWORD WINAPI NTAHookIntl_ResumeThread(_In_ HANDLE hThread) {
+static DWORD WINAPI NTAHookIntl_ResumeThread(_In_ HANDLE hThread) {
     ULONG PreviousResumeCount;
     NTSTATUS lStatus = NtResumeThread(hThread, &PreviousResumeCount);
     if (!NT_SUCCESS(lStatus)) {

@@ -1,10 +1,10 @@
 #include "include\NTAssassin\NTAssassin.h"
 
-LPWSTR      pI18NFontName = NULL;
-BOOL        bI18NRTLReading = FALSE;
-PI18N_ITEM  pI18NStringTable = NULL;
-PI18N_ITEM  pI18NDefaultStringTable = NULL;
-USHORT      usI18NStringCount = 0;
+static LPWSTR      pI18NFontName = NULL;
+static BOOL        bI18NRTLReading = FALSE;
+static PI18N_ITEM  pI18NStringTable = NULL;
+static PI18N_ITEM  pI18NDefaultStringTable = NULL;
+static USHORT      usI18NStringCount = 0;
 
 PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT ItemCount, PCWSTR LangName) {
     usI18NStringCount = ItemCount;

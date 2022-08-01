@@ -23,7 +23,7 @@ typedef struct _DPI_APPLYTOCHILD_REF {
     BOOL    bRedrawFontNow;
 } DPI_APPLYTOCHILD_REF, *PDPI_APPLYTOCHILD_REF;
 
-PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
+static PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
 
 BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY) {
     PKUSER_SHARED_DATA pKUSD = NT_GetKUSD();
@@ -61,7 +61,7 @@ VOID NTAPI DPI_ScaleRect(_Inout_ PRECT Rect, _In_ UINT OldDPIX, _In_ UINT NewDPI
     DPI_ScaleInt(&Rect->bottom, OldDPIY, NewDPIY);
 }
 
-BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
+static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
     PDPI_APPLYTOCHILD_REF pstRef = (PDPI_APPLYTOCHILD_REF)lParam;
     BOOL bNeedsRedraw = FALSE;
     if (pstRef->bUpdateFont) {
@@ -97,7 +97,7 @@ BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
     return TRUE;
 }
 
-LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_DPICHANGED) {
         PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;

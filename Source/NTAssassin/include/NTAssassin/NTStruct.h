@@ -52,6 +52,7 @@
 #undef SystemLookasideInformation
 #undef SystemCodeIntegrityInformation
 #undef SystemPolicyInformation
+#undef _OBJECT_INFORMATION_CLASS
 #undef OBJECT_INFORMATION_CLASS
 #undef ObjectBasicInformation
 #undef ObjectTypeInformation
@@ -1416,13 +1417,13 @@ typedef struct _SYSTEM_THREAD_INFORMATION {
     ULONG PadPadAlignment;
 } SYSTEM_THREAD_INFORMATION, *PSYSTEM_THREAD_INFORMATION;
 
-typedef enum _OBJECT_INFO_CLASS {
+typedef enum _OBJECT_INFORMATION_CLASS {
     ObjectBasicInformation,
     ObjectNameInformation,
     ObjectTypeInformation,
     ObjectAllTypesInformation,
     ObjectHandleInformation
-} OBJECT_INFO_CLASS, *POBJECT_INFO_CLASS;
+} OBJECT_INFORMATION_CLASS, *POBJECT_INFORMATION_CLASS;
 
 typedef enum _MEMORY_INFORMATION_CLASS {
     MemoryBasicInformation,

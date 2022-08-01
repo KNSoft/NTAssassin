@@ -80,7 +80,7 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(Buffer
     return uFileSize;
 }
 
-VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW FontInfo) {
+static VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW FontInfo) {
     FontInfo->elfEnumLogfontEx.elfFullName[0] = FontInfo->elfEnumLogfontEx.elfStyle[0] = FontInfo->elfEnumLogfontEx.elfScript[0] = '\0';
     FontInfo->elfDesignVector.dvReserved = STAMP_DESIGNVECTOR;
     FontInfo->elfDesignVector.dvNumAxes = 0;
