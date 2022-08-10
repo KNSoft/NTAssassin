@@ -673,19 +673,19 @@ _Success_(return == TRUE)
 BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Dest, _In_ SIZE_T DestCchSize) {
     PWSTR   psz;
     WCHAR   ch;
-    UINT    uCh = 6;
+    UINT    uCh;
     DWORD   dwColor = Color;
     if (DestCchSize < HEXRGB_CCH)
         return FALSE;
     psz = Dest;
     *psz++ = '#';
-    psz[uCh] = '\0';
-    do {
+    for (uCh = 0; uCh < 6; uCh++) {
         ch = (WCHAR)(dwColor & 0xF);
         ch += ch <= 9 ? '0' : ('A' - 0xA);
-        psz[--uCh] = ch;
+        psz[uCh] = ch;
         dwColor >>= 4;
-    } while (uCh);
+    }
+    psz[uCh] = '\0';
     return TRUE;
 }
 

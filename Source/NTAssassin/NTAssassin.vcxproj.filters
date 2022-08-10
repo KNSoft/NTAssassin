@@ -108,6 +108,9 @@
     <ClCompile Include="Precomp4C.Output.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NTAWS.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTACon.h">
@@ -219,6 +222,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Precomp4C.Output.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAWS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

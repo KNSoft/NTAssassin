@@ -193,3 +193,7 @@ VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size) {
     }
 }
 
+BOOL NTAPI UI_AllowDrop(HWND Window) {
+    return ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD) &&
+        ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
+}

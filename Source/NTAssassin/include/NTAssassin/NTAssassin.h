@@ -106,6 +106,7 @@
 #define ObjectBasicInformation MS_ObjectBasicInformation
 #define ObjectTypeInformation MS_ObjectTypeInformation
 
+#define _WINSOCKAPI_
 #include <Windows.h>
 #include <Winternl.h>
 #include <WindowsX.h>
@@ -116,6 +117,7 @@
 #include <dwmapi.h>
 #include <Tpcshrd.h>
 #include <wtsapi32.h>
+#include <WinSock2.h>
 
 EXTERN_C_START
 
@@ -133,6 +135,7 @@ EXTERN_C_START
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(lib, "UxTheme.lib")
 #pragma comment(lib, "winsta.lib")
+#pragma comment(lib, "ws2_32.lib")
 
 // Always use ComCtl32.dll V6.0
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -259,5 +262,6 @@ EXTERN_C_START
 #include "NTAGDIP.h"
 #include "NTAHook.h"
 #include "NTAShell.h"
+#include "NTAWS.h"
 
 EXTERN_C_END
