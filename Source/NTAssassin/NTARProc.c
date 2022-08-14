@@ -100,7 +100,7 @@ HANDLE NTAPI RProc_OpenThread(DWORD DesiredAccess, DWORD ThreadId) {
     return hThread;
 }
 
-BOOL NTAPI RProc_AdjustPrivilege(HANDLE ProcessHandle, RPROC_LM_SE_NAMES Privilege, BOOL EnableState) {
+BOOL NTAPI RProc_AdjustPrivilege(HANDLE ProcessHandle, SE_PRIVILEGE Privilege, BOOL EnableState) {
     HANDLE              hToken;
     TOKEN_PRIVILEGES    stTokenPrivilege;
     NTSTATUS            lStatus;

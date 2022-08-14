@@ -392,6 +392,18 @@ NtOpenProcessToken(
     _Out_ PHANDLE       TokenHandle
 );
 
+_Must_inspect_result_ __kernel_entry
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtQueryInformationToken(
+    _In_ HANDLE TokenHandle,
+    _In_ TOKEN_INFORMATION_CLASS TokenInformationClass,
+    _Out_writes_bytes_to_opt_(TokenInformationLength, *ReturnLength) PVOID TokenInformation,
+    _In_ ULONG TokenInformationLength,
+    _Out_ PULONG ReturnLength
+);
+
 NTSYSAPI
 NTSTATUS
 NTAPI
