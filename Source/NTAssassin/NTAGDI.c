@@ -1,4 +1,6 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAGDI.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTAUI.h"
 
 BOOL NTAPI GDI_FillSolidRect(HDC DC, _In_ PRECT Rect, COLORREF Color) {
     COLORREF    crPrev = SetBkColor(DC, Color);

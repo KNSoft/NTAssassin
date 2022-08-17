@@ -1,4 +1,6 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAProc.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAStr.h"
 
 PLDR_DATA_TABLE_ENTRY NTAPI Proc_EnumDlls(_In_ PROC_DLLENUMPROC DllEnumProc, LPARAM Param) {
     PLDR_DATA_TABLE_ENTRY pHead, pNode;

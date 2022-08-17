@@ -1,4 +1,6 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAFile.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAMem.h"
 
 HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions) {
     UNICODE_STRING      stString;

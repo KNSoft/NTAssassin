@@ -1,4 +1,5 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTAUCRT.h"
 
 // String Length and Size
 
@@ -65,15 +66,17 @@ INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2) {
 }
 
 // String Format
-
+_Success_(return >= 0)
 INT NTAPI Str_VPrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList) {
     return UCRT_vswprintf_s(Dest, DestCchSize, Format, ArgList);
 }
 
+_Success_(return >= 0)
 INT NTAPI Str_VPrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
     return UCRT__vsnprintf(Dest, DestCchSize, Format, ArgList);
 }
 
+_Success_(return >= 0)
 INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, ...) {
     va_list args;
     va_start(args, Format);
@@ -82,6 +85,7 @@ INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestC
     return i;
 }
 
+_Success_(return >= 0)
 INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, ...) {
     va_list args;
     va_start(args, Format);

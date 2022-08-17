@@ -1,4 +1,5 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAList.h"
+#include "include\NTAssassin\NTAMem.h"
 
 VOID NTAPI Data_ListInit(_Out_ PDATA_LIST DataList) {
     DataList->First = DataList->Last = NULL;

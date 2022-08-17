@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAMath.h"
 
 static ULONG ulRandSeed = 0;
 

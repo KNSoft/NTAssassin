@@ -1,4 +1,10 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAKNS.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTAMem.h"
+#include "include\NTAssassin\NTADPI.h"
+#include "include\NTAssassin\NTAShell.h"
+#include "include\NTAssassin\NTASys.h"
 
 #define KNS_MAX_VER_CCH 48
 #define KNS_DEFAULT_DLGFONTSIZE 20
@@ -93,7 +99,7 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
                 DestroyIcon(pstRef->hIcon);
             stIconInfo.fIcon = TRUE;
             stIconInfo.xHotspot = 0;
-            if (pstRef->hIcon = LoadImageW(IMAGE_BASE, MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, pstRef->lHeight * KNS_BANNER_ICON_SCALE, pstRef->lHeight * KNS_BANNER_ICON_SCALE, 0))
+            if (pstRef->hIcon = LoadImageW(NT_GetImageBase(), MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, pstRef->lHeight * KNS_BANNER_ICON_SCALE, pstRef->lHeight * KNS_BANNER_ICON_SCALE, 0))
                 if (GetIconInfo(pstRef->hIcon, &stIconInfo)) {
                     pstRef->lIconHotspot = stIconInfo.xHotspot;
                     DeleteObject(stIconInfo.hbmMask);
@@ -163,10 +169,10 @@ INT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
     if (!KNS_GetVersionString(szVersion))
         szVersion[0] = '\0';
     if (lpKNSInfo->UI.IconResID != -1)
-        hIconDefault = LoadImageW(IMAGE_BASE, MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, 0, 0, 0);
+        hIconDefault = LoadImageW(NT_GetImageBase(), MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, 0, 0, 0);
     hFontBig = I18N_CreateFont(ICON_SIDE, FW_NORMAL);
     hFontSmall = I18N_CreateFont(ICON_SIDE / 2, FW_NORMAL);
-    return DialogBoxParamW(IMAGE_BASE, MAKEINTRESOURCEW(KNSInfo->UI.DlgResID), NULL, KNS_DlgProc, 0);
+    return DialogBoxParamW(NT_GetImageBase(), MAKEINTRESOURCEW(KNSInfo->UI.DlgResID), NULL, KNS_DlgProc, 0);
 }
 
 INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type) {

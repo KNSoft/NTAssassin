@@ -1,4 +1,8 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTADlg.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTADPI.h"
+#include "include\NTAssassin\NTASys.h"
 
 #define DRE_MAX_NUM_CCH 16
 #define DRE_ITEM_W      64

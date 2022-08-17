@@ -251,10 +251,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTACon.h" />
+    <ClInclude Include="include\NTAssassin\NTAConst.h" />
     <ClInclude Include="include\NTAssassin\NTACtl.h" />
     <ClInclude Include="include\NTAssassin\NTACtl_ColorPicker.h" />
     <ClInclude Include="include\NTAssassin\NTAData.h" />
     <ClInclude Include="include\NTAssassin\NTADbg.h" />
+    <ClInclude Include="include\NTAssassin\NTADef.h" />
+    <ClInclude Include="include\NTAssassin\NTADepends.h" />
     <ClInclude Include="include\NTAssassin\NTADlg.h" />
     <ClInclude Include="include\NTAssassin\NTADlg_RectEditor.h" />
     <ClInclude Include="include\NTAssassin\NTADlg_ValueEditor.h" />
@@ -268,9 +271,11 @@
     <ClInclude Include="include\NTAssassin\NTAIO.h" />
     <ClInclude Include="include\NTAssassin\NTAKNS.h" />
     <ClInclude Include="include\NTAssassin\NTAList.h" />
+    <ClInclude Include="include\NTAssassin\NTAMacro.h" />
     <ClInclude Include="include\NTAssassin\NTAMath.h" />
     <ClInclude Include="include\NTAssassin\NTAMem.h" />
     <ClInclude Include="include\NTAssassin\NTANT.h" />
+    <ClInclude Include="include\NTAssassin\NTAOptions.h" />
     <ClInclude Include="include\NTAssassin\NTAPE.h" />
     <ClInclude Include="include\NTAssassin\NTAPI.h" />
     <ClInclude Include="include\NTAssassin\NTAProc.h" />
@@ -288,6 +293,9 @@
     <ClInclude Include="include\NTAssassin\NTTypes.h" />
     <ClInclude Include="include\NTAssassin\NTAOpCode.h" />
     <ClInclude Include="Precomp4C.Output.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

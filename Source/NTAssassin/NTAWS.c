@@ -1,4 +1,5 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAWS.h"
+#include "include\NTAssassin\NTANT.h"
 
 BOOL NTAPI WS_Startup() {
     WORD wVersionRequested = MAKEWORD(2, 2);

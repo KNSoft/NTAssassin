@@ -16,6 +16,9 @@
     <Filter Include="Header Files\NTDef">
       <UniqueIdentifier>{3cece7a0-828d-4d20-90b2-daa1fd49a902}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\NTABase">
+      <UniqueIdentifier>{30a7e2f4-4210-4b4d-9ea8-366632e0423e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NTACon.c">
@@ -227,5 +230,23 @@
     <ClInclude Include="include\NTAssassin\NTAWS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAConst.h">
+      <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTADef.h">
+      <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAOptions.h">
+      <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTADepends.h">
+      <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAMacro.h">
+      <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
   </ItemGroup>
 </Project>

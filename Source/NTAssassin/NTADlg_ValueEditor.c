@@ -1,4 +1,9 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTADlg_ValueEditor.h"
+#include "include\NTAssassin\NTACtl.h"
+#include "include\NTAssassin\NTADlg.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTADPI.h"
 
 #define PADDING_X   14
 #define PADDING_Y   20

@@ -1,4 +1,9 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAHijack.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTARProc.h"
+#include "include\NTAssassin\NTAProc.h"
+
 #include "Precomp4C.Output.h"
 
 //  [STRING_ALIGNMENT]
@@ -191,6 +196,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     usTotalSize = sizeof(HIJACK_CALLPROCHEADER) + sizeof(HIJACK_CALLPROCPARAM) * uParamCount;
     pParam = Params;
     for (i = 0; i < uParamCount; i++) {
+        _Analysis_assume_(pParam != NULL);
         usTotalSize += BYTE_ALIGN(pParam[i].Size, STRING_ALIGNMENT);
     }
     pRemoteBuffer = NULL;

@@ -1,4 +1,7 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAShell.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTASys.h"
 
 BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle) {
     SHELLEXECUTEINFOW   stSEIW = { sizeof(SHELLEXECUTEINFOW) };

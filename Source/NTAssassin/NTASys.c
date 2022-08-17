@@ -1,4 +1,9 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTASys.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAProc.h"
+#include "include\NTAssassin\NTADlg.h"
+#include "include\NTAssassin\NTAMem.h"
+#include "include\NTAssassin\NTAStr.h"
 
 static HMODULE hSysDlls[SysDllNameMax] = { NULL };
 static PCWSTR  pszSysDllNames[] = {
@@ -17,7 +22,7 @@ static PCWSTR  pszSysDllNames[] = {
 HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll) {
     if (SysDll >= 0 && SysDll < SysDllNameMax) {
         if (!hSysDlls[SysDll]) {
-            hSysDlls[SysDll] = SysDll == SysDllNameNTDll ? Proc_GetNtdllHandle() : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
+            hSysDlls[SysDll] = SysDll == SysDllNameNTDll ? NT_GetNtdllHandle() : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
         }
         return hSysDlls[SysDll];
     } else {
@@ -53,7 +58,7 @@ PCWSTR NTAPI Sys_GetErrorInfo(DWORD Error) {
 }
 
 PCWSTR NTAPI Sys_GetStatusInfo(NTSTATUS Status) {
-    return Sys_GetMessage(Proc_GetNtdllHandle(), Status);
+    return Sys_GetMessage(NT_GetNtdllHandle(), Status);
 }
 
 PCWSTR NTAPI Sys_GetStatusErrorInfo(NTSTATUS Status) {

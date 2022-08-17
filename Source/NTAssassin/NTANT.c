@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTANT.h"
 
 DWORD NTAPI NT_SetLastNTError(NTSTATUS Status) {
     DWORD dwErrCode;

@@ -1,4 +1,7 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAI18N.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTAGDI.h"
+#include "include\NTAssassin\NTAUI.h"
 
 static LPWSTR      pI18NFontName = NULL;
 static BOOL        bI18NRTLReading = FALSE;
@@ -21,14 +24,14 @@ VOID NTAPI I18N_SetLocale(PI18N_LANGUAGE Lang) {
 }
 
 PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR LangName) {
-    WCHAR   wcName[MAX_LOCALENAME_CCH];
+    WCHAR   wcName[LOCALE_NAME_MAX_LENGTH];
     PCWSTR  pszLangName;
     int     iCchName;
 
     // Use user default language instead when lpszName is NULL
     if (LangName) {
         pszLangName = LangName;
-        iCchName = MAX_LOCALENAME_CCH;
+        iCchName = LOCALE_NAME_MAX_LENGTH;
     } else {
         iCchName = GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, LOCALE_SNAME, wcName, ARRAYSIZE(wcName));
         if (iCchName == 0 || wcName[0] == '\0')

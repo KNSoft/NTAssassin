@@ -1,4 +1,5 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAUCRT.h"
+#include "include\NTAssassin\NTANT.h"
 
 #pragma warning(disable: 6001)
 
@@ -63,7 +64,7 @@ static PDWORD padwNamesRVA = NULL;
 static PVOID UCRT_GetProcAddr(_In_z_ PCSTR ProcName) {
     PVOID pFunc = NULL;
     if (!hNtDLL) {
-        hNtDLL = Proc_GetNtdllHandle();
+        hNtDLL = NT_GetNtdllHandle();
         pExportDir = &MOVE_PTR(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
         pExportTable = MOVE_PTR(hNtDLL, pExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
         padwNamesRVA = MOVE_PTR(hNtDLL, pExportTable->AddressOfNames, DWORD);

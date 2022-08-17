@@ -1,4 +1,6 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAIO.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAStr.h"
 
 BOOL NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, _In_reads_bytes_(Length) PVOID Buffer, ULONG Length) {
     IO_STATUS_BLOCK stIOStatus;

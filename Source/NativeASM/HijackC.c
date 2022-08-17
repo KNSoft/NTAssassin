@@ -1,7 +1,8 @@
-#include "..\NTAssassin\include\NTAssassin\NTAssassin.h"
+#include "..\NTAssassin\include\NTAssassin\NTADef.h"
+#include "..\NTAssassin\include\NTAssassin\NTANT.h"
 
 NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
-    PVOID* ppProc;
+    PVOID*      ppProc;
     PWSTR       pszLib;
     PSTR        pszProc;
     PWORD       pwOrd;
@@ -63,7 +64,7 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     }
 
     // Start to load
-    HMODULE hDLL = NULL, hNtDLL = Proc_GetNtdllHandle();
+    HMODULE hDLL = NULL, hNtDLL = NT_GetNtdllHandle();
     // Get DLL handle if already loaded
     PLDR_DATA_TABLE_ENTRY pLdrNodeHead, pLdrNode;
     pLdrNodeHead = CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
@@ -73,9 +74,9 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
             for (iCch = 0; iCch < iCchLib; iCch++) {
                 if (
                     pszLib[iCch] != pLdrNode->BaseDllName.Buffer[iCch] && (
-                        (pszLib[iCch] >= 'a' && pszLib[iCch] <= 'z' && pszLib[iCch] - ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch]) ||
-                        (pszLib[iCch] >= 'A' && pszLib[iCch] <= 'Z' && pszLib[iCch] + ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch])
-                        )
+                    (pszLib[iCch] >= 'a' && pszLib[iCch] <= 'z' && pszLib[iCch] - ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch]) ||
+                    (pszLib[iCch] >= 'A' && pszLib[iCch] <= 'Z' && pszLib[iCch] + ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch])
+                    )
                     )
                     break;
             }
@@ -117,13 +118,13 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
             *MOVE_PTR(pdwFuncName, 7, DWORD) == ('llD'))
             ppLdrFunc = (PVOID*)&pLdrLoadDll;
         else if (pszProc && !pLdrGetProcedureAddress &&
-            pdwFuncName[0] == ('GrdL') &&
-            pdwFuncName[1] == ('rPte') &&
-            pdwFuncName[2] == ('deco') &&
-            *MOVE_PTR(pdwFuncName, 11, DWORD) == ('erud') &&
-            *MOVE_PTR(pdwFuncName, 15, DWORD) == ('rddA') &&
-            *MOVE_PTR(pdwFuncName, 19, DWORD) == ('sse')
-            )
+                 pdwFuncName[0] == ('GrdL') &&
+                 pdwFuncName[1] == ('rPte') &&
+                 pdwFuncName[2] == ('deco') &&
+                 *MOVE_PTR(pdwFuncName, 11, DWORD) == ('erud') &&
+                 *MOVE_PTR(pdwFuncName, 15, DWORD) == ('rddA') &&
+                 *MOVE_PTR(pdwFuncName, 19, DWORD) == ('sse')
+                 )
             ppLdrFunc = (PVOID*)&pLdrGetProcedureAddress;
         if (ppLdrFunc) {
             // LdrLoadDll and LdrGetProcedureAddress are not forward thunks

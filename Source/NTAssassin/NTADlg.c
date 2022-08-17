@@ -1,4 +1,8 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTADlg.h"
+#include "include\NTAssassin\NTAGDI.h"
+#include "include\NTAssassin\NTADPI.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTAMem.h"
 
 LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(_Out_ PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
     Template->wMenu = Template->wClass = Template->wTitle = Template->Template.cdit = 0;
@@ -62,19 +66,21 @@ BOOL NTAPI Dlg_ChooseColor(HWND Owner, _Inout_ LPCOLORREF Color) {
     return bRet;
 }
 
-BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Out_ PLOGFONTW Font, _Inout_opt_ LPCOLORREF Color) {
+BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt_ LPCOLORREF Color) {
     CHOOSEFONTW stChooseFontW = { sizeof(CHOOSEFONTW) };
     BOOL        bRet;
     stChooseFontW.hwndOwner = Owner;
+    DWORD dwFlags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_SELECTSCRIPT;
     if (Color) {
-        stChooseFontW.Flags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_EFFECTS;
+        dwFlags |= CF_EFFECTS;
         stChooseFontW.rgbColors = *Color;
-    } else
-        stChooseFontW.Flags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST;
+    }
+    stChooseFontW.Flags = dwFlags;
     stChooseFontW.lpLogFont = Font;
     bRet = ChooseFontW(&stChooseFontW);
-    if (bRet && Color)
+    if (bRet && Color) {
         *Color = stChooseFontW.rgbColors;
+    }
     return bRet;
 }
 
@@ -121,7 +127,7 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     DWORD           dwOldDPIX;
     DWORD           dwOldDPIY;
     DLG_RESIZEDPROC pfnResizedProc;
-} DLG_SETRESIZINGSUBCLASS_REF, *PDLG_SETRESIZINGSUBCLASS_REF;
+} DLG_SETRESIZINGSUBCLASS_REF, * PDLG_SETRESIZINGSUBCLASS_REF;
 
 static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_DPICHANGED) {
@@ -182,7 +188,7 @@ typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF {
     RECT                        SheetRect;
     PDLG_TREEVIEWPROPSHEETPAGE  Sheets;
     UINT                        Count;
-} DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF, *PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF;
+} DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF, * PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF;
 
 static LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_NOTIFY) {

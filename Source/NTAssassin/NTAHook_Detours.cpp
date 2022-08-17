@@ -44,7 +44,7 @@
 #define SetLastError NT_SetLastError
 #define GetLastError NT_GetLastError
 
-#define GetModuleHandleW(NULL) IMAGE_BASE
+#define GetModuleHandleW(NULL) NT_GetImageBase()
 
 _Ret_maybenull_ _Post_writable_byte_size_(dwSize)
 static LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD flAllocationType, _In_ DWORD flProtect) {

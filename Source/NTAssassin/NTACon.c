@@ -1,4 +1,5 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTACon.h"
+#include "include\NTAssassin\NTAStr.h"
 
 DWORD NTAPI Con_Write(HANDLE ConHandle, _In_reads_bytes_opt_(Length) PVOID Buffer, _In_ ULONG Length) {
     IO_STATUS_BLOCK IOStatus;

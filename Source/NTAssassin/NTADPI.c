@@ -1,4 +1,11 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTADPI.h"
+#include "include\NTAssassin\NTASys.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAProc.h"
+#include "include\NTAssassin\NTAMath.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTAMem.h"
+#include "include\NTAssassin\NTAGDI.h"
 
 typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
     DWORD   dwNewDPIX;

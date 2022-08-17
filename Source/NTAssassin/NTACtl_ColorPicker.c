@@ -1,4 +1,8 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTACtl.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTADlg.h"
+#include "include\NTAssassin\NTAStr.h"
+#include "include\NTAssassin\NTAGDI.h"
 
 #define CTL_COLORPICKER_COLOR TEXT("NTAssassin.Ctl.ColorPicker")
 

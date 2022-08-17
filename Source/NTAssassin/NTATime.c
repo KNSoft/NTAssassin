@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTATime.h"
 
 ULONGLONG NTAPI Time_StopWatch100nm(ULONGLONG PrevTime) {
     LARGE_INTEGER li;

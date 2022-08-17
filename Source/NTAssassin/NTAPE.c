@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAPE.h"
 
 _Success_(return != FALSE)
 BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap, SIZE_T OfflineMapFileSize) {

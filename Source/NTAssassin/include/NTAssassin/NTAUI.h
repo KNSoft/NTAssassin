@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
 
 #define UI_NONOTIFYPROP TEXT("NTAssassin.UI.NoNotify")
 

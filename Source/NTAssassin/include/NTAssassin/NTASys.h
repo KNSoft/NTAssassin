@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
+#include "NTANT.h"
 
 typedef enum _SYS_DLL_NAME {
     SysDllNameNTDll = 0,

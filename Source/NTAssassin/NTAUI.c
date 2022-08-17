@@ -1,4 +1,6 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAUI.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTARProc.h"
 
 HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint) {
     Paint->DC = CreateCompatibleDC(BeginPaint(Window, &Paint->Paint));

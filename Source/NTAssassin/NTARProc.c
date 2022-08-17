@@ -1,4 +1,6 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTARProc.h"
+#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAStr.h"
 
 BOOL NTAPI RProc_EnumDlls(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC DllEnumProc, LPARAM Param) {
     NTSTATUS                    lStatus;

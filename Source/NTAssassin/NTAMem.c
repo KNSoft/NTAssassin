@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTAMem.h"
 
 _Ret_maybenull_ _Post_writable_byte_size_(Size) _Check_return_
 PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect) {

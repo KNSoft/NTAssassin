@@ -1,19 +1,20 @@
 ﻿#pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
+#include "NTANT.h"
 
 /// <summary>
 /// Allocates heap memory
 /// </summary>
 /// <seealso cref="RtlAllocateHeap"/>
-#define Mem_HeapAllocEx(Flags, Size) RtlAllocateHeap(DEFAULT_HEAP_HANDLE, Flags, Size)
-#define Mem_HeapAlloc(Size) RtlAllocateHeap(DEFAULT_HEAP_HANDLE, 0, Size)
+#define Mem_HeapAllocEx(Flags, Size) RtlAllocateHeap(NT_GetHeap(), Flags, Size)
+#define Mem_HeapAlloc(Size) RtlAllocateHeap(NT_GetHeap(), 0, Size)
 
 /// <summary>
 /// Frees heap memory
 /// </summary>
 /// <seealso cref="RtlFreeHeap"/>
-#define Mem_HeapFree(BaseAddress) RtlFreeHeap(DEFAULT_HEAP_HANDLE, 0, BaseAddress)
+#define Mem_HeapFree(BaseAddress) RtlFreeHeap(NT_GetHeap(), 0, BaseAddress)
 
 /// <summary>
 /// Allocates memory pages

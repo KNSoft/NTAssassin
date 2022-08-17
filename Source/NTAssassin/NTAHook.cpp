@@ -1,4 +1,4 @@
-﻿#include "include\NTAssassin\NTAssassin.h"
+﻿#include "include\NTAssassin\NTAHook.h"
 
 // Hook by using Detours
 #include "NTAHook_Detours.cpp"

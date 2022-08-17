@@ -1,4 +1,7 @@
-﻿#include "include\NTAssassin\NTAssassin.h"
+﻿#include "include\NTAssassin\NTAGDIP.h"
+#include "include\NTAssassin\NTAMem.h"
+#include "include\NTAssassin\NTASys.h"
+
 #include <gdiplus.h>
 
 #pragma warning(disable: 26812)
