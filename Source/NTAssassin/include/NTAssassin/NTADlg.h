@@ -109,10 +109,9 @@ typedef VOID(CALLBACK* DLG_RESIZEDPROC)(HWND Dialog, LONG NewWidth, LONG NewHeig
 /// Subclasses a dialog box to help support of resizing
 /// </summary>
 /// <param name="Dialog">Handle to the dialog box</param>
-/// <param name="MinWidth">Minimum width of window, set to 0 will no limitation</param>
-/// <param name="MinHeight">Minimum height of window, set to 0 will no limitation</param>
+/// <param name="MinLimit">Use current size as minimum size of window, set to FALSE will no limitation</param>
 /// <param name="ResizedProc">Callback procedure will be invoked when the size of dialog box changed</param>
 /// <returns>TRUE if succeeded, or FALSE if failed, no error code reports due to SetWindowSubclass does</returns>
-NTA_API BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, LONG MinWidth, LONG MinHeight, DLG_RESIZEDPROC ResizedProc);
+NTA_API BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC ResizedProc);
 
 NTA_API BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PRECT SheetRect, _In_ PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count);

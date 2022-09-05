@@ -237,6 +237,8 @@
     <ClCompile Include="NTAMath.c" />
     <ClCompile Include="NTAMem.c" />
     <ClCompile Include="NTANT.c" />
+    <ClCompile Include="NTANT_Reg.c" />
+    <ClCompile Include="NTANT_Sec.c" />
     <ClCompile Include="NTAPE.c" />
     <ClCompile Include="NTAProc.c" />
     <ClCompile Include="NTARProc.c" />
@@ -247,6 +249,7 @@
     <ClCompile Include="NTAUCRT.c" />
     <ClCompile Include="NTAUI.c" />
     <ClCompile Include="NTAWS.c" />
+    <ClCompile Include="NTObject.c" />
     <ClCompile Include="Precomp4C.Output.c" />
   </ItemGroup>
   <ItemGroup>
@@ -285,13 +288,18 @@
     <ClInclude Include="include\NTAssassin\NTAStr.h" />
     <ClInclude Include="include\NTAssassin\NTASys.h" />
     <ClInclude Include="include\NTAssassin\NTATime.h" />
+    <ClInclude Include="include\NTAssassin\NTATypes.h" />
     <ClInclude Include="include\NTAssassin\NTAUCRT.h" />
     <ClInclude Include="include\NTAssassin\NTAUI.h" />
     <ClInclude Include="include\NTAssassin\NTAWS.h" />
     <ClInclude Include="include\NTAssassin\NTConst.h" />
+    <ClInclude Include="include\NTAssassin\NT_MSTSTS.h" />
+    <ClInclude Include="include\NTAssassin\NT_NTDDK.h" />
+    <ClInclude Include="include\NTAssassin\NTObject.h" />
     <ClInclude Include="include\NTAssassin\NTStruct.h" />
     <ClInclude Include="include\NTAssassin\NTTypes.h" />
     <ClInclude Include="include\NTAssassin\NTAOpCode.h" />
+    <ClInclude Include="include\NTAssassin\NT_R3Shared.h" />
     <ClInclude Include="Precomp4C.Output.h" />
   </ItemGroup>
   <ItemGroup>

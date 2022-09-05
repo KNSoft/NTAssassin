@@ -1,6 +1,11 @@
 #include "..\NTAssassin\include\NTAssassin\NTADef.h"
 #include "..\NTAssassin\include\NTAssassin\NTANT.h"
 
+// Override project settings as far as possible
+#pragma check_stack( off )
+#pragma strict_gs_check( push, off )
+#pragma runtime_checks( "", off )
+
 NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     PVOID*      ppProc;
     PWSTR       pszLib;

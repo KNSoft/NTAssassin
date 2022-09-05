@@ -1,8 +1,10 @@
 #include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTARProc.h"
+#include "include\NTAssassin\NTAMem.h"
 
 DWORD NTAPI NT_SetLastNTError(NTSTATUS Status) {
     DWORD dwErrCode;
-    dwErrCode = RtlNtStatusToDosError(Status);
+    dwErrCode = RtlNtStatusToDosErrorNoTeb(Status);
     NT_SetLastError(dwErrCode);
     return dwErrCode;
 }

@@ -4,14 +4,17 @@
 
 PLDR_DATA_TABLE_ENTRY NTAPI Proc_EnumDlls(_In_ PROC_DLLENUMPROC DllEnumProc, LPARAM Param) {
     PLDR_DATA_TABLE_ENTRY pHead, pNode;
+    RtlEnterCriticalSection(NT_GetPEB()->LoaderLock);
     pHead = CONTAINING_RECORD(NT_GetPEB()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
     pNode = pHead;
     while (DllEnumProc(pNode, Param)) {
         pNode = CONTAINING_RECORD(pNode->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
         if (pNode == pHead) {
-            return NULL;
+            pNode = NULL;
+            break;
         }
     }
+    RtlLeaveCriticalSection(NT_GetPEB()->LoaderLock);
     return pNode;
 }
 
@@ -69,6 +72,7 @@ PVOID NTAPI Proc_GetProcAddr(_In_ HMODULE Module, _In_z_ PCSTR ProcName) {
     PANSI_STRING    pstProcName;
     ULONG           ulProcOrd;
     PVOID           pProc;
+    NTSTATUS        lStatus;
     if ((UINT_PTR)ProcName > MAXWORD) {
         ANSI_STRING stProcName;
         stProcName.Length = (USHORT)Str_LenA(ProcName);
@@ -80,7 +84,13 @@ PVOID NTAPI Proc_GetProcAddr(_In_ HMODULE Module, _In_z_ PCSTR ProcName) {
         pstProcName = NULL;
         ulProcOrd = (ULONG)(ULONG_PTR)ProcName;
     }
-    return NT_SUCCESS(LdrGetProcedureAddress(Module, pstProcName, ulProcOrd, &pProc)) ? pProc : NULL;
+    lStatus = LdrGetProcedureAddress(Module, pstProcName, ulProcOrd, &pProc);
+    if (NT_SUCCESS(lStatus)) {
+        return pProc;
+    } else {
+        NT_SetLastStatus(lStatus);
+        return NULL;
+    }
 }
 
 PVOID NTAPI Proc_LoadProcAddr(_In_z_ PCWSTR LibName, _In_z_ PCSTR ProcName) {

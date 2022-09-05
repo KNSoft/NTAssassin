@@ -226,7 +226,7 @@ BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MA
 }
 
 VOID NTAPI File_Unmap(_In_ PFILE_MAP FileMap) {
-    NTSTATUS lStatus = NtUnmapViewOfSection(CURRENT_PROCESS_HANDLE, FileMap->Map);
+    NtUnmapViewOfSection(CURRENT_PROCESS_HANDLE, FileMap->Map);
     NtClose(FileMap->SectionHandle);
     NtClose(FileMap->FileHandle);
 }

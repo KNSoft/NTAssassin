@@ -126,7 +126,7 @@ static BOOL GDIP_FindCodecEnumProc(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARA
     PGDIP_IMGCODECENUMPARAM pParam = reinterpret_cast<PGDIP_IMGCODECENUMPARAM>(Param);
     BOOL bRet = TRUE;
     if (Sys_EqualGUID(ImageCodecInfo.FormatID, pParam->FormatCLSID)) {
-        Sys_CopyGUID(pParam->OutCLSID, ImageCodecInfo.Clsid);
+        *(pParam->OutCLSID) = ImageCodecInfo.Clsid;
         pParam->Found = TRUE;
         bRet = FALSE;
     }

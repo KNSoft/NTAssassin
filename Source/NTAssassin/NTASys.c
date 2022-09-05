@@ -62,7 +62,7 @@ PCWSTR NTAPI Sys_GetStatusInfo(NTSTATUS Status) {
 }
 
 PCWSTR NTAPI Sys_GetStatusErrorInfo(NTSTATUS Status) {
-    DWORD   dwError = RtlNtStatusToDosError(Status);
+    DWORD   dwError = RtlNtStatusToDosErrorNoTeb(Status);
     if (dwError == ERROR_MR_MID_NOT_FOUND)
         return Sys_GetStatusInfo(Status);
     return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
@@ -120,39 +120,13 @@ BOOL NTAPI Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2) {
         *(PQWORD)(GUID1->Data4) == *(PQWORD)(GUID2->Data4);
 }
 
-VOID NTAPI Sys_CopyGUID(LPGUID Dest, REFGUID Src) {
-    Dest->Data1 = Src->Data1;
-    Dest->Data2 = Src->Data2;
-    Dest->Data3 = Src->Data3;
-    *(PQWORD)(Dest->Data4) = *(PQWORD)(Src->Data4);
-}
-
-BOOL NTAPI Sys_GetActiveSession(PDWORD SessionId) {
-    PSESSIONIDW pBuffer = NULL, pSessionInfo;
-    DWORD dwCount;
-    BOOL bRet = FALSE;
-    if (WinStationEnumerateW(NULL, &pBuffer, &dwCount) && pBuffer) {
-        pSessionInfo = pBuffer;
-        while (dwCount--) {
-            if (pSessionInfo->State == State_Active) {
-                *SessionId = pSessionInfo->SessionId;
-                bRet = TRUE;
-                break;
-            }
-            pSessionInfo++;
-        }
-        WinStationFreeMemory(pBuffer);
-    }
-    return bRet;
-}
-
 DWORD NTAPI Sys_HRESULTToWin32(HRESULT hr) {
     DWORD dwError = HRESULT_CODE(hr);
     if (hr != MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, dwError)) {
         if (!IS_ERROR(hr)) {
             dwError = ERROR_SUCCESS;
         } else if ((DWORD)hr & FACILITY_NT_BIT) {
-            dwError = RtlNtStatusToDosError(hr & (~FACILITY_NT_BIT));
+            dwError = RtlNtStatusToDosErrorNoTeb(hr & (~FACILITY_NT_BIT));
         } else {
             if (hr == E_NOINTERFACE) {
                 dwError = ERROR_INVALID_FUNCTION;
@@ -167,6 +141,8 @@ DWORD NTAPI Sys_HRESULTToWin32(HRESULT hr) {
     }
     return dwError;
 }
+
+// WIP
 
 #define SYS_REG_SERVICES_PATH L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Services"
 

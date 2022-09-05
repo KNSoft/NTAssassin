@@ -153,9 +153,7 @@ static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 VOID NTAPI KNS_SetDialogSubclass(HWND Dialog, DLG_RESIZEDPROC ResizedProc) {
     DPI_SetAutoAdjustSubclass(Dialog, I18N_CreateFont(KNS_DEFAULT_DLGFONTSIZE, FW_NORMAL));
     if (ResizedProc) {
-        RECT    rcWnd;
-        UI_GetWindowRect(Dialog, &rcWnd);
-        Dlg_SetResizingSubclass(Dialog, rcWnd.right - rcWnd.left, rcWnd.bottom - rcWnd.top, ResizedProc);
+        Dlg_SetResizingSubclass(Dialog, TRUE, ResizedProc);
     }
 }
 

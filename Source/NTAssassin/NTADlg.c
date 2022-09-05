@@ -122,6 +122,8 @@ BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot) {
 typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     LONG            lMinWidth;
     LONG            lMinHeight;
+    LONG            lCurClientWidth;
+    LONG            lCurClientHeight;
     DWORD           dwNewDPIX;
     DWORD           dwNewDPIY;
     DWORD           dwOldDPIX;
@@ -131,7 +133,7 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
 
 static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_DPICHANGED) {
-        PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
+        PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;
         pstRef->dwOldDPIY = pstRef->dwNewDPIY;
         pstRef->dwNewDPIX = LOWORD(wParam);
@@ -140,26 +142,32 @@ static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WP
         DPI_ScaleInt(&pstRef->lMinHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_SIZING) {
-        PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
+        PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         PRECT pRect = (RECT*)lParam;
-        if (pstRef->lMinWidth && pRect->right < pRect->left + pstRef->lMinWidth)
+        if (pstRef->lMinWidth && pRect->right < pRect->left + pstRef->lMinWidth) {
             pRect->right = pRect->left + pstRef->lMinWidth;
-        if (pstRef->lMinHeight && pRect->bottom < pRect->top + pstRef->lMinHeight)
+        }
+        if (pstRef->lMinHeight && pRect->bottom < pRect->top + pstRef->lMinHeight) {
             pRect->bottom = pRect->top + pstRef->lMinHeight;
+        }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
     } else if (uMsg == WM_SIZE) {
         if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED) {
-            PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
+            PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
+            pstRef->lCurClientWidth = LOWORD(lParam);
+            pstRef->lCurClientHeight = HIWORD(lParam);
             pstRef->pfnResizedProc(hDlg, LOWORD(lParam), HIWORD(lParam), FALSE);
-            UI_Redraw(hDlg);
             SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
         }
     } else if (uMsg == WM_WINDOWPOSCHANGED) {
-        PDLG_SETRESIZINGSUBCLASS_REF    pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
-        RECT                            rcClient;
+        PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
+        RECT rcClient;
         GetClientRect(hDlg, &rcClient);
-        pstRef->pfnResizedProc(hDlg, rcClient.right, rcClient.bottom, TRUE);
-        UI_Redraw(hDlg);
+        if (pstRef->lCurClientWidth != rcClient.right || pstRef->lCurClientHeight != rcClient.bottom) {
+            pstRef->lCurClientWidth = rcClient.right;
+            pstRef->lCurClientHeight = rcClient.bottom;
+            pstRef->pfnResizedProc(hDlg, rcClient.right, rcClient.bottom, TRUE);
+        }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_DESTROY) {
         Mem_Free((PVOID)dwRefData);
@@ -167,14 +175,22 @@ static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WP
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, LONG MinWidth, LONG MinHeight, DLG_RESIZEDPROC ResizedProc) {
+BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC ResizedProc) {
     PDLG_SETRESIZINGSUBCLASS_REF pstRef;
+    RECT rcClient, rcWnd;
     pstRef = Mem_Alloc(sizeof(DLG_SETRESIZINGSUBCLASS_REF));
-    if (!pstRef) {
+    if (!pstRef || !GetClientRect(Dialog, &rcClient) || !GetWindowRect(Dialog, &rcWnd)) {
         return FALSE;
     }
-    pstRef->lMinWidth = MinWidth;
-    pstRef->lMinHeight = MinHeight;
+    pstRef->lCurClientWidth = rcClient.right;
+    pstRef->lCurClientHeight = rcClient.bottom;
+    if (MinLimit) {
+        pstRef->lMinWidth = rcWnd.right - rcWnd.left;
+        pstRef->lMinHeight = rcWnd.bottom - rcWnd.top;
+    } else {
+        pstRef->lMinWidth = 0;
+        pstRef->lMinHeight = 0;
+    }
     DPI_FromWindow(Dialog, &pstRef->dwOldDPIX, &pstRef->dwOldDPIY);
     pstRef->dwNewDPIX = pstRef->dwOldDPIX;
     pstRef->dwNewDPIY = pstRef->dwOldDPIY;

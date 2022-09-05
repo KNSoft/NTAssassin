@@ -19,7 +19,7 @@
 // Fixme: Patches C6101, in fact, beginning bytes unaligned will be ignored
 #pragma warning(disable: 6101)
 _Ret_notnull_
-PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE) PVOID Buffer, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _When_(ProcName != NULL, _Notnull_) PVOID64** ProcAddrPointer) {
+PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE) PVOID Buffer, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _Out_opt_ _When_(ProcName != NULL, _Notnull_) PVOID64** ProcAddrPointer) {
     SIZE_T  iCcb;
     WORD    wProcOrdinal;
     PVOID   pStruct, pTemp;
@@ -136,7 +136,8 @@ Label_0:
     return bRet;
 }
 
-BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _When_(ProcName != NULL, _Notnull_) PVOID64 * ProcAddr, DWORD Timeout) {
+_Success_(return != FALSE)
+BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _Out_opt_ _When_(ProcName != NULL, _Notnull_) PVOID64 * ProcAddr, DWORD Timeout) {
     BYTE    Buffer[HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE];
     LPVOID  pParam;
     PVOID64 *pProc;
@@ -184,6 +185,8 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     RPROC_MAP               ProcMap;
     HANDLE                  hThread;
     BOOL                    b32Proc;
+    BOOL                    bKeepMem = FALSE;
+
 #ifdef _WIN64
     if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
         return FALSE;
@@ -191,6 +194,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
 #else
     b32Proc = TRUE;
 #endif
+
     // Calculate size of remote buffer and allocate memory
     uParamCount = CallProcHeader->ParamCount;
     usTotalSize = sizeof(HIJACK_CALLPROCHEADER) + sizeof(HIJACK_CALLPROCPARAM) * uParamCount;
@@ -254,6 +258,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     }
     lStatus = Proc_WaitForObject(hThread, Timeout);
     if (lStatus != STATUS_SUCCESS) {
+        bKeepMem = TRUE;
         NT_SetLastStatus(lStatus);
         goto Label_3;
     }
@@ -285,9 +290,13 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
 Label_3:
     NtClose(hThread);
 Label_2:
-    RProc_MemUnmap(ProcessHandle, &ProcMap);
+    if (!bKeepMem) {
+        RProc_MemUnmap(ProcessHandle, &ProcMap);
+    }
 Label_1:
-    NtFreeVirtualMemory(ProcessHandle, &pRemoteBuffer, &usPageSize, MEM_RELEASE);
+    if (!bKeepMem) {
+        NtFreeVirtualMemory(ProcessHandle, &pRemoteBuffer, &usPageSize, MEM_RELEASE);
+    }
 Label_0:
     return bRet;
 }

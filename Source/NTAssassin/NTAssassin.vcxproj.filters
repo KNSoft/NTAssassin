@@ -19,15 +19,18 @@
     <Filter Include="Header Files\NTABase">
       <UniqueIdentifier>{30a7e2f4-4210-4b4d-9ea8-366632e0423e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\NTADlg">
+      <UniqueIdentifier>{972733ad-303d-4653-9a6a-fe1f4dab4058}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\NTANT">
+      <UniqueIdentifier>{ac38cc14-36dd-4651-8539-d9e2a132b91f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NTACon.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTACtl.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NTADlg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAFile.c">
@@ -54,9 +57,6 @@
     <ClCompile Include="NTAMem.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NTANT.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NTAPE.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -81,13 +81,7 @@
     <ClCompile Include="NTAHijack.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="NTADlg_ValueEditor.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NTAData.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NTADlg_RectEditor.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTADPI.c">
@@ -113,6 +107,27 @@
     </ClCompile>
     <ClCompile Include="NTAWS.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTObject.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADlg.c">
+      <Filter>Source Files\NTADlg</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADlg_RectEditor.c">
+      <Filter>Source Files\NTADlg</Filter>
+    </ClCompile>
+    <ClCompile Include="NTADlg_ValueEditor.c">
+      <Filter>Source Files\NTADlg</Filter>
+    </ClCompile>
+    <ClCompile Include="NTANT.c">
+      <Filter>Source Files\NTANT</Filter>
+    </ClCompile>
+    <ClCompile Include="NTANT_Sec.c">
+      <Filter>Source Files\NTANT</Filter>
+    </ClCompile>
+    <ClCompile Include="NTANT_Reg.c">
+      <Filter>Source Files\NTANT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -243,6 +258,21 @@
       <Filter>Header Files\NTABase</Filter>
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTAMacro.h">
+      <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTObject.h">
+      <Filter>Header Files\NTDef</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NT_MSTSTS.h">
+      <Filter>Header Files\NTDef</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NT_NTDDK.h">
+      <Filter>Header Files\NTDef</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NT_R3Shared.h">
+      <Filter>Header Files\NTDef</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTATypes.h">
       <Filter>Header Files\NTABase</Filter>
     </ClInclude>
   </ItemGroup>
