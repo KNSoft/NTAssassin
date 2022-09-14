@@ -18,11 +18,11 @@
 typedef struct _DLG_VALUEEDITOR {
     HWND                    Owner;
     DWORD                   Flags;
-    PCWSTR*                 Texts;      // ["Title", "Reset", "OK", "Member", "Value", "Info", "Unknow"]
+    PCWSTR*                 Texts;          // ["Title", "Reset", "OK", "Member", "Value", "Info", "Unknow"]
     PDLG_VALUEEDITOR_CONST  Consts;
     UINT                    NumOfConsts;
     QWORD                   Value;
-    QWORD                   Reserved;   // Reserved, do not use
+    QWORD                   PreviousValue;  // Reserved, do not use
 } DLG_VALUEEDITOR, *PDLG_VALUEEDITOR;
 
 static INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR pstDVE, PWSTR pszBuff, INT iCchBuff, QWORD qwValue) {
@@ -45,7 +45,7 @@ static VOID Dlg_ValueEditor_SetValue(PDLG_VALUEEDITOR pstDVE, HWND hDlg, QWORD q
         hDlg,
         IDC_EDIT,
         Dlg_ValueEditor_FormatValue(pstDVE, szValue, qwValue) ? szValue : NULL);
-    pstDVE->Reserved = qwValue;
+    pstDVE->PreviousValue = qwValue;
 }
 
 static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE) {
@@ -103,7 +103,7 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
 
         // Initialize
         lpstDVE = (PDLG_VALUEEDITOR)lParam;
-        lpstDVE->Reserved = lpstDVE->Value;
+        lpstDVE->PreviousValue = lpstDVE->Value;
         lpsz = lpstDVE->Texts[0] ? lpstDVE->Texts[0] : (lpstDVE->Flags & DVE_TYPE_COMBINATION ? L"Combined Value Editor" : L"Value Editor");
         SendMessageW(hDlg, WM_SETTEXT, 0, (LPARAM)lpsz);
         SetWindowLongPtr(hDlg, DWLP_USER, lParam);
@@ -229,8 +229,8 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
                     BOOL                    bNewChecked = (lpnmlv->uNewState & LVIS_STATEIMAGEMASK) >> 12 == 2;
                     BOOL                    bOldChecked = (lpnmlv->uOldState & LVIS_STATEIMAGEMASK) >> 12 == 2;
                     if (bNewChecked != bOldChecked) {
-                        pstDVE->Reserved = COMBINE_FLAGS(pstDVE->Reserved, pstConst->Value, bNewChecked);
-                        Dlg_ValueEditor_SetValue(pstDVE, hDlg, pstDVE->Reserved);
+                        pstDVE->PreviousValue = COMBINE_FLAGS(pstDVE->PreviousValue, pstConst->Value, bNewChecked);
+                        Dlg_ValueEditor_SetValue(pstDVE, hDlg, pstDVE->PreviousValue);
                     }
                 }
             }
@@ -241,10 +241,10 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
             PDLG_VALUEEDITOR    lpstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
             SendMessage(hListView, LVM_DELETEALLITEMS, 0, 0);
             Dlg_ValueEditor_AddItems(hListView, lpstDVE);
-            lpstDVE->Reserved = lpstDVE->Value;
+            lpstDVE->PreviousValue = lpstDVE->Value;
         } else if (wParam == MAKEWPARAM(IDC_OKBTN, 0)) {
             PDLG_VALUEEDITOR pstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
-            pstDVE->Value = pstDVE->Reserved;
+            pstDVE->Value = pstDVE->PreviousValue;
             EndDialog(hDlg, TRUE);
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
@@ -257,9 +257,8 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
 
 BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Strings, _Inout_ PQWORD Value, _In_ PDLG_VALUEEDITOR_CONST Consts, _In_ UINT ConstCount) {
     DLG_VALUEEDITOR stDVE = { Owner, Flags, Strings, Consts, ConstCount, *Value, *Value };
-    BOOL            bSucc;
     DLG_TEMPLATE    stDlgTemplate;
-    bSucc = DialogBoxIndirectParamW(
+    BOOL bRet = DialogBoxIndirectParam(
         NULL,
         Dlg_InitTemplate(
             &stDlgTemplate,
@@ -273,8 +272,9 @@ BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Stri
         Dlg_ValueEditor_DlgProc,
         (LPARAM)&stDVE
     ) == TRUE;
-    if (bSucc) {
+    if (bRet) {
         *Value = stDVE.Value;
     }
-    return bSucc;
+
+    return bRet;
 }

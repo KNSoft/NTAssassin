@@ -2,46 +2,7 @@
 
 #pragma once
 
-#include "NTAssassin.h"
-
-typedef enum _RPROC_LM_SE_NAMES {
-    LSE_CREATE_TOKEN_NAME = 2,
-    LSE_ASSIGNPRIMARYTOKEN_NAME = 3,
-    LSE_LOCK_MEMORY_NAME = 4,
-    LSE_INCREASE_QUOTA_NAME = 5,
-    LSE_UNSOLICITED_INPUT_NAME = 0,
-    LSE_MACHINE_ACCOUNT_NAME = 6,
-    LSE_TCB_NAME = 7,
-    LSE_SECURITY_NAME = 8,
-    LSE_TAKE_OWNERSHIP_NAME = 9,
-    LSE_LOAD_DRIVER_NAME = 10,
-    LSE_SYSTEM_PROFILE_NAME = 11,
-    LSE_SYSTEMTIME_NAME = 12,
-    LSE_PROF_SINGLE_PROCESS_NAME = 13,
-    LSE_INC_BASE_PRIORITY_NAME = 14,
-    LSE_CREATE_PAGEFILE_NAME = 15,
-    LSE_CREATE_PERMANENT_NAME = 16,
-    LSE_BACKUP_NAME = 17,
-    LSE_RESTORE_NAME = 18,
-    LSE_SHUTDOWN_NAME = 19,
-    LSE_DEBUG_NAME = 20,
-    LSE_AUDIT_NAME = 21,
-    LSE_SYSTEM_ENVIRONMENT_NAME = 22,
-    LSE_CHANGE_NOTIFY_NAME = 23,
-    LSE_REMOTE_SHUTDOWN_NAME = 24,
-    LSE_UNDOCK_NAME = 25,
-    LSE_SYNC_AGENT_NAME = 26,
-    LSE_ENABLE_DELEGATION_NAME = 27,
-    LSE_MANAGE_VOLUME_NAME = 28,
-    LSE_IMPERSONATE_NAME = 29,
-    LSE_CREATE_GLOBAL_NAME = 30,
-    LSE_TRUSTED_CREDMAN_ACCESS_NAME = 31,
-    LSE_RELABEL_NAME = 32,
-    LSE_INC_WORKING_SET_NAME = 34,
-    LSE_TIME_ZONE_NAME = 35,
-    LSE_CREATE_SYMBOLIC_LINK_NAME = 36,
-    LSE_DELEGATE_SESSION_USER_IMPERSONATE_NAME = 37
-} RPROC_LM_SE_NAMES, *PRPROC_LM_SE_NAMES;
+#include "NTADef.h"
 
 typedef struct _RPROC_MAP {
     PVOID   Local;
@@ -58,7 +19,8 @@ typedef struct _RPROC_MAP {
 /// <param name="DllLdrEntry">Pointer to a LDR_DATA_TABLE_ENTRY structure represents each DLL</param>
 /// <param name="Param">User defined value passed to this callback</param>
 /// <returns>TRUE if continue enumeration, or FALSE to stop</returns>
-typedef BOOL(CALLBACK* RPROC_DLLENUMPROC)(_In_ HANDLE ProcessHandle, _In_ PLDR_DATA_TABLE_ENTRY DllLdrEntry, LPARAM Param);
+typedef BOOL(CALLBACK* RPROC_DLLENUMPROC64)(_In_ HANDLE ProcessHandle, _In_ PLDR_DATA_TABLE_ENTRY64 DllLdrEntry, LPARAM Param);
+typedef BOOL(CALLBACK* RPROC_DLLENUMPROC32)(_In_ HANDLE ProcessHandle, _In_ PLDR_DATA_TABLE_ENTRY32 DllLdrEntry, LPARAM Param);
 
 /// <summary>
 /// Enumerates DLL modules of remote process
@@ -67,7 +29,8 @@ typedef BOOL(CALLBACK* RPROC_DLLENUMPROC)(_In_ HANDLE ProcessHandle, _In_ PLDR_D
 /// <param name="DllEnumProc">Callback procedure to receive information of each DLL</param>
 /// <param name="Param">User defined value passed to the callback</param>
 /// <returns>TRUE if succeeded, or FALSE if failed, error code storaged in last STATUS</returns>
-NTA_API BOOL NTAPI RProc_EnumDlls(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC DllEnumProc, LPARAM Param);
+NTA_API BOOL NTAPI RProc_EnumDlls64(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC64 DllEnumProc, LPARAM Param);
+NTA_API BOOL NTAPI RProc_EnumDlls32(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC32 DllEnumProc, LPARAM Param);
 
 /// <seealso cref="RtlCreateUserThread"/>
 _Success_(return != FALSE) NTA_API BOOL NTAPI RProc_CreateThread(_In_ HANDLE ProcessHandle, _In_ LPTHREAD_START_ROUTINE StartAddress, _In_opt_ __drv_aliasesMem PVOID Param, BOOL CreateSuspended, _Out_opt_ PHANDLE ThreadHandle);
@@ -90,10 +53,10 @@ NTA_API HANDLE NTAPI RProc_OpenThread(DWORD DesiredAccess, DWORD ThreadId);
 /// </summary>
 /// <seealso cref="AdjustTokenPrivileges"/>
 /// <param name="ProcessHandle">Handle to the process</param>
-/// <param name="Privilege">Privilege to adjust, specify one of RPROC_LM_SE_NAMES value</param>
-/// <param name="EnableState">Set to TRUE to enable specified privilege, or FALSE to disable</param>
+/// <param name="Privilege">Privilege value to adjust, SE_XXX_PRIVILEGE</param>
+/// <param name="Attributes">Attribute of privilege, SE_PRIVILEGE_XXX, or 0 to disable the privilege</param>
 /// <returns>TRUE if succeeded, or FALSE if failed, error code storaged in last STATUS</returns>
-NTA_API BOOL NTAPI RProc_AdjustPrivilege(HANDLE ProcessHandle, RPROC_LM_SE_NAMES Privilege, BOOL EnableState);
+NTA_API BOOL NTAPI RProc_AdjustPrivilege(_In_ HANDLE ProcessHandle, _In_ SE_PRIVILEGE Privilege, _In_ DWORD Attributes);
 
 /// <summary>
 /// Gets Win32 format full path of specified process
@@ -114,7 +77,7 @@ _Success_(return > 0) NTA_API UINT NTAPI RProc_GetFullImageNameEx(HANDLE Process
 /// <param name="OutputString">Pointer to the buffer to receive translated string</param>
 /// <param name="OutputStringCch">The size of the FilePath buffer in WCHARs</param>
 /// <returns>Number of characters written, NOT including null-terminates, or 0 if failed, error code storaged in last STATUS</returns>
-_Success_(return > 0) NTA_API UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ PVOID Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch);
+_Success_(return > 0) NTA_API UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ ULONGLONG Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch);
 #define RProc_TranslateAddress(ProcessHandle, Address, OutputString) RProc_TranslateAddressEx(ProcessHandle, Address, OutputString, ARRAYSIZE(OutputString))
 
 /// <summary>
@@ -154,8 +117,16 @@ _Success_(return != FALSE) NTA_API BOOL NTAPI RProc_MemMap(HANDLE ProcessHandle,
 /// </summary>
 /// <param name="ProcessHandle">Handle to the remote process</param>
 /// <param name="RemoteMemMap">Pointer to the RPROC_MAP structure</param>
-/// <returns>NTSTATUS</returns>
-#define RProc_MemUnmap(ProcessHandle, RemoteMemMap) NtFreeVirtualMemory(ProcessHandle, &(RemoteMemMap)->Remote, &(RemoteMemMap)->RemoteSize, MEM_DECOMMIT)
+/// <returns>TRUE if succeeded, or FALSE if failed, error code storaged in last STATUS</returns>
+NTA_API BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap);
+
+_Success_(return != FALSE) NTA_API BOOL NTAPI RProc_GetWow64PEB(_In_ HANDLE hProcess, _Out_ PPEB32 * Wow64PEB);
 
 /// <seealso cref="IsWow64Process"/>
 _Success_(return != FALSE) NTA_API BOOL NTAPI RProc_IsWow64(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process);
+
+/// <summary>
+/// Creates a new process
+/// </summary>
+/// <seealso cref="CreateProcessAsUser"/>
+HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ LPCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles);

@@ -713,6 +713,25 @@ BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest
     return TRUE;
 }
 
+static CHAR arrSizeUnitPrefix[] = {
+    '\0', 'K', 'M', 'G', 'T', 'P', 'E' // , 'Z', 'Y'
+};
+
+DOUBLE NTAPI Str_SimplifySize(UINT64 Size, _Out_opt_ PCHAR Unit) {
+    UINT64 uTotal = Size, uDivisor, uDivisorTemp = 1;
+    UINT uTimes = 0;
+    do {
+        uDivisor = uDivisorTemp;
+        uDivisorTemp = uDivisorTemp << 10;
+        uTimes++;
+    } while (uTotal >= uDivisorTemp && uDivisorTemp > uDivisor);
+    if (Unit) {
+        *Unit = arrSizeUnitPrefix[uTimes - 1];
+    }
+    return uTotal / (DOUBLE)uDivisor;
+}
+
+
 // String Hash
 
 DWORD NTAPI Str_HashW(_In_ PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm) {

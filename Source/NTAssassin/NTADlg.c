@@ -70,7 +70,7 @@ BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt_ LPCOLO
     CHOOSEFONTW stChooseFontW = { sizeof(CHOOSEFONTW) };
     BOOL        bRet;
     stChooseFontW.hwndOwner = Owner;
-    DWORD dwFlags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_SELECTSCRIPT;
+    DWORD dwFlags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_INACTIVEFONTS;
     if (Color) {
         dwFlags |= CF_EFFECTS;
         stChooseFontW.rgbColors = *Color;
@@ -111,7 +111,7 @@ BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot) {
                 NULL,
                 ScreenSnapshot->hInstance,
                 ScreenSnapshot->lParam);
-            bRet = hWnd && UI_MessageLoop(NULL);
+            bRet = hWnd && UI_MessageLoop(NULL, NULL);
             GDI_DeleteSnapshot(&ScreenSnapshot->Snapshot);
         }
         UnregisterClassW(MAKEINTRESOURCEW(atomClass), stWndClsExCaptureW.hInstance);
@@ -122,8 +122,6 @@ BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot) {
 typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     LONG            lMinWidth;
     LONG            lMinHeight;
-    LONG            lCurClientWidth;
-    LONG            lCurClientHeight;
     DWORD           dwNewDPIX;
     DWORD           dwNewDPIY;
     DWORD           dwOldDPIX;
@@ -154,19 +152,14 @@ static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WP
     } else if (uMsg == WM_SIZE) {
         if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED) {
             PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
-            pstRef->lCurClientWidth = LOWORD(lParam);
-            pstRef->lCurClientHeight = HIWORD(lParam);
-            pstRef->pfnResizedProc(hDlg, LOWORD(lParam), HIWORD(lParam), FALSE);
+            pstRef->pfnResizedProc(hDlg, LOWORD(lParam), HIWORD(lParam), NULL);
             SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
         }
     } else if (uMsg == WM_WINDOWPOSCHANGED) {
         PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         RECT rcClient;
-        GetClientRect(hDlg, &rcClient);
-        if (pstRef->lCurClientWidth != rcClient.right || pstRef->lCurClientHeight != rcClient.bottom) {
-            pstRef->lCurClientWidth = rcClient.right;
-            pstRef->lCurClientHeight = rcClient.bottom;
-            pstRef->pfnResizedProc(hDlg, rcClient.right, rcClient.bottom, TRUE);
+        if (GetClientRect(hDlg, &rcClient)) {
+            pstRef->pfnResizedProc(hDlg, rcClient.right, rcClient.bottom, (PWINDOWPOS)lParam);
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_DESTROY) {
@@ -182,8 +175,6 @@ BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC R
     if (!pstRef || !GetClientRect(Dialog, &rcClient) || !GetWindowRect(Dialog, &rcWnd)) {
         return FALSE;
     }
-    pstRef->lCurClientWidth = rcClient.right;
-    pstRef->lCurClientHeight = rcClient.bottom;
     if (MinLimit) {
         pstRef->lMinWidth = rcWnd.right - rcWnd.left;
         pstRef->lMinHeight = rcWnd.bottom - rcWnd.top;
@@ -267,4 +258,28 @@ BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PREC
     pstRef->Count = Count;
     Dlg_SetTreeViewPropertySheetSubclass_InitSheet(pstRef, (HTREEITEM)TVI_ROOT, Sheets, Count);
     return SetWindowSubclass(Dialog, Dlg_SetTreeViewPropertySheetSubclass_DlgProc, 0, (DWORD_PTR)pstRef);
+}
+
+_Success_(return != FALSE)
+BOOL NTAPI Dlg_MessageLoop(_In_opt_ HWND Window, _In_ HWND Dialog, _In_opt_ HACCEL Accelerator, _Out_opt_ PUINT_PTR ExitCode) {
+    BOOL    bRet;
+    MSG     stMsg;
+    while (TRUE) {
+        bRet = GetMessage(&stMsg, Window, 0, 0);
+        if (bRet != 0 && bRet != -1) {
+            if ((!Accelerator || !TranslateAcceleratorW(Dialog, Accelerator, &stMsg)) && !IsDialogMessageW(Dialog, &stMsg)) {
+                TranslateMessage(&stMsg);
+                DispatchMessage(&stMsg);
+            }
+        } else {
+            if (bRet == 0) {
+                if (ExitCode) {
+                    *ExitCode = stMsg.wParam;
+                }
+                return TRUE;
+            } else {
+                return FALSE;
+            }
+        }
+    }
 }

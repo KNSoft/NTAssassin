@@ -103,7 +103,14 @@ NTA_API BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt
 /// <returns>TRUE if the window created and ended successfully, or FALSE if failed</returns>
 NTA_API BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot);
 
-typedef VOID(CALLBACK* DLG_RESIZEDPROC)(HWND Dialog, LONG NewWidth, LONG NewHeight, BOOL FromMgmtFunc);
+/// <summary>
+/// Callback registered by <c>Dlg_SetResizingSubclass</c>
+/// </summary>
+/// <param name="Dialog">Handle to the dialog box</param>
+/// <param name="NewWidth">New width of client area</param>
+/// <param name="NewHeight">New height of client area</param>
+/// <param name="WindowPos">Not NULL when window changed by window-management functions</param>
+typedef VOID(CALLBACK* DLG_RESIZEDPROC)(HWND Dialog, LONG NewWidth, LONG NewHeight, PWINDOWPOS WindowPos);
 
 /// <summary>
 /// Subclasses a dialog box to help support of resizing
@@ -115,3 +122,7 @@ typedef VOID(CALLBACK* DLG_RESIZEDPROC)(HWND Dialog, LONG NewWidth, LONG NewHeig
 NTA_API BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC ResizedProc);
 
 NTA_API BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PRECT SheetRect, _In_ PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count);
+
+/// <seealso cref="UI_MessageLoop"/>
+/// <remarks>Support dialogue messages and accelerators</remarks>
+NTA_API _Success_(return != FALSE) BOOL NTAPI Dlg_MessageLoop(_In_opt_ HWND Window, _In_ HWND Dialog, _In_opt_ HACCEL Accelerator, _Out_opt_ PUINT_PTR ExitCode);

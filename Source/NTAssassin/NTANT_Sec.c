@@ -86,7 +86,7 @@ PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLAS
                     Info = NULL;
                 }
             } else {
-                Status = STATUS_NO_MEMORY;
+                return NULL;
             }
         } else {
             Status = STATUS_NOT_FOUND;

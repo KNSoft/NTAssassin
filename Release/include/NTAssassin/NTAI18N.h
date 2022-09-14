@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
 
 typedef struct _I18N_ITEM {
     DWORD   KeyHash;
@@ -41,13 +41,6 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *lpLangs, UINT uCount, PCWSTR lpsz
   * @return Returns pointer to the string
   */
 NTA_API PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex);
-
-/**
-  * @brief Creates a logical font with I18N prefered name and specified size and weight, see also "CreateFont"
-  * @see "CreateFont"
-  * @return Returns handle to a logical font, or NULL if failed
-  */
-NTA_API HFONT NTAPI I18N_CreateFont(INT FontSize, INT FontWeight);
 
 /**
   * @brief Sets window text by specified I18N string index

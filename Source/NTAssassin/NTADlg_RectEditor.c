@@ -48,7 +48,7 @@ static VOID Dlg_RectEditor_CreateCtl(HWND hDlg, INT nIDText, INT nIDEdit, LPCWST
     hCtl = CreateWindowExW(WS_EX_RIGHT,
         WC_STATICW,
         NULL,
-        SS_SIMPLE | SS_RIGHT | WS_CHILD | WS_VISIBLE,
+        SS_SIMPLE | SS_RIGHT | SS_CENTERIMAGE | WS_CHILD | WS_VISIBLE,
         iX,
         iY,
         DRE_ITEM_W,
@@ -214,7 +214,7 @@ static INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPar
 BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR* Strings, _Inout_ PRECT Rect) {
     DLG_RECTEDITOR  stDRD = { Owner, Strings, Rect };
     DLG_TEMPLATE    stDlgTemplate;
-    return DialogBoxIndirectParam(
+    BOOL bRet = DialogBoxIndirectParam(
         NULL,
         Dlg_InitTemplate(
             &stDlgTemplate,
@@ -228,4 +228,5 @@ BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR* Strings, _Inout_ PRECT Re
         Dlg_RectEditor_DlgProc,
         (LPARAM)&stDRD
     ) == TRUE;
+    return bRet;
 }

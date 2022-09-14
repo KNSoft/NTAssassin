@@ -14,7 +14,6 @@ static PKNS_INFO   lpKNSInfo;
 static DLGPROC     lpfnMainDlgProc;
 static HWND        hMainDlg;
 
-static HBRUSH      hbrMainColor;
 static HFONT       hFontBig, hFontSmall;
 static HCURSOR     hCurArrow, hCurPointer;
 static HICON       hIconDefault = NULL;
@@ -63,7 +62,7 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
         hDC = UI_BeginPaint(hWnd, &stPaint);
         SetBkMode(hDC, TRANSPARENT);
         SetTextColor(hDC, RGB(255, 255, 255));
-        FillRect(hDC, &stPaint.Rect, hbrMainColor);
+        GDI_FillSolidRect(hDC, &stPaint.Rect, lpKNSInfo->UI.MainColor);
         rcText.left = rcText.top = KNS_BANNER_MARGIN;
         if (pstRef->hIcon)
             rcText.left += (pstRef->lIconHotspot * 2 + KNS_BANNER_MARGIN);
@@ -84,30 +83,53 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
         }
         UI_EndPaint(hWnd, &stPaint);
     } else if (uMsg == WM_WINDOWPOSCHANGED) {
-        PWINDOWPOS  lpstWndPos = (PWINDOWPOS)lParam;
-        ICONINFO    stIconInfo;
+        PWINDOWPOS lpstWndPos = (PWINDOWPOS)lParam;
         if (pstRef->lWidth != lpstWndPos->cx || pstRef->lHeight != lpstWndPos->cy) {
             pstRef->lWidth = lpstWndPos->cx;
             pstRef->lHeight = lpstWndPos->cy;
-            if (pstRef->hFontBig)
-                DeleteObject(pstRef->hFontBig);
-            pstRef->hFontBig = I18N_CreateFont(pstRef->lHeight * KNS_BANNER_FONTBIG_SCALE, 0);
-            if (pstRef->hFontSmall)
-                DeleteObject(pstRef->hFontSmall);
-            pstRef->hFontSmall = I18N_CreateFont(pstRef->lHeight * KNS_BANNER_FONTSMALL_SCALE, 0);
-            if (pstRef->hIcon)
-                DestroyIcon(pstRef->hIcon);
+
+            // Scale fonts
+            HFONT hFont;
+            ENUMLOGFONTEXDVW FontInfo;
+            if (GDI_GetDefaultFont(&FontInfo, 0)) {
+                FontInfo.elfEnumLogfontEx.elfLogFont.lfWidth = 0;
+                FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = pstRef->lHeight * KNS_BANNER_FONTBIG_SCALE;
+                hFont = CreateFontIndirectExW(&FontInfo);
+                if (hFont) {
+                    if (pstRef->hFontBig) {
+                        DeleteObject(pstRef->hFontBig);
+                    }
+                    pstRef->hFontBig = hFont;
+                }
+                FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = pstRef->lHeight * KNS_BANNER_FONTSMALL_SCALE;
+                hFont = CreateFontIndirectExW(&FontInfo);
+                if (hFont) {
+                    if (pstRef->hFontSmall) {
+                        DeleteObject(pstRef->hFontSmall);
+                    }
+                    pstRef->hFontSmall = hFont;
+                }
+            }
+
+            // Scale icon
+            ICONINFO stIconInfo;
             stIconInfo.fIcon = TRUE;
             stIconInfo.xHotspot = 0;
-            if (pstRef->hIcon = LoadImageW(NT_GetImageBase(), MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, pstRef->lHeight * KNS_BANNER_ICON_SCALE, pstRef->lHeight * KNS_BANNER_ICON_SCALE, 0))
-                if (GetIconInfo(pstRef->hIcon, &stIconInfo)) {
+            HICON hIcon = LoadImageW(NT_GetImageBase(), MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, pstRef->lHeight * KNS_BANNER_ICON_SCALE, pstRef->lHeight * KNS_BANNER_ICON_SCALE, 0);
+            if (hIcon) {
+                if (GetIconInfo(hIcon, &stIconInfo) && stIconInfo.xHotspot) {
+                    if (pstRef->hIcon) {
+                        DestroyIcon(pstRef->hIcon);
+                    }
                     pstRef->lIconHotspot = stIconInfo.xHotspot;
+                    pstRef->hIcon = hIcon;
                     DeleteObject(stIconInfo.hbmMask);
                     DeleteObject(stIconInfo.hbmColor);
                 } else {
-                    DestroyIcon(pstRef->hIcon);
-                    pstRef->hIcon = NULL;
+                    DestroyIcon(hIcon);
+                    hIcon = NULL;
                 }
+            }
         }
     }
     return DefSubclassProc(hWnd, uMsg, wParam, lParam);
@@ -138,8 +160,6 @@ VOID KNS_SetBannerSubclass(HWND hBanner) {
 
 static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     if (uMsg == WM_INITDIALOG) {
-        hMainDlg = hDlg;
-        hbrMainColor = CreateSolidBrush(lpKNSInfo->UI.MainColor);
         if (hIconDefault) {
             SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)hIconDefault);
             SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hIconDefault);
@@ -151,13 +171,13 @@ static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 }
 
 VOID NTAPI KNS_SetDialogSubclass(HWND Dialog, DLG_RESIZEDPROC ResizedProc) {
-    DPI_SetAutoAdjustSubclass(Dialog, I18N_CreateFont(KNS_DEFAULT_DLGFONTSIZE, FW_NORMAL));
+    DPI_SetAutoAdjustSubclass(Dialog, NULL);
     if (ResizedProc) {
         Dlg_SetResizingSubclass(Dialog, TRUE, ResizedProc);
     }
 }
 
-INT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
+UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
     lpKNSInfo = KNSInfo;
     lpfnMainDlgProc = KNSInfo->UI.DlgProc;
     hCurArrow = LoadImageW(NULL, MAKEINTRESOURCE(OCR_NORMAL), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
@@ -168,9 +188,35 @@ INT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
         szVersion[0] = '\0';
     if (lpKNSInfo->UI.IconResID != -1)
         hIconDefault = LoadImageW(NT_GetImageBase(), MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, 0, 0, 0);
-    hFontBig = I18N_CreateFont(ICON_SIDE, FW_NORMAL);
-    hFontSmall = I18N_CreateFont(ICON_SIDE / 2, FW_NORMAL);
-    return DialogBoxParamW(NT_GetImageBase(), MAKEINTRESOURCEW(KNSInfo->UI.DlgResID), NULL, KNS_DlgProc, 0);
+    ENUMLOGFONTEXDVW FontInfo;
+    if (GDI_GetDefaultFont(&FontInfo, 0)) {
+        FontInfo.elfEnumLogfontEx.elfLogFont.lfWidth = 0;
+        FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = ICON_SIDE;
+        hFontBig = CreateFontIndirectExW(&FontInfo);
+        FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = ICON_SIDE / 2;
+        hFontSmall = CreateFontIndirectExW(&FontInfo);
+    } else {
+        hFontBig = hFontSmall = NULL;
+    }
+    hMainDlg = CreateDialogParamW(NT_GetImageBase(), MAKEINTRESOURCEW(KNSInfo->UI.DlgResID), NULL, KNS_DlgProc, 0);
+    HACCEL hAccel;
+    if (KNSInfo->UI.DlgAccResID != -1) {
+        hAccel = LoadAcceleratorsW(NT_GetImageBase(), MAKEINTRESOURCEW(KNSInfo->UI.DlgAccResID));
+    } else {
+        hAccel = NULL;
+    }
+    UINT_PTR ulRet;
+    ulRet = Dlg_MessageLoop(NULL, hMainDlg, hAccel, &ulRet) ? ulRet : (UINT_PTR)NT_GetLastError();
+    if (hFontBig) {
+        DeleteObject(hFontBig);
+    }
+    if (hFontSmall) {
+        DeleteObject(hFontSmall);
+    }
+    if (hAccel) {
+        DestroyAcceleratorTable(hAccel);
+    }
+    return ulRet;
 }
 
 INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type) {
@@ -218,7 +264,7 @@ static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wPara
         UI_WINDBPAINT pt;
         UI_BeginPaint(hDlg, &pt);
         // Background
-        FillRect(pt.DC, &pt.Rect, hbrMainColor);
+        GDI_FillSolidRect(pt.DC, &pt.Rect, lpKNSInfo->UI.MainColor);
         SetTextColor(pt.DC, RGB(255, 255, 255));
         SetBkColor(pt.DC, lpKNSInfo->UI.MainColor);
         SetBkMode(pt.DC, TRANSPARENT);

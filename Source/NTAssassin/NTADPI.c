@@ -112,61 +112,44 @@ static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, 
         pstRef->dwNewDPIX = LOWORD(wParam);
         pstRef->dwNewDPIY = HIWORD(wParam);
 
-        // Adjust rectangle if this is top-level window
-        if (!(GetWindowLongPtr(hDlg, GWL_STYLE) & WS_CHILD)) {
-            // System suggested RECT in lParam includes DWM shadow area,
-            // so we had to calculate new RECT on our own
-            RECT rcWnd;
-            UI_GetWindowRect(hDlg, &rcWnd);
-            RECT rcClient;
-            GetClientRect(hDlg, &rcClient);
-            rcClient.right = Math_RoundInt((rcClient.right * (FLOAT)pstRef->dwNewDPIX / pstRef->dwOldDPIX - rcClient.right) / 2);
-            rcClient.bottom = Math_RoundInt((rcClient.bottom * (FLOAT)pstRef->dwNewDPIY / pstRef->dwOldDPIY - rcClient.bottom) / 2);
-            rcWnd.top -= rcClient.bottom;
-            rcWnd.bottom += rcClient.bottom;
-            rcWnd.left -= rcClient.right;
-            rcWnd.right += rcClient.right;
-            // Correct to (0, 0) if overflow
-            if (rcWnd.left < 0) {
-                rcWnd.right += -rcWnd.left;
-                rcWnd.left = 0;
-            }
-            if (rcWnd.top < 0) {
-                rcWnd.bottom += -rcWnd.top;
-                rcWnd.top = 0;
-            }
-            UI_SetWindowRect(hDlg, &rcWnd);
+        // Adjust rectangle, Win11 has fixed the DWM shadow problem
+        PRECT prc = (PRECT)lParam;
+        if (NT_GetKUSD()->NtMajorVersion >= 10 || NT_GetKUSD()->NtBuildNumber >= 22000) {
+            SetWindowPos(hDlg, NULL, prc->left, prc->top, prc->right - prc->left, prc->bottom - prc->top, SWP_NOZORDER | SWP_NOACTIVATE);
+        } else {
+            UI_SetWindowRect(hDlg, prc);
         }
 
         // Adjust DPI for child
-        DPI_APPLYTOCHILD_REF dwChildRef;
-        dwChildRef.bUpdateDPI = TRUE;
-        dwChildRef.dwOldDPIX = pstRef->dwOldDPIX;
-        dwChildRef.dwOldDPIY = pstRef->dwOldDPIX;
-        dwChildRef.dwNewDPIX = LOWORD(wParam);
-        dwChildRef.dwNewDPIY = HIWORD(wParam);
-        dwChildRef.ptParent.x = dwChildRef.ptParent.y = 0;
-        ClientToScreen(hDlg, &dwChildRef.ptParent);
+        DPI_APPLYTOCHILD_REF ChildRef;
+        ChildRef.bUpdateDPI = TRUE;
+        ChildRef.dwOldDPIX = pstRef->dwOldDPIX;
+        ChildRef.dwOldDPIY = pstRef->dwOldDPIX;
+        ChildRef.dwNewDPIX = LOWORD(wParam);
+        ChildRef.dwNewDPIY = HIWORD(wParam);
+        ChildRef.ptParent.x = ChildRef.ptParent.y = 0;
+        ClientToScreen(hDlg, &ChildRef.ptParent);
 
         // Adjust font for child
-        dwChildRef.bUpdateFont = FALSE;
+        ChildRef.bUpdateFont = FALSE;
         if (pstRef->hFont) {
             ENUMLOGFONTEXDVW FontInfo;
             if (GDI_GetFont(pstRef->hFont, &FontInfo)) {
+                FontInfo.elfEnumLogfontEx.elfLogFont.lfWidth = 0;
                 DPI_ScaleInt(&FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
                 HFONT hFont = CreateFontIndirectExW(&FontInfo);
                 if (hFont) {
                     DeleteObject(pstRef->hFont);
                     pstRef->hFont = hFont;
-                    dwChildRef.bUpdateFont = TRUE;
-                    dwChildRef.hFont = hFont;
-                    dwChildRef.bRedrawFontNow = TRUE;
+                    ChildRef.bUpdateFont = TRUE;
+                    ChildRef.hFont = hFont;
+                    ChildRef.bRedrawFontNow = TRUE;
                 }
             }
         }
 
         // Apply to child windows
-        UI_EnumChildWindows(hDlg, DPI_Subclass_DlgProc_ApplyToChild, (LPARAM)&dwChildRef);
+        UI_EnumChildWindows(hDlg, DPI_Subclass_DlgProc_ApplyToChild, (LPARAM)&ChildRef);
         UI_Redraw(hDlg);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     } else if (uMsg == WM_DESTROY) {
@@ -179,23 +162,63 @@ static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, 
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-BOOL NTAPI DPI_SetAutoAdjustSubclass(HWND Dialog, _In_opt_ HFONT Font) {
+BOOL NTAPI DPI_SetAutoAdjustSubclass(_In_ HWND Dialog, _In_opt_ PENUMLOGFONTEXDVW FontInfo) {
     PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef;
+    RECT rcDlg;
+    UINT DPIX, DPIY;
+    LONG lDelta;
     pstRef = Mem_Alloc(sizeof(DPI_SETAUTOADJUSTSUBCLASS_REF));
     if (!pstRef) {
         return FALSE;
     }
     pstRef->dwNewDPIX = pstRef->dwNewDPIY = pstRef->dwOldDPIX = pstRef->dwOldDPIY = USER_DEFAULT_SCREEN_DPI;
-    pstRef->hFont = Font;
-    if (SetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (DWORD_PTR)pstRef)) {
-        UINT DPIX, DPIY;
+    if (UI_GetWindowRect(Dialog, &rcDlg) &&
+        SetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (DWORD_PTR)pstRef)) {
         DPI_FromWindow(Dialog, &DPIX, &DPIY);
-        RECT rcDlg;
-        UI_GetWindowRect(Dialog, &rcDlg);
-        DPI_ScaleRect(&rcDlg, USER_DEFAULT_SCREEN_DPI, DPIX, USER_DEFAULT_SCREEN_DPI, DPIY);
+        pstRef->hFont = FontInfo ? CreateFontIndirectExW(FontInfo) : GDI_CreateDefaultFont();
+        if (DPIX != USER_DEFAULT_SCREEN_DPI) {
+            lDelta = Math_RoundInt((rcDlg.right - rcDlg.left) * (((FLOAT)DPIX / USER_DEFAULT_SCREEN_DPI) - 1) / 2);
+            if (lDelta <= rcDlg.left) {
+                rcDlg.left -= lDelta;
+                rcDlg.right += lDelta;
+            } else {
+                rcDlg.right += 2 * lDelta - rcDlg.left;
+                rcDlg.left = 0;
+            }
+        }
+        if (DPIY != USER_DEFAULT_SCREEN_DPI) {
+            lDelta = Math_RoundInt((rcDlg.bottom - rcDlg.top) * (((FLOAT)DPIY / USER_DEFAULT_SCREEN_DPI) - 1) / 2);
+            if (lDelta <= rcDlg.top) {
+                rcDlg.top -= lDelta;
+                rcDlg.bottom += lDelta;
+            } else {
+                rcDlg.bottom += 2 * lDelta - rcDlg.top;
+                rcDlg.top = 0;
+            }
+        }
         SendMessage(Dialog, WM_DPICHANGED, MAKEDWORD(DPIX, DPIY), (LPARAM)&rcDlg);
         return TRUE;
+    } else {
+        Mem_Free(pstRef);
+        return FALSE;
     }
-    Mem_Free(pstRef);
-    return FALSE;
+}
+
+_Success_(return != FALSE)
+BOOL NTAPI DPI_GetAutoAdjustSubclass(_In_ HWND Dialog, _Out_opt_ PDWORD NewDPIX, _Out_opt_ PDWORD NewDPIY, _Out_opt_ HFONT * Font) {
+    PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef;
+    if (GetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (PDWORD_PTR)&pstRef)) {
+        if (NewDPIX) {
+            *NewDPIX = pstRef->dwNewDPIX;
+        }
+        if (NewDPIY) {
+            *NewDPIY = pstRef->dwNewDPIY;
+        }
+        if (Font) {
+            *Font = pstRef->hFont;
+        }
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }

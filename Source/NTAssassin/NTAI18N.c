@@ -97,12 +97,6 @@ PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
     return NULL;
 }
 
-HFONT NTAPI I18N_CreateFont(INT FontSize, INT FontWeight) {
-    ENUMLOGFONTEXDVW FontInfo;
-    GDI_InitFontInfo(&FontInfo, FontSize, FontWeight, pI18NFontName ? pI18NFontName : L"MS Shell Dlg");
-    return CreateFontIndirectExW(&FontInfo);
-}
-
 HWND NTAPI I18N_InitCtlText(HWND Dialog, INT CtlID, UINT_PTR StrIndex) {
     HWND hCtl = GetDlgItem(Dialog, CtlID);
     UI_EnableWindowStyle(hCtl, GWL_EXSTYLE, WS_EX_RTLREADING, bI18NRTLReading);

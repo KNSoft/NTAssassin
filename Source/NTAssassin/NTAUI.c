@@ -170,7 +170,8 @@ _Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLo
     return bRet;
 }
 
-BOOL NTAPI UI_MessageLoop(HWND Window) {
+_Success_(return != FALSE)
+BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode) {
     BOOL    bRet;
     MSG     stMsg;
     while (TRUE) {
@@ -179,7 +180,11 @@ BOOL NTAPI UI_MessageLoop(HWND Window) {
             TranslateMessage(&stMsg);
             DispatchMessage(&stMsg);
         } else {
-            return bRet == 0;
+            bRet = bRet == 0;
+            if (bRet && ExitCode) {
+                *ExitCode = stMsg.wParam;
+            }
+            return bRet;
         }
     }
 }

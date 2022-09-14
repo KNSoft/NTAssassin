@@ -25,3 +25,30 @@ BOOL NTAPI NT_InitPathObject(POBJECT_ATTRIBUTES Object, _In_z_ PCWSTR Path, HAND
         return FALSE;
     }
 }
+
+PVOID NTAPI NT_GetSystemInfo(_In_ SYSTEM_INFORMATION_CLASS SystemInformationClass) {
+    PVOID Info = NULL;
+    ULONG Length;
+    NTSTATUS Status;
+    Status = NtQuerySystemInformation(SystemInformationClass, NULL, 0, &Length);
+    if (Status == STATUS_BUFFER_TOO_SMALL) {
+        if (Length) {
+            Info = Mem_Alloc(Length);
+            if (Info) {
+                Status = NtQuerySystemInformation(SystemInformationClass, Info, Length, &Length);
+                if (!NT_SUCCESS(Status)) {
+                    Mem_Free(Info);
+                    Info = NULL;
+                }
+            } else {
+                return NULL;
+            }
+        } else {
+            Status = STATUS_NOT_FOUND;
+        }
+    }
+    if (!Info) {
+        NT_SetLastStatus(Status);
+    }
+    return Info;
+}

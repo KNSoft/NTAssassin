@@ -3,8 +3,8 @@
 #include "include\NTAssassin\NTAUI.h"
 
 BOOL NTAPI GDI_FillSolidRect(HDC DC, _In_ PRECT Rect, COLORREF Color) {
-    COLORREF    crPrev = SetBkColor(DC, Color);
-    BOOL        bRet = ExtTextOut(DC, 0, 0, ETO_OPAQUE, Rect, NULL, 0, NULL);
+    COLORREF crPrev = SetBkColor(DC, Color);
+    BOOL bRet = ExtTextOut(DC, 0, 0, ETO_OPAQUE, Rect, NULL, 0, NULL);
     SetBkColor(DC, crPrev);
     return bRet;
 }
@@ -126,7 +126,34 @@ VOID NTAPI GDI_InitFontInfoEx(
     }
 }
 
-INT NTAPI GDI_GetFont(HFONT Font, PENUMLOGFONTEXDVW FontInfo) {
+_Success_(return != FALSE)
+BOOL NTAPI GDI_GetDefaultFont(_Out_ PENUMLOGFONTEXDVW FontInfo, _In_opt_ LONG Height) {
+    BOOL bRet;
+    NONCLIENTMETRICSW ncm;
+    ncm.cbSize = sizeof(ncm);
+    bRet = SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
+    if (bRet) {
+        GDI_InitInternalFontInfo(FontInfo);
+        RtlMoveMemory(&FontInfo->elfEnumLogfontEx.elfLogFont, &ncm.lfMessageFont, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont));
+        if (Height) {
+            FontInfo->elfEnumLogfontEx.elfLogFont.lfHeight = Height;
+            FontInfo->elfEnumLogfontEx.elfLogFont.lfWidth = 0;
+        }
+    }
+    return bRet;
+}
+
+HFONT NTAPI GDI_CreateDefaultFont() {
+    HFONT hFont = NULL;
+    ENUMLOGFONTEXDVW FontInfo;
+    if (GDI_GetDefaultFont(&FontInfo, 0)) {
+        hFont = CreateFontIndirectExW(&FontInfo);
+    }
+    return hFont;
+}
+
+_Success_(return > 0)
+INT NTAPI GDI_GetFont(_In_ HFONT Font, _Out_ PENUMLOGFONTEXDVW FontInfo) {
     GDI_InitInternalFontInfo(FontInfo);
     INT i = GetObjectW(Font, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont), &FontInfo->elfEnumLogfontEx.elfLogFont);
     i = i > 0 ? sizeof(*FontInfo) : 0;

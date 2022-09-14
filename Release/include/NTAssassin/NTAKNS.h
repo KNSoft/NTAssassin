@@ -2,7 +2,9 @@
 
 #pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
+#include "NTAI18N.h"
+#include "NTADlg.h"
 
 #define KNS_VERSION_ALPHA 1
 #define KNS_VERSION_BETA 2
@@ -35,6 +37,7 @@ typedef struct _KNS_INFO {
         COLORREF    MainColor;      // Main color to draw splash, banner, etc.
         UINT        IconResID;      // Main icon resource to draw splash, banner, etc.
         UINT        DlgResID;       // Main dialog resource template
+        UINT        DlgAccResID;    // Main dialog accelerator
         DLGPROC     DlgProc;        // Main dialog callback function
         UINT        BannerCtlID;    // ID of static control for banner on main dialog
         UINT        SplashResID;    // ID of splash image resource
@@ -54,7 +57,7 @@ typedef struct _KNS_INFO {
     } OnlineService;
 } KNS_INFO, * PKNS_INFO;
 
-NTA_API INT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo);
+NTA_API UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo);
 
 NTA_API INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type);
 

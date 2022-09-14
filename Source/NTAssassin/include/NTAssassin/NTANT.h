@@ -236,3 +236,10 @@ NTA_API HANDLE NTAPI NT_CreateTokenEx(_In_ TOKEN_TYPE Type, _In_ PSID OwnerSid, 
 /// <param name="Privileges">Token privileges, or NULL to use privileges of RefToken</param>
 /// <returns>Handle to the token new created, or NULL if failed, error code storaged in last STATUS</returns>
 NTA_API HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefToken, _In_opt_ PSID OwnerSid, _In_opt_ PLUID AuthenticationId, _In_opt_ PTOKEN_GROUPS Groups, _In_opt_ PTOKEN_PRIVILEGES Privileges);
+
+/// <summary>
+/// Gets system information
+/// </summary>
+/// <seealso cref="NtQuerySystemInformation"/>
+/// <returns>Pointer to a new allocated buffer contains information, should be freed by <c>Mem_Free</c></returns>
+PVOID NTAPI NT_GetSystemInfo(_In_ SYSTEM_INFORMATION_CLASS SystemInformationClass);

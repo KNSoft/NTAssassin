@@ -50,24 +50,6 @@ VOID NTAPI Ctl_DestroyMenuEx(_In_ PCTL_MENU Menus, _In_ UINT Count, HMENU Menu) 
     }
 }
 
-static LRESULT NTAPI Ctl_PropertySheetPageDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
-    TCHAR   szClassName[MAX_CLASSNAME_CCH];
-    if (uMsg == WM_CTLCOLORDLG) {
-        return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
-    } else if (uMsg == WM_CTLCOLORSTATIC) {
-        SetBkMode((HDC)wParam, TRANSPARENT);
-        if (GetClassName((HWND)lParam, szClassName, ARRAYSIZE(szClassName))) {
-            if (Str_EqualW(szClassName, WC_EDITW)) {
-                if (GetWindowLongPtr((HWND)lParam, GWL_STYLE) & ES_READONLY) {
-                    return (LRESULT)GetSysColorBrush(COLOR_BTNFACE);
-                }
-            }  
-        } 
-        return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
-    }
-    return DefSubclassProc(hDlg, uMsg, wParam, lParam);
-}
-
 static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
     if (uMsg == WM_NOTIFY) {
         LPNMHDR lpnmhdr = (LPNMHDR)lParam;
@@ -105,8 +87,7 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
     SendMessage(hTab, TCM_DELETEALLITEMS, 0, 0);
     for (i = 0; i < SheetCount; i++) {
         Sheets[i].Handle = CreateDialogParam(Sheets[i].Instance, MAKEINTRESOURCE(Sheets[i].DlgResID), Dialog, Sheets[i].DlgProc, Param);
-        if (Sheets[i].Handle &&
-            SetWindowSubclass(Sheets[i].Handle, Ctl_PropertySheetPageDialogProc, 0, 0)) {
+        if (Sheets[i].Handle) {
             stTCI.pszText = (LPTSTR)(IS_INTRESOURCE(Sheets[i].Title) ? I18N_GetString((DWORD_PTR)Sheets[i].Title) : Sheets[i].Title);
             stTCI.lParam = (LPARAM)Sheets[i].Handle;
             SendMessage(hTab, TCM_INSERTITEM, i, (LPARAM)&stTCI);
@@ -118,6 +99,7 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
     if (bRet) {
         bRet = SetWindowSubclass(Dialog, Ctl_PropertySheetDialogProc, 0, TabCtlID);
         if (SheetCount) {
+            SetWindowPos(hTab, Sheets[i - 1].Handle, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
             SendMessage(hTab, TCM_SETCURSEL, 0, 0);
             stnmhdr.hwndFrom = hTab;
             stnmhdr.idFrom = TabCtlID;

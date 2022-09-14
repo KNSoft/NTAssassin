@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
 
 #define UI_NONOTIFYPROP TEXT("NTAssassin.UI.NoNotify")
 
@@ -137,8 +137,8 @@ NTA_API LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, _In_opt_ PCWSTR Text);
   * @note Sometimes "WM_GETTEXT" works incorrectly, this function may safer
   */
 
-/// <seealso cref="WM_GETTEXT"/>
-/// <remarks><c>WM_GETTEXT</c> may not writting null-terminates in some cases, this wrapper fixes it</remarks>
+  /// <seealso cref="WM_GETTEXT"/>
+  /// <remarks><c>WM_GETTEXT</c> may not writting null-terminates in some cases, this wrapper fixes it</remarks>
 NTA_API _Success_(return > 0) UINT NTAPI UI_GetWindowTextExW(HWND Window, _Out_writes_z_(TextCch) PWSTR Text, UINT TextCch);
 NTA_API _Success_(return > 0) UINT NTAPI UI_GetWindowTextExA(HWND Window, _Out_writes_z_(TextCch) PSTR Text, UINT TextCch);
 #define UI_GetWindowTextW(Window, Text) UI_GetWindowTextExW(Window, Text, ARRAYSIZE(Text))
@@ -166,9 +166,10 @@ NTA_API _Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL
 /// Enters message loop for specified window
 /// <see href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getmessage">GetMessage - MSDN</see>
 /// </summary>
-/// <param name="Window">Handle to the window</param>
+/// <param name="Window">Handle to the window, NULL to loop all windows belong to current thread</param>
+/// <param name="ExitCode">Pointer to a variable receives exit code</param>
 /// <returns>TRUE if the loop ended when receives WM_QUIT, or FALSE when an error occurred</returns>
-NTA_API BOOL NTAPI UI_MessageLoop(HWND Window);
+NTA_API _Success_(return != FALSE) BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode);
 
 /// <summary>
 /// Gets position and size of virtual screen (multiple monitors support)
@@ -176,3 +177,10 @@ NTA_API BOOL NTAPI UI_MessageLoop(HWND Window);
 /// <param name="Point">Pointer to a POINT structure receives position of virtual screen</param>
 /// <param name="Size">Pointer to a SIZE structure receives size of virtual screen</param>
 NTA_API VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size);
+
+/// <summary>
+/// Allows WM_DROPFILES message, especially in an elevated application
+/// </summary>
+/// <param name="Window">Handle to the window</param>
+/// <returns>TRUE if successed, or FALSE if failed</returns>
+NTA_API BOOL NTAPI UI_AllowDrop(HWND Window);
