@@ -2,7 +2,7 @@
 #include "include\NTAssassin\NTAUI.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTADPI.h"
-#include "include\NTAssassin\NTASys.h"
+#include "include\NTAssassin\NTAEH.h"
 
 #define DRE_MAX_NUM_CCH 16
 #define DRE_ITEM_W      64
@@ -200,7 +200,7 @@ static INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPar
                 lpstDRE->Rect->bottom = rc.bottom;
                 EndDialog(hDlg, TRUE);
             } else {
-                Sys_ErrorMsgBox(hDlg, lpstDRE->Texts[0] ? lpstDRE->Texts[0] : L"Rectangle Editor", ERROR_INVALID_PARAMETER);
+                EH_ErrorMsgBox(hDlg, lpstDRE->Texts[0] ? lpstDRE->Texts[0] : L"Rectangle Editor", ERROR_INVALID_PARAMETER);
             }
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);

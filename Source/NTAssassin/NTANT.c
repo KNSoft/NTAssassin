@@ -1,13 +1,6 @@
 #include "include\NTAssassin\NTANT.h"
-#include "include\NTAssassin\NTARProc.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAMem.h"
-
-DWORD NTAPI NT_SetLastNTError(NTSTATUS Status) {
-    DWORD dwErrCode;
-    dwErrCode = RtlNtStatusToDosErrorNoTeb(Status);
-    NT_SetLastError(dwErrCode);
-    return dwErrCode;
-}
 
 VOID NTAPI NT_InitObject(_Out_ POBJECT_ATTRIBUTES Object, HANDLE RootDirectory, PUNICODE_STRING ObjectName, ULONG Attributes) {
     Object->Length = sizeof(OBJECT_ATTRIBUTES);
@@ -48,7 +41,7 @@ PVOID NTAPI NT_GetSystemInfo(_In_ SYSTEM_INFORMATION_CLASS SystemInformationClas
         }
     }
     if (!Info) {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
     }
     return Info;
 }

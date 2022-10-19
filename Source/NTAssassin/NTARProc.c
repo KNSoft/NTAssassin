@@ -3,12 +3,13 @@
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAProc.h"
 #include "include\NTAssassin\NTASys.h"
+#include "include\NTAssassin\NTAEH.h"
 
 static PFNCreateProcessInternalW pfnCreateProcessInternalW = NULL;
 
-HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ LPCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles) {
+_Check_return_
+HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles, _In_opt_ PCWSTR CurrentDirectory, _In_opt_ LPSTARTUPINFOW StartupInfo) {
     HANDLE hProc = NULL;
-    STARTUPINFOW si = { sizeof(si) };
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = NORMAL_PRIORITY_CLASS | CREATE_NEW_CONSOLE | CREATE_DEFAULT_ERROR_MODE;
     PVOID pEnv = NULL;
@@ -16,7 +17,7 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ LPCWSTR Applicat
     if (!pfnCreateProcessInternalW) {
         pfnCreateProcessInternalW = (PFNCreateProcessInternalW)Proc_GetProcAddr(Sys_LoadDll(SysDllNameKernel32), "CreateProcessInternalW");
         if (!pfnCreateProcessInternalW) {
-            NT_SetLastNTError(NT_GetLastStatus());
+            EH_SetLastNTError(EH_GetLastStatus());
             return NULL;
         }
     }
@@ -26,7 +27,14 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ LPCWSTR Applicat
             dwCreationFlags |= CREATE_UNICODE_ENVIRONMENT;
         }
     }
-    if (pfnCreateProcessInternalW(TokenHandle, ApplicationName, CommandLine, NULL, NULL, InheritHandles, dwCreationFlags, pEnv, NULL, &si, &pi, NULL)) {
+    LPSTARTUPINFOW psi;
+    if (StartupInfo) {
+        psi = StartupInfo;
+    } else {
+        STARTUPINFOW si = { sizeof(si) };
+        psi = &si;
+    }
+    if (pfnCreateProcessInternalW(TokenHandle, ApplicationName, CommandLine, NULL, NULL, InheritHandles, dwCreationFlags, pEnv, CurrentDirectory, psi, &pi, NULL)) {
         NtClose(pi.hThread);
         hProc = pi.hProcess;
     }
@@ -75,7 +83,7 @@ BOOL NTAPI RProc_EnumDlls64(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC64 
     return TRUE;
 
 Label_0:
-    NT_SetLastStatus(lStatus);
+    EH_SetLastStatus(lStatus);
     return FALSE;
 }
 
@@ -121,7 +129,7 @@ BOOL NTAPI RProc_EnumDlls32(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC32 
     return TRUE;
 
 Label_0:
-    NT_SetLastStatus(lStatus);
+    EH_SetLastStatus(lStatus);
     return FALSE;
 }
 
@@ -131,7 +139,7 @@ BOOL NTAPI RProc_CreateThread(_In_ HANDLE ProcessHandle, _In_ LPTHREAD_START_ROU
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -143,7 +151,7 @@ SIZE_T NTAPI RProc_ReadMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress,
     if (NT_SUCCESS(lStatus)) {
         return sBytesWritten;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return 0;
     }
 }
@@ -155,7 +163,7 @@ SIZE_T NTAPI RProc_WriteMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress
     if (NT_SUCCESS(lStatus)) {
         return sBytesRead;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return 0;
     }
 }
@@ -170,7 +178,7 @@ HANDLE NTAPI RProc_Open(DWORD DesiredAccess, DWORD ProcessId) {
     stClientId.UniqueThread = 0;
     lStatus = NtOpenProcess(&hProc, DesiredAccess, &stObjectAttr, &stClientId);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
     }
     return hProc;
 }
@@ -185,7 +193,7 @@ HANDLE NTAPI RProc_OpenThread(DWORD DesiredAccess, DWORD ThreadId) {
     stClientId.UniqueThread = (HANDLE)(DWORD_PTR)ThreadId;
     lStatus = NtOpenThread(&hThread, DesiredAccess, &stObjectAttr, &stClientId);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
     }
     return hThread;
 }
@@ -199,7 +207,7 @@ BOOL NTAPI RProc_AdjustPrivilege(_In_ HANDLE ProcessHandle, _In_ SE_PRIVILEGE Pr
             return TRUE;
         }
     } else {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
     }
     return FALSE;
 }
@@ -219,7 +227,7 @@ UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, _Out_writes_z_(FilePat
             lStatus = STATUS_BUFFER_TOO_SMALL;
         }
     }
-    NT_SetLastStatus(lStatus);
+    EH_SetLastStatus(lStatus);
     return 0;
 }
 
@@ -399,7 +407,7 @@ BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap) {
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -410,7 +418,7 @@ BOOL NTAPI RProc_GetWow64PEB(_In_ HANDLE hProcess, _Out_ PPEB32 * Wow64PEB) {
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }

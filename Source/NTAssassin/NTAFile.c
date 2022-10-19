@@ -1,5 +1,5 @@
 #include "include\NTAssassin\NTAFile.h"
-#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAMem.h"
 
 HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions) {
@@ -12,7 +12,7 @@ HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MA
         lStatus = NtCreateFile(&hFile, DesiredAccess, &stObject, &stIOStatus, NULL, FILE_ATTRIBUTE_NORMAL, ShareAccess, CreateDisposition, CreateOptions, NULL, 0);
         Mem_HeapFree(stString.Buffer);
         if (!NT_SUCCESS(lStatus)) {
-            NT_SetLastStatus(lStatus);
+            EH_SetLastStatus(lStatus);
         }
     }
     return hFile;
@@ -28,7 +28,7 @@ BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size) {
         *Size = (SIZE_T)fsi.EndOfFile.QuadPart;
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -41,7 +41,7 @@ ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PV
     if (NT_SUCCESS(lStatus)) {
         return (ULONG)stIOStatus.Information;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -62,7 +62,7 @@ BOOL NTAPI File_IsDirectory(_In_z_ PCWSTR FilePath, _Out_ PBOOL Result) {
     } else {
         lStatus = STATUS_OBJECT_NAME_INVALID;
     }
-    NT_SetLastStatus(lStatus);
+    EH_SetLastStatus(lStatus);
     return FALSE;
 }
 
@@ -82,7 +82,7 @@ BOOL NTAPI File_Delete(_In_z_ PCWSTR FilePath) {
     } else {
         lStatus = STATUS_OBJECT_NAME_INVALID;
     }
-    NT_SetLastStatus(lStatus);
+    EH_SetLastStatus(lStatus);
     return FALSE;
 }
 
@@ -94,7 +94,7 @@ BOOL NTAPI File_Dispose(HANDLE FileHandle) {
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -108,7 +108,7 @@ BOOL NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize) {
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -137,7 +137,7 @@ BOOL NTAPI File_ReadOnlyMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
                 }
                 NtClose(hSection);
             }
-            NT_SetLastStatus(lStatus);
+            EH_SetLastStatus(lStatus);
         }
         NtClose(hFile);
     }
@@ -176,7 +176,7 @@ BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
                 }
                 NtClose(hSection);
             }
-            NT_SetLastStatus(lStatus);
+            EH_SetLastStatus(lStatus);
         }
         NtClose(hFile);
     }
@@ -217,7 +217,7 @@ BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MA
         if (NT_SUCCESS(lStatus)) {
             return TRUE;
         } else {
-            NT_SetLastStatus(lStatus);
+            EH_SetLastStatus(lStatus);
             return FALSE;
         }
     } else {

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "NTAssassin.h"
+#include "NTADef.h"
 
 typedef struct _FILE_MAP {
     HANDLE  FileHandle;

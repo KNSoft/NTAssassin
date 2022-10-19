@@ -1,5 +1,6 @@
 #include "include\NTAssassin\NTAHijack.h"
 #include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTARProc.h"
 #include "include\NTAssassin\NTAProc.h"
@@ -99,7 +100,7 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
         NTSTATUS lStatus = Proc_WaitForObject(hThread, Timeout);
         if (lStatus != STATUS_SUCCESS) {
             // Keep remote memory due to the thread still running
-            NT_SetLastStatus(lStatus);
+            EH_SetLastStatus(lStatus);
             bKeepMem = TRUE;
             goto Label_3;
         }
@@ -167,7 +168,7 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
             }
             return TRUE;
         } else {
-            NT_SetLastStatus(ExitCode);
+            EH_SetLastStatus(ExitCode);
         }
     }
     return FALSE;
@@ -207,7 +208,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     usPageSize = usTotalSize;
     lStatus = NtAllocateVirtualMemory(ProcessHandle, &pRemoteBuffer, 0, &usPageSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         goto Label_0;
     }
 
@@ -217,7 +218,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     // Random Parameters..., align to STRING_ALIGNMENT
     lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteBuffer, CallProcHeader, sizeof(HIJACK_CALLPROCHEADER), NULL);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         goto Label_1;
     }
     pRemoteParam = MOVE_PTR(pRemoteBuffer, sizeof(HIJACK_CALLPROCHEADER), HIJACK_CALLPROCPARAM);
@@ -227,7 +228,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
         if (stMemParam.Size) {
             lStatus = NtWriteVirtualMemory(ProcessHandle, pTemp, (PVOID)pParam[i - 1].Address, (SIZE_T)stMemParam.Size, NULL);
             if (!NT_SUCCESS(lStatus)) {
-                NT_SetLastStatus(lStatus);
+                EH_SetLastStatus(lStatus);
                 goto Label_1;
             }
             stMemParam.Address = pTemp;
@@ -237,7 +238,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
         }
         lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteParam, &stMemParam, sizeof(stMemParam), NULL);
         if (!NT_SUCCESS(lStatus)) {
-            NT_SetLastStatus(lStatus);
+            EH_SetLastStatus(lStatus);
             goto Label_1;
         }
         pRemoteParam++;
@@ -259,14 +260,14 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     lStatus = Proc_WaitForObject(hThread, Timeout);
     if (lStatus != STATUS_SUCCESS) {
         bKeepMem = TRUE;
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         goto Label_3;
     }
 
     // Get return values and parameters
     lStatus = NtReadVirtualMemory(ProcessHandle, pRemoteBuffer, &stCallProcRet, sizeof(stCallProcRet), NULL);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         goto Label_3;
     }
     CallProcHeader->RetValue = stCallProcRet.RetValue;
@@ -278,7 +279,7 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
             if (pParam[i - 1].Out) {
                 lStatus = NtReadVirtualMemory(ProcessHandle, pRemoteRandomParam, (PVOID)pParam[i - 1].Address, (SIZE_T)pParam[i - 1].Size, NULL);
                 if (!NT_SUCCESS(lStatus)) {
-                    NT_SetLastStatus(lStatus);
+                    EH_SetLastStatus(lStatus);
                     goto Label_3;
                 }
             }

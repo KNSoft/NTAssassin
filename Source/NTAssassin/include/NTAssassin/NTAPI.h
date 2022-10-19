@@ -389,6 +389,14 @@ NtUnmapViewOfSection(
 NTSYSAPI
 NTSTATUS
 NTAPI
+NtQueryPerformanceCounter(
+  _Out_     PLARGE_INTEGER PerformanceCounter,
+  _Out_opt_ PLARGE_INTEGER PerformanceFrequency
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
 NtOpenThread(
     _Out_ PHANDLE            ThreadHandle,
     _In_  ACCESS_MASK        DesiredAccess,

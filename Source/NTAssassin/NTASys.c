@@ -1,9 +1,7 @@
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTANT.h"
 #include "include\NTAssassin\NTAProc.h"
-#include "include\NTAssassin\NTADlg.h"
 #include "include\NTAssassin\NTAMem.h"
-#include "include\NTAssassin\NTAStr.h"
 
 static HMODULE hSysDlls[SysDllNameMax] = { NULL };
 static PCWSTR  pszSysDllNames[] = {
@@ -49,56 +47,6 @@ PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId) {
         NULL;
 }
 
-PCWSTR NTAPI Sys_GetErrorInfo(DWORD Error) {
-    DWORD   dwError = Error;
-    if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
-        HRESULT_FACILITY(dwError) == FACILITY_WIN32)
-        dwError = HRESULT_CODE(dwError);
-    return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
-}
-
-PCWSTR NTAPI Sys_GetStatusInfo(NTSTATUS Status) {
-    return Sys_GetMessage(NT_GetNtdllHandle(), Status);
-}
-
-PCWSTR NTAPI Sys_GetStatusErrorInfo(NTSTATUS Status) {
-    DWORD   dwError = RtlNtStatusToDosErrorNoTeb(Status);
-    if (dwError == ERROR_MR_MID_NOT_FOUND)
-        return Sys_GetStatusInfo(Status);
-    return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
-}
-
-VOID NTAPI Sys_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
-    DWORD   dwError = Error;
-    if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
-        HRESULT_FACILITY(dwError) == FACILITY_WIN32)
-        dwError = HRESULT_CODE(dwError);
-    Dlg_MsgBox(
-        Owner,
-        Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError),
-        Title,
-        dwError == ERROR_SUCCESS ? 0 : MB_ICONERROR
-    );
-}
-
-VOID NTAPI Sys_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status) {
-    UINT    uType;
-    if (NT_INFORMATION(Status))
-        uType = MB_ICONINFORMATION;
-    else if (NT_WARNING(Status))
-        uType = MB_ICONWARNING;
-    else if (NT_ERROR(Status))
-        uType = MB_ICONERROR;
-    else
-        uType = 0;
-    Dlg_MsgBox(
-        Owner,
-        Sys_GetStatusErrorInfo(Status),
-        Title,
-        uType
-    );
-}
-
 PSYSTEM_PROCESS_INFORMATION NTAPI Sys_GetProcessInfo() {
     ULONG ulSize = 0;
     PSYSTEM_PROCESS_INFORMATION pSPI = NULL;
@@ -120,29 +68,9 @@ BOOL NTAPI Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2) {
         *(PQWORD)(GUID1->Data4) == *(PQWORD)(GUID2->Data4);
 }
 
-DWORD NTAPI Sys_HRESULTToWin32(HRESULT hr) {
-    DWORD dwError = HRESULT_CODE(hr);
-    if (hr != MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, dwError)) {
-        if (!IS_ERROR(hr)) {
-            dwError = ERROR_SUCCESS;
-        } else if ((DWORD)hr & FACILITY_NT_BIT) {
-            dwError = RtlNtStatusToDosErrorNoTeb(hr & (~FACILITY_NT_BIT));
-        } else {
-            if (hr == E_NOINTERFACE) {
-                dwError = ERROR_INVALID_FUNCTION;
-            } else if (hr == E_NOTIMPL) {
-                dwError = ERROR_CALL_NOT_IMPLEMENTED;
-            } else if (hr == E_UNEXPECTED) {
-                dwError = ERROR_INVALID_DATA;
-            } else {
-                dwError = hr;
-            }
-        }
-    }
-    return dwError;
-}
-
 // WIP
+
+#include "include\NTAssassin\NTAStr.h"
 
 #define SYS_REG_SERVICES_PATH L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Services"
 

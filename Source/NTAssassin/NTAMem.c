@@ -1,6 +1,7 @@
 #include "include\NTAssassin\NTAMem.h"
+#include "include\NTAssassin\NTAEH.h"
 
-_Ret_maybenull_ _Post_writable_byte_size_(Size) _Check_return_
+_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(Size)
 PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect) {
     PVOID       pBase = NULL;
     SIZE_T      sSize = Size;
@@ -8,7 +9,7 @@ PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect) {
     if (NT_SUCCESS(lStatus)) {
         return pBase;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return NULL;
     }
 }
@@ -20,7 +21,7 @@ BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect,
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }
@@ -32,7 +33,7 @@ BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) PVOID BaseAddress) {
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }

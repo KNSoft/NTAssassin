@@ -4,7 +4,7 @@
 #include "include\NTAssassin\NTAMem.h"
 #include "include\NTAssassin\NTADPI.h"
 #include "include\NTAssassin\NTAShell.h"
-#include "include\NTAssassin\NTASys.h"
+#include "include\NTAssassin\NTAEH.h"
 
 #define KNS_MAX_VER_CCH 48
 #define KNS_DEFAULT_DLGFONTSIZE 20
@@ -206,7 +206,7 @@ UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
         hAccel = NULL;
     }
     UINT_PTR ulRet;
-    ulRet = Dlg_MessageLoop(NULL, hMainDlg, hAccel, &ulRet) ? ulRet : (UINT_PTR)NT_GetLastError();
+    ulRet = Dlg_MessageLoop(NULL, hMainDlg, hAccel, &ulRet) ? ulRet : (UINT_PTR)EH_GetLastError();
     if (hFontBig) {
         DeleteObject(hFontBig);
     }
@@ -228,19 +228,19 @@ INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type) {
 }
 
 VOID NTAPI KNS_ErrorMsgBox(HWND Owner, DWORD Error) {
-    Sys_ErrorMsgBox(Owner, lpKNSInfo->Name, Error);
+    EH_ErrorMsgBox(Owner, lpKNSInfo->Name, Error);
 }
 
 VOID NTAPI KNS_StatusMsgBox(HWND Owner, NTSTATUS Status) {
-    Sys_StatusMsgBox(Owner, lpKNSInfo->Name, Status);
+    EH_StatusMsgBox(Owner, lpKNSInfo->Name, Status);
 }
 
 VOID NTAPI KNS_LastErrorMsgBox(HWND Owner) {
-    Sys_LastErrorMsgBox(Owner, lpKNSInfo->Name);
+    EH_LastErrorMsgBox(Owner, lpKNSInfo->Name);
 }
 
 VOID NTAPI KNS_LastStatusMsgBox(HWND Owner) {
-    Sys_LastStatusMsgBox(Owner, lpKNSInfo->Name);
+    EH_LastStatusMsgBox(Owner, lpKNSInfo->Name);
 }
 
 VOID NTAPI KNS_OpenHomePage() {

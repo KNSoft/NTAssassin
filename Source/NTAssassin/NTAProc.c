@@ -1,5 +1,6 @@
 #include "include\NTAssassin\NTAProc.h"
 #include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
 
 PLDR_DATA_TABLE_ENTRY NTAPI Proc_EnumDlls(_In_ PROC_DLLENUMPROC DllEnumProc, LPARAM Param) {
@@ -88,7 +89,7 @@ PVOID NTAPI Proc_GetProcAddr(_In_ HMODULE Module, _In_z_ PCSTR ProcName) {
     if (NT_SUCCESS(lStatus)) {
         return pProc;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return NULL;
     }
 }
@@ -118,7 +119,7 @@ BOOL NTAPI Proc_GetThreadExitCode(HANDLE ThreadHandle, _Out_ PDWORD ExitCode) {
         *ExitCode = stThreadInfo.ExitStatus;
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }

@@ -1,5 +1,5 @@
 #include "include\NTAssassin\NTAIO.h"
-#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
 
 BOOL NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, _In_reads_bytes_(Length) PVOID Buffer, ULONG Length) {
@@ -11,7 +11,7 @@ BOOL NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, _In_reads_bytes_(Le
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(lStatus);
+        EH_SetLastStatus(lStatus);
         return FALSE;
     }
 }

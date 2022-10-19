@@ -60,11 +60,6 @@
 #define NT_GetKUSD() ((CONST PKUSER_SHARED_DATA)MM_SHARED_USER_DATA_VA)
 
 /// <summary>
-/// Gets the Handle to the default heap
-/// </summary>
-#define NT_GetHeap() ((HANDLE)NT_GetPEB()->ProcessHeap)
-
-/// <summary>
 /// Gets instance handle of current executable module
 /// </summary>
 #define NT_GetImageBase() (NT_GetPEB()->ImageBaseAddress)
@@ -73,22 +68,6 @@
 /// Gets the handle to current directory
 /// </summary>
 #define NT_GetCurDirHandle() (NT_GetPEB()->ProcessParameters->CurrentDirectory.Handle)
-
-/// <summary>
-/// Gets or sets the last error
-/// </summary>
-#define NT_ClearLastError() NT_SetTEBMemberDWORD(LastErrorValue, ERROR_SUCCESS)
-#define NT_GetLastError() NT_GetTEBMemberDWORD(LastErrorValue)
-#define NT_SetLastError(dwError) NT_SetTEBMemberDWORD(LastErrorValue, dwError)
-#define NT_LastErrorSucceed() (NT_GetTEBMemberDWORD(LastErrorValue) == ERROR_SUCCESS)
-
-/// <summary>
-/// Gets or sets the last status
-/// </summary>
-#define NT_ClearLastStatus() NT_SetTEBMemberDWORD(LastStatusValue, STATUS_SUCCESS)
-#define NT_GetLastStatus() NT_GetTEBMemberDWORD(LastStatusValue)
-#define NT_SetLastStatus(lStatus) NT_SetTEBMemberDWORD(LastStatusValue, lStatus)
-#define NT_LastStatusSucceed() (NT_SUCCESS(NT_GetTEBMemberDWORD(LastStatusValue)))
 
 /// <summary>
 /// Gets PID of CSRSS
@@ -101,13 +80,6 @@ NTA_API DWORD NTAPI NT_GetLsaPid();
 /// Gets handle to ntdll.dll, which the first initialized module
 /// </summary>
 #define NT_GetNtdllHandle() (CONTAINING_RECORD(NT_GetPEB()->Ldr->InInitializationOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InInitializationOrderModuleList)->DllBase)
-
-/// <summary>
-/// Sets last win32 error according to given NT Status
-/// </summary>
-/// <param name="Status">NT Status</param>
-/// <returns>Win32 Error code corresponding to the given NT Status</returns>
-NTA_API DWORD NTAPI NT_SetLastNTError(NTSTATUS Status);
 
 /// <summary>
 /// Initializes OBJECT_ATTRIBUTES structure

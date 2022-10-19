@@ -129,6 +129,9 @@
     <ClCompile Include="NTANT_Reg.c">
       <Filter>Source Files\NTANT</Filter>
     </ClCompile>
+    <ClCompile Include="NTAEH.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTACon.h">
@@ -274,6 +277,9 @@
     </ClInclude>
     <ClInclude Include="include\NTAssassin\NTATypes.h">
       <Filter>Header Files\NTABase</Filter>
+    </ClInclude>
+    <ClInclude Include="include\NTAssassin\NTAEH.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

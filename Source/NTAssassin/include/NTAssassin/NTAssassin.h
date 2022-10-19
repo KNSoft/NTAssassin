@@ -9,6 +9,7 @@ EXTERN_C_START
 #include "NTAOpCode.h"
 #include "NTAUCRT.h"
 #include "NTANT.h"
+#include "NTAEH.h"
 #include "NTAData.h"
 #include "NTADbg.h"
 #include "NTAMath.h"

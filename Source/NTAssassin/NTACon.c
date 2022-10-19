@@ -1,4 +1,5 @@
 #include "include\NTAssassin\NTACon.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
 
 DWORD NTAPI Con_Write(HANDLE ConHandle, _In_reads_bytes_opt_(Length) PVOID Buffer, _In_ ULONG Length) {
@@ -8,7 +9,7 @@ DWORD NTAPI Con_Write(HANDLE ConHandle, _In_reads_bytes_opt_(Length) PVOID Buffe
     if (NT_SUCCESS(Status)) {
         return (DWORD)IOStatus.Information;
     } else {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
         return 0;
     }
 }

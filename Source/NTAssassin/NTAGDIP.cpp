@@ -1,6 +1,12 @@
-﻿#include "include\NTAssassin\NTAGDIP.h"
+﻿#include "include\NTAssassin\NTADef.h"
+
+EXTERN_C_START
+
+#include "include\NTAssassin\NTAGDIP.h"
 #include "include\NTAssassin\NTAMem.h"
 #include "include\NTAssassin\NTASys.h"
+
+EXTERN_C_END
 
 #include <gdiplus.h>
 
@@ -8,6 +14,8 @@
 
 using namespace Gdiplus;
 using namespace Gdiplus::DllExports;
+
+EXTERN_C_START
 
 typedef BOOL(GDIP_IMGCODECENUMPROC)(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARAM Param);
 
@@ -245,3 +253,5 @@ BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, G
 }
 
 #pragma warning(default: 26812)
+
+EXTERN_C_END

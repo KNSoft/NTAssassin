@@ -1,5 +1,5 @@
 #include "include\NTAssassin\NTAUI.h"
-#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTARProc.h"
 
 HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint) {
@@ -93,12 +93,12 @@ BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag,
     BOOL        bRet;
     bRet = FALSE;
     if (StyleIndex == GWL_STYLE || StyleIndex == GWL_EXSTYLE) {
-        NT_ClearLastError();
+        EH_ClearLastError();
         lStyle = GetWindowLongPtr(Window, StyleIndex);
-        if (lStyle || NT_LastErrorSucceed()) {
-            NT_ClearLastError();
+        if (lStyle || EH_LastErrorSucceed()) {
+            EH_ClearLastError();
             lStyle = SetWindowLongPtr(Window, StyleIndex, COMBINE_FLAGS(lStyle, StyleFlag, EnableState));
-            return lStyle || NT_LastErrorSucceed();
+            return lStyle || EH_LastErrorSucceed();
         }
     }
     return bRet;
@@ -149,7 +149,7 @@ _Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLo
     BOOL        bRet;
     // GetWindowLongPtr may crash in some cases
     __try {
-        NT_ClearLastError();
+        EH_ClearLastError();
         BOOL bUnicode = IsWindowUnicode(Window);
         if (bUnicode && !ClassLong) {
             lResult = GetWindowLongPtrW(Window, Index);
@@ -160,10 +160,10 @@ _Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLo
         } else {
             lResult = GetClassLongPtrA(Window, Index);
         }
-        bRet = lResult ? TRUE : (NT_GetLastError() == ERROR_SUCCESS);
+        bRet = lResult ? TRUE : EH_LastErrorSucceed();
     } __except (EXCEPTION_EXECUTE_HANDLER) {
         lResult = 0;
-        NT_SetLastError(ERROR_INVALID_FUNCTION);
+        EH_SetLastError(ERROR_INVALID_FUNCTION);
         bRet = FALSE;
     }
     *Result = lResult;

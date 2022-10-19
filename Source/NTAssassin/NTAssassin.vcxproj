@@ -225,6 +225,7 @@
     <ClCompile Include="NTADlg.c" />
     <ClCompile Include="NTADlg_RectEditor.c" />
     <ClCompile Include="NTADlg_ValueEditor.c" />
+    <ClCompile Include="NTAEH.c" />
     <ClCompile Include="NTAFile.c" />
     <ClCompile Include="NTAGDI.c" />
     <ClCompile Include="NTAGDIP.cpp" />
@@ -265,6 +266,7 @@
     <ClInclude Include="include\NTAssassin\NTADlg_RectEditor.h" />
     <ClInclude Include="include\NTAssassin\NTADlg_ValueEditor.h" />
     <ClInclude Include="include\NTAssassin\NTADPI.h" />
+    <ClInclude Include="include\NTAssassin\NTAEH.h" />
     <ClInclude Include="include\NTAssassin\NTAFile.h" />
     <ClInclude Include="include\NTAssassin\NTAGDI.h" />
     <ClInclude Include="include\NTAssassin\NTAGDIP.h" />

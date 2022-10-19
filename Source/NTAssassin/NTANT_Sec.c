@@ -1,4 +1,5 @@
 #include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTARProc.h"
 #include "include\NTAssassin\NTAMem.h"
 
@@ -57,14 +58,14 @@ HANDLE NTAPI NT_DuplicateCsrssToken(_In_ TOKEN_TYPE Type, _In_reads_(PrivilegeCo
                         }
                         Mem_Free(Priv);
                     } else {
-                        Status = NT_GetLastStatus();
+                        Status = EH_GetLastStatus();
                     }
                 }
             }
             NtClose(hToken);
         }
         if (!hDuplicatedToken) {
-            NT_SetLastStatus(Status);
+            EH_SetLastStatus(Status);
         }
         NtClose(hProc);
     }
@@ -93,7 +94,7 @@ PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLAS
         }
     }
     if (!Info) {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
     }
     return Info;
 }
@@ -104,7 +105,7 @@ BOOL NTAPI NT_AdjustPrivilege(_In_ HANDLE TokenHandle, _In_ SE_PRIVILEGE Privile
     if (Status == STATUS_SUCCESS) {
         return TRUE;
     } else {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
         return FALSE;
     }
 }
@@ -114,7 +115,7 @@ BOOL NTAPI NT_Impersonate(HANDLE TokenHandle) {
     if (NT_SUCCESS(Status)) {
         return TRUE;
     } else {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
         return FALSE;
     }
 }
@@ -203,7 +204,7 @@ BOOL NTAPI NT_GetLogonSessionInfo(_In_opt_ PSID LogonUserSid, _Out_opt_ PSID Use
     }
 
     if (!bRet) {
-        NT_SetLastNTError(Status);
+        EH_SetLastNTError(Status);
     }
     return bRet;
 }
@@ -221,7 +222,7 @@ HANDLE NTAPI NT_GetSessionToken(DWORD SessionId, BOOL UseLinkedToken) {
             NtClose(Token);
             Token = LinkedToken;
         } else if (Status != STATUS_NO_SUCH_LOGON_SESSION) {
-            NT_SetLastNTError(Status);
+            EH_SetLastNTError(Status);
             NtClose(Token);
             Token = NULL;
         }
@@ -261,7 +262,7 @@ HANDLE NTAPI NT_CreateTokenEx(_In_ TOKEN_TYPE Type, _In_ PSID OwnerSid, _In_ PLU
     if (NT_SUCCESS(Status)) {
         return Token;
     } else {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
         return NULL;
     }
 }
@@ -284,7 +285,7 @@ HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefToken, _In_
             return NULL;
         }
     } else {
-        NT_SetLastStatus(STATUS_INVALID_PARAMETER);
+        EH_SetLastStatus(STATUS_INVALID_PARAMETER);
         return NULL;
     }
 
@@ -298,7 +299,7 @@ HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefToken, _In_
             goto Label_0;
         }
     } else {
-        NT_SetLastStatus(STATUS_INVALID_PARAMETER);
+        EH_SetLastStatus(STATUS_INVALID_PARAMETER);
         goto Label_0;
     }
 
@@ -310,7 +311,7 @@ HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefToken, _In_
             goto Label_0;
         }
     } else {
-        NT_SetLastStatus(STATUS_INVALID_PARAMETER);
+        EH_SetLastStatus(STATUS_INVALID_PARAMETER);
         goto Label_0;
     }
 
@@ -322,7 +323,7 @@ HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefToken, _In_
             goto Label_1;
         }
     } else {
-        NT_SetLastStatus(STATUS_INVALID_PARAMETER);
+        EH_SetLastStatus(STATUS_INVALID_PARAMETER);
         goto Label_1;
     }
 

@@ -1,5 +1,5 @@
 #include "include\NTAssassin\NTAWS.h"
-#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 
 BOOL NTAPI WS_Startup() {
     WORD wVersionRequested = MAKEWORD(2, 2);
@@ -15,7 +15,7 @@ BOOL NTAPI WS_Startup() {
         }
     } else {
     Error:
-        NT_SetLastError(iError);
+        EH_SetLastError(iError);
         return FALSE;
     }
 }

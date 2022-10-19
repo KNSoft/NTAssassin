@@ -1,4 +1,5 @@
 #include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 
 HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK DesiredAccess) {
     HANDLE hKey;
@@ -7,7 +8,7 @@ HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK Desire
     if (NT_SUCCESS(Status)) {
         return hKey;
     } else {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
         return NULL;
     }
 }
@@ -27,7 +28,7 @@ BOOL NTAPI NT_RegGetDword(_In_ HANDLE KeyHandle, _In_ PUNICODE_STRING KeyName, _
         }
     }
     if (!Ret) {
-        NT_SetLastStatus(Status);
+        EH_SetLastStatus(Status);
     }
     return Ret;
 }

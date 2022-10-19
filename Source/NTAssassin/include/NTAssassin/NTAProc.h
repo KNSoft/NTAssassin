@@ -3,7 +3,13 @@
 #pragma once
 
 #include "NTADef.h"
+#include "NTANT.h"
 #include "NTARProc.h"
+
+/// <summary>
+/// Gets the Handle to the default heap
+/// </summary>
+#define Proc_GetHeap() ((HANDLE)NT_GetPEB()->ProcessHeap)
 
 /// <summary>
 /// Callback procedure to enumerate DLL modules

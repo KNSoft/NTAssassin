@@ -1,6 +1,6 @@
 #include "include\NTAssassin\NTACtl.h"
 #include "include\NTAssassin\NTAI18N.h"
-#include "include\NTAssassin\NTANT.h"
+#include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAUI.h"
 
@@ -31,9 +31,9 @@ HMENU NTAPI Ctl_CreateMenuEx(_Inout_ PCTL_MENU Menus, _In_ UINT Count, _In_opt_ 
             }
         }
         if (i < Count) {
-            DWORD dwError = NT_GetLastError();
+            DWORD dwError = EH_GetLastError();
             Ctl_DestroyMenuEx(Menus, Count, hMenu);
-            NT_SetLastError(dwError);
+            EH_SetLastError(dwError);
             hMenu = NULL;
         }
     }

@@ -1,5 +1,7 @@
 ﻿// Use native instructions and system calls instead
 
+EXTERN_C_START
+
 #define GetCurrentProcess MS_GetCurrentProcess
 #define GetCurrentThreadId MS_GetCurrentThreadId
 #define VirtualAlloc MS_VirtualAlloc
@@ -14,7 +16,8 @@
 #define SetLastError MS_SetLastError
 #define GetLastError MS_GetLastError
 
-#include "include\NTAssassin\NTAssassin.h"
+#include "include\NTAssassin\NTADef.h"
+#include "include\NTAssassin\NTAEH.h"
 
 #undef GetCurrentProcess
 #undef GetCurrentThreadId
@@ -41,8 +44,8 @@
 #define GetThreadContext NTAHookIntl_GetThreadContext
 #define SetThreadContext NTAHookIntl_SetThreadContext
 #define ResumeThread NTAHookIntl_ResumeThread
-#define SetLastError NT_SetLastError
-#define GetLastError NT_GetLastError
+#define SetLastError EH_SetLastError
+#define GetLastError EH_GetLastError
 
 #define GetModuleHandleW(NULL) NT_GetImageBase()
 
@@ -50,7 +53,7 @@ _Ret_maybenull_ _Post_writable_byte_size_(dwSize)
 static LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD flAllocationType, _In_ DWORD flProtect) {
     NTSTATUS lStatus = NtAllocateVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, 0, &dwSize, flAllocationType, flProtect);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
         return NULL;
     }
     return lpAddress;
@@ -61,7 +64,7 @@ static SIZE_T WINAPI NTAHookIntl_VirtualQuery(_In_opt_ LPCVOID lpAddress, _Out_w
     SIZE_T ResultLength = 0;
     lStatus = NtQueryVirtualMemory(CURRENT_PROCESS_HANDLE, (LPVOID)lpAddress, MemoryBasicInformation, lpBuffer, dwLength, &ResultLength);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
     }
     return ResultLength;
 }
@@ -70,7 +73,7 @@ _Success_(return != FALSE)
 static BOOL WINAPI NTAHookIntl_VirtualProtect(_In_ LPVOID lpAddress, _In_  SIZE_T dwSize, _In_  DWORD flNewProtect, PDWORD lpflOldProtect) {
     NTSTATUS lStatus = NtProtectVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, &dwSize, flNewProtect, lpflOldProtect);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
         return FALSE;
     }
     return TRUE;
@@ -88,19 +91,19 @@ _When_(((dwFreeType & (MEM_RELEASE | MEM_DECOMMIT))) == (MEM_RELEASE | MEM_DECOM
     if (!(dwSize) || !(dwFreeType & MEM_RELEASE)) {
         lStatus = NtFreeVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, &dwSize, dwFreeType);
         if (!NT_SUCCESS(lStatus)) {
-            NT_SetLastNTError(lStatus);
+            EH_SetLastNTError(lStatus);
             return FALSE;
         }
         return TRUE;
     }
-    NT_SetLastNTError(STATUS_INVALID_PARAMETER);
+    EH_SetLastNTError(STATUS_INVALID_PARAMETER);
     return FALSE;
 }
 
 static BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_reads_bytes_opt_(dwSize) LPCVOID lpBaseAddress, _In_ SIZE_T dwSize) {
     NTSTATUS lStatus = NtFlushInstructionCache(hProcess, (PVOID)lpBaseAddress, dwSize);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
         return FALSE;
     }
     return TRUE;
@@ -109,7 +112,7 @@ static BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_r
 static BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPCONTEXT lpContext) {
     NTSTATUS lStatus = NtGetContextThread(hThread, lpContext);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
         return FALSE;
     }
     return TRUE;
@@ -118,7 +121,7 @@ static BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPC
 static BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST CONTEXT* lpContext) {
     NTSTATUS lStatus = NtSetContextThread(hThread, (PCONTEXT)lpContext);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
         return FALSE;
     }
     return TRUE;
@@ -128,11 +131,13 @@ static DWORD WINAPI NTAHookIntl_ResumeThread(_In_ HANDLE hThread) {
     ULONG PreviousResumeCount;
     NTSTATUS lStatus = NtResumeThread(hThread, &PreviousResumeCount);
     if (!NT_SUCCESS(lStatus)) {
-        NT_SetLastNTError(lStatus);
+        EH_SetLastNTError(lStatus);
         return -1;
     }
     return PreviousResumeCount;
 }
+
+EXTERN_C_END
 
 // Hook by using Detours
 #pragma warning(disable: 26495)
