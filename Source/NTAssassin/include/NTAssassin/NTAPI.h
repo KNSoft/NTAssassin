@@ -139,6 +139,13 @@ RtlLeaveCriticalSection(
 );
 
 NTSYSAPI
+VOID
+NTAPI
+RtlDeleteCriticalSection(
+    _Inout_ LPCRITICAL_SECTION lpCriticalSection
+);
+
+NTSYSAPI
 NTSTATUS
 NTAPI
 RtlFindMessage(

@@ -31,7 +31,7 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
     if (StartupInfo) {
         psi = StartupInfo;
     } else {
-        STARTUPINFOW si = { sizeof(si) };
+        STARTUPINFOW si = { sizeof(si), NULL, L"winsta0\\default" };
         psi = &si;
     }
     if (pfnCreateProcessInternalW(TokenHandle, ApplicationName, CommandLine, NULL, NULL, InheritHandles, dwCreationFlags, pEnv, CurrentDirectory, psi, &pi, NULL)) {

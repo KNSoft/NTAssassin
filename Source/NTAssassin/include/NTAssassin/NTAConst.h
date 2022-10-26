@@ -5,6 +5,7 @@
 #define CODE_ALIGNMENT 0x10
 #define STRING_ALIGNMENT 0x4
 
+#define ASCII_CASE_MASK                         0b100000
 #define MAX_WORD_IN_DEC_CCH                     6                                   // Max WORD in decimal is 65535
 #define MAX_QWORD_IN_HEX_CCH                    17                                  
 #define MAX_CLASSNAME_CCH                       256

@@ -138,8 +138,8 @@ NTA_API VOID NTAPI Str_LowerA(_Inout_ PSTR String);
 #define Str_Upper Str_UpperA
 #define Str_Lower Str_LowerA
 #endif
-#define Str_UpperChar(Ch) ((Ch) >= 'a' && (Ch) <= 'z' ? (Ch) - 'a' + 'A' : (Ch))
-#define Str_LowerChar(Ch) ((Ch) >= 'A' && (Ch) <= 'Z' ? (Ch) - 'A' + 'a' : (Ch))
+#define Str_UpperChar(Ch) ((Ch) >= 'a' && (Ch) <= 'z' ? (Ch ^ ASCII_CASE_MASK) : (Ch))
+#define Str_LowerChar(Ch) ((Ch) >= 'A' && (Ch) <= 'Z' ? (Ch ^ ASCII_CASE_MASK) : (Ch))
 
 // String Initialize
 

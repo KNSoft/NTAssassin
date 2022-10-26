@@ -102,7 +102,7 @@ NTA_API HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MAS
 /// <summary>
 /// Gets a DWORD value from registry key
 /// </summary>
-/// <seealso cref="NtOpenKey"/>
+/// <seealso cref="NtQueryValueKey"/>
 _Success_(return != FALSE) NTA_API BOOL NTAPI NT_RegGetDword(_In_ HANDLE KeyHandle, _In_ PUNICODE_STRING KeyName, _Out_ PDWORD Value);
 
 /// <seealso cref="RtlLengthSid"/>
