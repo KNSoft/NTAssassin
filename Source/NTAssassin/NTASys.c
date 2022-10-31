@@ -47,20 +47,6 @@ PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId) {
         NULL;
 }
 
-PSYSTEM_PROCESS_INFORMATION NTAPI Sys_GetProcessInfo() {
-    ULONG ulSize = 0;
-    PSYSTEM_PROCESS_INFORMATION pSPI = NULL;
-    NtQuerySystemInformation(SystemProcessInformation, NULL, 0, &ulSize);
-    if (ulSize) {
-        pSPI = Mem_Alloc(ulSize);
-        if (pSPI && !NT_SUCCESS(NtQuerySystemInformation(SystemProcessInformation, pSPI, ulSize, NULL))) {
-            Mem_Free(pSPI);
-            pSPI = NULL;
-        }
-    }
-    return pSPI;
-}
-
 BOOL NTAPI Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2) {
     return GUID1->Data1 == GUID2->Data1 &&
         GUID1->Data2 == GUID2->Data2 &&

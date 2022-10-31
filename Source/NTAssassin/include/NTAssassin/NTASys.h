@@ -43,14 +43,6 @@ NTA_API PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, _In_z_ PCSTR APIName);
 /// <returns>Pointer to the message string, or NULL if failed</returns>
 NTA_API PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId);
 
-/// <summary>
-/// Gets current system processes information
-/// </summary>
-/// <returns>Pointer to SYSTEM_PROCESS_INFORMATION buffer, should be freed by <c>Sys_FreeProcessInfo</c> when no longer needed</returns>
-NTA_API PSYSTEM_PROCESS_INFORMATION NTAPI Sys_GetProcessInfo();
-
-#define Sys_FreeProcessInfo(p) Mem_Free(p);
-
 /// <seealso cref="IsProcessorFeaturePresent"/>
 #define Sys_TestCPUFeature(Feature) ((Feature) < PROCESSOR_FEATURE_MAX ? (BOOL)NT_GetKUSD()->ProcessorFeatures[(Feature)] : FALSE)
 
