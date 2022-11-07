@@ -1,4 +1,5 @@
 #include "include\NTAssassin\NTAData.h"
+
 #include "include\NTAssassin\NTAMem.h"
 
 _Check_return_ PVOID WINAPIV Data_StructCombineEx(_In_ UINT GroupCount, _In_ UINT Size, ...) {

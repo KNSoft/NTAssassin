@@ -5,7 +5,7 @@
 include HijackASM.inc
 
 .code
-assume  fs:nothing
+assume fs:nothing
 
 ; DWORD WINAPI Hijack_CallProc_InjectThread_x86(LPVOID lParam)
 Hijack_CallProc_InjectThread_x86 PROC USES ebx edi esi lParam

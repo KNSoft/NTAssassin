@@ -25,6 +25,9 @@
     <Filter Include="Source Files\NTANT">
       <UniqueIdentifier>{ac38cc14-36dd-4651-8539-d9e2a132b91f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\NTAData">
+      <UniqueIdentifier>{5f1df65f-8a47-4486-a992-45b3f22d5a6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="NTACon.c">
@@ -46,9 +49,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAKNS.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NTAList.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAMath.c">
@@ -79,9 +79,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTAHijack.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="NTAData.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="NTADPI.c">
@@ -131,6 +128,12 @@
     </ClCompile>
     <ClCompile Include="NTAEH.c">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAData.c">
+      <Filter>Source Files\NTAData</Filter>
+    </ClCompile>
+    <ClCompile Include="NTAData_List.c">
+      <Filter>Source Files\NTAData</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -146,6 +146,55 @@ RtlDeleteCriticalSection(
 );
 
 NTSYSAPI
+VOID
+NTAPI
+RtlInitializeSRWLock(
+    _Out_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
+VOID
+NTAPI
+RtlAcquireSRWLockExclusive(
+    _Inout_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
+VOID
+NTAPI
+RtlAcquireSRWLockShared(
+    _Inout_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
+VOID
+NTAPI
+RtlReleaseSRWLockExclusive(
+    _Inout_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
+VOID
+NTAPI
+RtlReleaseSRWLockShared(
+    _Inout_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
+BOOLEAN
+NTAPI
+RtlTryAcquireSRWLockExclusive(
+    _Inout_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
+BOOLEAN
+NTAPI
+RtlTryAcquireSRWLockShared(
+    _Inout_ PRTL_SRWLOCK SRWLock
+);
+
+NTSYSAPI
 NTSTATUS
 NTAPI
 RtlFindMessage(
@@ -217,6 +266,14 @@ NTSYSAPI
 ULONG
 NTAPI
 RtlNtStatusToDosErrorNoTeb(IN NTSTATUS Status);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlWow64EnableFsRedirectionEx(
+    IN PVOID Wow64FsEnableRedirection,
+    OUT PVOID* OldFsRedirectionLevel
+);
 
 // Nt*/Zw*
 

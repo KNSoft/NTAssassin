@@ -17,6 +17,8 @@ typedef struct _PE_STRUCT {
     SIZE_T                          OverlayDataSize;
 } PE_STRUCT, *PPE_STRUCT;
 
+#define PE_GetOptionalHeaderValue(pe, m) (PE_GetBits(pe) == 64 ? PE_GetOptionalHeaderValueEx(pe,  UFIELD_OFFSET(IMAGE_OPTIONAL_HEADER64, m), RTL_FIELD_SIZE(IMAGE_OPTIONAL_HEADER64, m)) : PE_GetOptionalHeaderValueEx(pe,  UFIELD_OFFSET(IMAGE_OPTIONAL_HEADER32, m), RTL_FIELD_SIZE(IMAGE_OPTIONAL_HEADER32, m)))
+
 /// <summary>
 /// Resolves a PE image to PE_STRUCT structure
 /// </summary>
@@ -25,6 +27,15 @@ typedef struct _PE_STRUCT {
 /// <param name="OfflineMap">TRUE if PE image is offline (like file map), or FALSE if PE image is loaded in memory as a module</param>
 /// <returns>TRUE if succeeded, or FALSE if failed</returns>
 _Success_(return != FALSE) NTA_API BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap, SIZE_T OfflineMapFileSize);
+
+/// <summary>
+/// Gets bits of PE image
+/// </summary>
+/// <param name="PEStruct"></param>
+/// <returns></returns>
+NTA_API UINT NTAPI PE_GetBits(_In_ PPE_STRUCT PEStruct);
+
+NTA_API ULONGLONG NTAPI PE_GetOptionalHeaderValueEx(_In_ PPE_STRUCT PEStruct, ULONG FieldOffset, ULONG FieldSize);
 
 /// <summary>
 /// Gets data directory entry of PE image

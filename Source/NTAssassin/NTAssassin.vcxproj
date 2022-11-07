@@ -234,7 +234,7 @@
     <ClCompile Include="NTAI18N.c" />
     <ClCompile Include="NTAIO.c" />
     <ClCompile Include="NTAKNS.c" />
-    <ClCompile Include="NTAList.c" />
+    <ClCompile Include="NTAData_List.c" />
     <ClCompile Include="NTAMath.c" />
     <ClCompile Include="NTAMem.c" />
     <ClCompile Include="NTANT.c" />

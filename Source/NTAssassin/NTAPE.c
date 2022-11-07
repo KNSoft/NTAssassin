@@ -47,6 +47,36 @@ BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineM
     return bRet;
 }
 
+UINT NTAPI PE_GetBits(_In_ PPE_STRUCT PEStruct) {
+    UINT uBits = 0;
+    __try {
+        if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+            uBits = 32;
+        else if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+            uBits = 64;
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+    }
+    return uBits;
+}
+
+ULONGLONG NTAPI PE_GetOptionalHeaderValueEx(_In_ PPE_STRUCT PEStruct, ULONG FieldOffset, ULONG FieldSize) {
+    ULONGLONG ull = 0;
+    __try {
+        PBYTE p = (PBYTE)PEStruct->OptionalHeader;
+        if (FieldSize == sizeof(BYTE)) {
+            ull = *(PBYTE)(p + FieldOffset);
+        } else if (FieldSize == sizeof(USHORT)) {
+            ull = *(PUSHORT)(p + FieldOffset);
+        } else if (FieldSize == sizeof(ULONG)) {
+            ull = *(PULONG)(p + FieldOffset);
+        } else if (FieldSize == sizeof(ULONGLONG)) {
+            ull = *(PULONGLONG)(p + FieldOffset);
+        }
+    } __except (EXCEPTION_EXECUTE_HANDLER) {
+    }
+    return ull;
+}
+
 PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(_In_ PPE_STRUCT PEStruct, UINT Index) {
     PIMAGE_DATA_DIRECTORY pDataDirectory = NULL;
     __try {
