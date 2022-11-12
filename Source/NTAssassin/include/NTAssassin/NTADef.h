@@ -6,6 +6,7 @@
 #include "NTATypes.h"
 
 // Windows
+#pragma comment(lib, "ntdll.lib")
 
 // Conflicts with NTAssassin
 #define _LDR_DATA_TABLE_ENTRY _MS_LDR_DATA_TABLE_ENTRY
@@ -203,18 +204,6 @@
 #undef Int64ShraMod32
 #undef Int64ShrlMod32
 
-#include <WindowsX.h>
-#include <CommCtrl.h>
-#include <Shlobj.h>
-#include <Shlwapi.h>
-#include <shellscalingapi.h>
-#include <dwmapi.h>
-#include <Tpcshrd.h>
-#include <wtsapi32.h>
-#include <WinSock2.h>
-#include <UserEnv.h>
-#include <ntsecapi.h>
-
 #undef _LDR_DATA_TABLE_ENTRY
 #undef LDR_DATA_TABLE_ENTRY
 #undef PLDR_DATA_TABLE_ENTRY
@@ -296,3 +285,5 @@
 #endif
 
 #define ANYSIZE_STRUCT_SIZE(structure, field, size) UFIELD_OFFSET(structure, field[size])
+
+#include "NTAOptions.h"

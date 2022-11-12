@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAI18N.h"
+﻿#include "include\NTAssassin\NTAI18N.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAGDI.h"
 #include "include\NTAssassin\NTAUI.h"

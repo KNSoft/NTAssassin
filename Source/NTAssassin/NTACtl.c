@@ -1,8 +1,12 @@
-#include "include\NTAssassin\NTACtl.h"
+﻿#include "include\NTAssassin\NTACtl.h"
+
 #include "include\NTAssassin\NTAI18N.h"
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAUI.h"
+
+#pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 HMENU NTAPI Ctl_CreateMenuEx(_Inout_ PCTL_MENU Menus, _In_ UINT Count, _In_opt_ HMENU Parent) {
     HMENU hMenu = Parent ? Parent : CreateMenu();
@@ -57,6 +61,7 @@ static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wP
         TCITEM  stTCI;
         RECT    rcTab;
         if (lpnmhdr->idFrom == dwRefData) {
+            #pragma warning(disable: 26454)
             if (lpnmhdr->code == TCN_SELCHANGING || lpnmhdr->code == TCN_SELCHANGE) {
                 iSelected = (INT)SendMessage(lpnmhdr->hwndFrom, TCM_GETCURSEL, 0, 0);
                 if (iSelected != -1) {
@@ -72,6 +77,7 @@ static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wP
                     }
                 }
             }
+            #pragma warning(default: 26454)
         }
     }
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
@@ -103,7 +109,9 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
             SendMessage(hTab, TCM_SETCURSEL, 0, 0);
             stnmhdr.hwndFrom = hTab;
             stnmhdr.idFrom = TabCtlID;
+            #pragma warning(disable: 26454)
             stnmhdr.code = TCN_SELCHANGE;
+            #pragma warning(default: 26454)
             SendMessage(Dialog, WM_NOTIFY, TabCtlID, (LPARAM)&stnmhdr);
         }
     }

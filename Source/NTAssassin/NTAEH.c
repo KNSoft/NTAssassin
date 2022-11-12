@@ -1,4 +1,5 @@
-#include "include\NTAssassin\NTAEH.h"
+﻿#include "include\NTAssassin\NTAEH.h"
+
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTADlg.h"
 

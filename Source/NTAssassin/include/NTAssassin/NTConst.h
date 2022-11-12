@@ -15,20 +15,3 @@
 // NTSTATUS
 #undef WIN32_NO_STATUS
 #include <ntstatus.h>
-
-// Patches C26454 warning
-
-#undef NM_FIRST
-#define NM_FIRST 4294967296
-
-#undef TCN_FIRST
-#define TCN_FIRST 4294966746
-
-#undef TVN_FIRST
-#define TVN_FIRST 0xFFFFFE70
-
-#undef LVN_ITEMCHANGING
-#define LVN_ITEMCHANGING 4294967196
-
-#undef LVN_ITEMCHANGED
-#define LVN_ITEMCHANGED 4294967195

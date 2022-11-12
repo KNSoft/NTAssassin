@@ -34,7 +34,7 @@ EXTERN_C_START
 #undef GetLastError
 
 #define GetCurrentProcess() CURRENT_PROCESS_HANDLE
-#define GetCurrentThreadId() CURRENT_THREAD_ID
+#define GetCurrentThreadId() NT_GetCurrentTID()
 #define VirtualAlloc NTAHookIntl_VirtualAlloc
 #define VirtualQuery NTAHookIntl_VirtualQuery
 #define VirtualProtect NTAHookIntl_VirtualProtect

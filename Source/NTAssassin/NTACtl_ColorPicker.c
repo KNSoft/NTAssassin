@@ -1,8 +1,14 @@
-#include "include\NTAssassin\NTACtl.h"
+﻿#include "include\NTAssassin\NTACtl.h"
+
+#include <WindowsX.h>
+
 #include "include\NTAssassin\NTAUI.h"
 #include "include\NTAssassin\NTADlg.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAGDI.h"
+
+#pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #define CTL_COLORPICKER_COLOR TEXT("NTAssassin.Ctl.ColorPicker")
 

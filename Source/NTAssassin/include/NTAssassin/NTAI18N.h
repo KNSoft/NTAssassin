@@ -47,14 +47,14 @@ NTA_API PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex);
   */
 #define I18N_SetWndText(Window, StrIndex) SendMessageW(Window, WM_SETTEXT, 0, (LPARAM)I18N_GetString(StrIndex))
 
-/**
-  * @brief Sets a dialogue item text by specified I18N string index
-  */
+  /**
+    * @brief Sets a dialogue item text by specified I18N string index
+    */
 #define I18N_SetDlgItemText(Dialog, ItemId, StrIndex) I18N_SetWndText(GetDlgItem(Dialog, ItemId), StrIndex)
 
-/**
-  * @brief Initializes window text by specified I18N string index
-  */
+    /**
+      * @brief Initializes window text by specified I18N string index
+      */
 NTA_API HWND NTAPI I18N_InitCtlText(HWND Dialog, INT CtlID, UINT_PTR StrIndex);
 
 /**

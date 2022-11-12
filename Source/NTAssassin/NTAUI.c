@@ -1,6 +1,12 @@
 #include "include\NTAssassin\NTAUI.h"
+
+#include <dwmapi.h>
+
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTARProc.h"
+
+#pragma comment(lib, "Dwmapi.lib")
+#pragma comment(lib, "UxTheme.lib")
 
 HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint) {
     Paint->DC = CreateCompatibleDC(BeginPaint(Window, &Paint->Paint));

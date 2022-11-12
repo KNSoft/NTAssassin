@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAData.h"
+﻿#include "include\NTAssassin\NTAData.h"
 
 #include "include\NTAssassin\NTAMem.h"
 
@@ -14,7 +14,7 @@ _Check_return_ PVOID WINAPIV Data_StructCombineEx(_In_ UINT GroupCount, _In_ UIN
             uStructCount += u;
         }
     }
-    pBuffer = Mem_HeapAlloc(uStructCount * Size);
+    pBuffer = Mem_Alloc(uStructCount * Size);
     if (pBuffer) {
         pDst = pBuffer;
         va_start(args, Size);

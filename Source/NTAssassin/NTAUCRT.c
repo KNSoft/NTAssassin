@@ -1,4 +1,5 @@
 #include "include\NTAssassin\NTAUCRT.h"
+
 #include "include\NTAssassin\NTANT.h"
 
 #pragma warning(disable: 6001)

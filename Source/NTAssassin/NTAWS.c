@@ -1,5 +1,8 @@
 #include "include\NTAssassin\NTAWS.h"
+
 #include "include\NTAssassin\NTAEH.h"
+
+#pragma comment(lib, "ws2_32.lib")
 
 BOOL NTAPI WS_Startup() {
     WORD wVersionRequested = MAKEWORD(2, 2);
@@ -20,7 +23,7 @@ BOOL NTAPI WS_Startup() {
     }
 }
 
-_Must_inspect_result_
+_Check_return_
 SOCKET NTAPI WS_CreateIPv4ListenSocket(IPPROTO Protocol, PIN_ADDR Address, USHORT Port) {
     INT iSockType;
     if (Protocol == IPPROTO_TCP) {

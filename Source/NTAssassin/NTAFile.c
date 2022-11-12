@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAFile.h"
+﻿#include "include\NTAssassin\NTAFile.h"
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAMem.h"
 

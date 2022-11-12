@@ -1,4 +1,8 @@
-#include "include\NTAssassin\NTADPI.h"
+﻿#include "include\NTAssassin\NTADPI.h"
+
+#include <shellscalingapi.h>
+#include <CommCtrl.h>
+
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTANT.h"
 #include "include\NTAssassin\NTAProc.h"
@@ -6,6 +10,9 @@
 #include "include\NTAssassin\NTAUI.h"
 #include "include\NTAssassin\NTAMem.h"
 #include "include\NTAssassin\NTAGDI.h"
+
+#pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
     DWORD   dwNewDPIX;
@@ -29,6 +36,13 @@ typedef struct _DPI_APPLYTOCHILD_REF {
     HFONT   hFont;
     BOOL    bRedrawFontNow;
 } DPI_APPLYTOCHILD_REF, *PDPI_APPLYTOCHILD_REF;
+
+typedef HRESULT(STDAPICALLTYPE* PFNGetDpiForMonitor)(
+    _In_ HMONITOR hmonitor,
+    _In_ MONITOR_DPI_TYPE dpiType,
+    _Out_ UINT *dpiX,
+    _Out_ UINT *dpiY
+    );
 
 static PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
 

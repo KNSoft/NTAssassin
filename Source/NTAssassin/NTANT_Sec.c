@@ -1,7 +1,13 @@
 #include "include\NTAssassin\NTANT.h"
+
+#include <ntsecapi.h>
+
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTARProc.h"
 #include "include\NTAssassin\NTAMem.h"
+
+#pragma comment(lib, "winsta.lib")
+#pragma comment(lib, "Secur32.lib")
 
 BOOL NTAPI NT_EqualSid(_In_ PSID Sid1, _In_ PSID Sid2) {
     SIZE_T Length = NT_LengthSid(Sid1);
@@ -100,7 +106,7 @@ PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLAS
 }
 
 BOOL NTAPI NT_AdjustPrivilege(_In_ HANDLE TokenHandle, _In_ SE_PRIVILEGE Privilege, _In_ DWORD Attributes) {
-    TOKEN_PRIVILEGES stTokenPrivilege = { 1, { { { Privilege, 0 }, Attributes} } };
+    TOKEN_PRIVILEGES stTokenPrivilege = { 1, { { { Privilege, 0 }, Attributes } } };
     NTSTATUS Status = NtAdjustPrivilegesToken(TokenHandle, FALSE, &stTokenPrivilege, sizeof(stTokenPrivilege), NULL, NULL);
     if (Status == STATUS_SUCCESS) {
         return TRUE;

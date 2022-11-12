@@ -1,4 +1,7 @@
-#include "include\NTAssassin\NTAGDI.h"
+﻿#include "include\NTAssassin\NTAGDI.h"
+
+#include <WindowsX.h>
+
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAUI.h"
 

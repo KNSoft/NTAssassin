@@ -1,8 +1,6 @@
 ﻿#pragma once
 
-#include "NTAOptions.h"
 #include "NTADef.h"
-#include "NTADepends.h"
 
 EXTERN_C_START
 
@@ -25,7 +23,6 @@ EXTERN_C_START
 #include "NTAGDI.h"
 #include "NTADlg.h"
 #include "NTAI18N.h"
-#include "NTAKNS.h"
 #include "NTAFile.h"
 #include "NTAIO.h"
 #include "NTATime.h"
@@ -36,5 +33,6 @@ EXTERN_C_START
 #include "NTAHook.h"
 #include "NTAShell.h"
 #include "NTAWS.h"
+#include "NTAKNS.h"
 
 EXTERN_C_END

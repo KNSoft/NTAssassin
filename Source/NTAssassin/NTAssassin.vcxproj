@@ -261,10 +261,7 @@
     <ClInclude Include="include\NTAssassin\NTAData.h" />
     <ClInclude Include="include\NTAssassin\NTADbg.h" />
     <ClInclude Include="include\NTAssassin\NTADef.h" />
-    <ClInclude Include="include\NTAssassin\NTADepends.h" />
     <ClInclude Include="include\NTAssassin\NTADlg.h" />
-    <ClInclude Include="include\NTAssassin\NTADlg_RectEditor.h" />
-    <ClInclude Include="include\NTAssassin\NTADlg_ValueEditor.h" />
     <ClInclude Include="include\NTAssassin\NTADPI.h" />
     <ClInclude Include="include\NTAssassin\NTAEH.h" />
     <ClInclude Include="include\NTAssassin\NTAFile.h" />

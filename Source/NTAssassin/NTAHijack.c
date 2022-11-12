@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAHijack.h"
+﻿#include "include\NTAssassin\NTAHijack.h"
 #include "include\NTAssassin\NTANT.h"
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
@@ -174,7 +174,7 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
     return FALSE;
 }
 
-// TODO ��д
+// TODO 重写
 BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHEADER CallProcHeader, _In_opt_ PHIJACK_CALLPROCPARAM Params, DWORD Timeout) {
     BOOL                    bRet = FALSE;
     NTSTATUS                lStatus;

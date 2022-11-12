@@ -20,8 +20,6 @@
 #define CURRENT_PROCESS_TOKEN_HANDLE            ((HANDLE)-4)
 #define CURRENT_THREAD_TOKEN_HANDLE             ((HANDLE)-5)
 #define CURRENT_THREAD_EFFECTIVETOKEN_HANDLE    ((HANDLE)-6)
-#define CURRENT_PROCESS_ID                      (NT_GetTEBMemberDWORD(ClientId.UniqueProcess))
-#define CURRENT_THREAD_ID                       (NT_GetTEBMemberDWORD(ClientId.UniqueThread))
 #define FIXED_IMAGE_BASE32                      ((HINSTANCE)0x00400000)
 #define FIXED_IMAGE_BASE64                      ((HINSTANCE)0x0000000140000000)
 

@@ -1,4 +1,5 @@
 #include "include\NTAssassin\NTAStr.h"
+
 #include "include\NTAssassin\NTAUCRT.h"
 
 // String Length and Size

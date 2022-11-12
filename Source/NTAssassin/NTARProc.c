@@ -1,9 +1,14 @@
 #include "include\NTAssassin\NTARProc.h"
+
+#include <UserEnv.h>
+
 #include "include\NTAssassin\NTANT.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAProc.h"
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTAEH.h"
+
+#pragma comment(lib, "UserEnv.lib")
 
 static PFNCreateProcessInternalW pfnCreateProcessInternalW = NULL;
 

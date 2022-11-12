@@ -69,6 +69,9 @@
 /// </summary>
 #define NT_GetCurDirHandle() (NT_GetPEB()->ProcessParameters->CurrentDirectory.Handle)
 
+#define NT_GetCurrentPID() (NT_GetTEBMemberDWORD(ClientId.UniqueProcess))
+#define NT_GetCurrentTID() (NT_GetTEBMemberDWORD(ClientId.UniqueThread))
+
 /// <summary>
 /// Gets PID of CSRSS
 /// </summary>

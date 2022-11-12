@@ -1,4 +1,7 @@
 #include "include\NTAssassin\NTAShell.h"
+
+#include <Shlobj.h>
+
 #include "include\NTAssassin\NTANT.h"
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAEH.h"

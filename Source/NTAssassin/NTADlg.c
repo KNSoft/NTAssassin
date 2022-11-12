@@ -1,8 +1,12 @@
-#include "include\NTAssassin\NTADlg.h"
+﻿#include "include\NTAssassin\NTADlg.h"
+
 #include "include\NTAssassin\NTAGDI.h"
 #include "include\NTAssassin\NTADPI.h"
 #include "include\NTAssassin\NTAUI.h"
 #include "include\NTAssassin\NTAMem.h"
+
+#pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(_Out_ PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
     Template->wMenu = Template->wClass = Template->wTitle = Template->Template.cdit = 0;

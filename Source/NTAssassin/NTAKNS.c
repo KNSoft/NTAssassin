@@ -1,10 +1,16 @@
 #include "include\NTAssassin\NTAKNS.h"
+
+#include <WindowsX.h>
+
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAUI.h"
 #include "include\NTAssassin\NTAMem.h"
 #include "include\NTAssassin\NTADPI.h"
 #include "include\NTAssassin\NTAShell.h"
 #include "include\NTAssassin\NTAEH.h"
+
+#pragma comment(lib, "ComCtl32.Lib")
+#pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #define KNS_MAX_VER_CCH 48
 #define KNS_DEFAULT_DLGFONTSIZE 20

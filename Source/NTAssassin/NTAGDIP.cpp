@@ -9,6 +9,10 @@ EXTERN_C_START
 EXTERN_C_END
 
 #include <gdiplus.h>
+#include <Shlwapi.h>
+
+#pragma comment(lib, "gdiplus.lib")
+#pragma comment(lib, "Shlwapi.lib")
 
 #pragma warning(disable: 26812)
 
