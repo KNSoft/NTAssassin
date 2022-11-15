@@ -77,6 +77,7 @@
 #define _WINSOCKAPI_
 #include <Windows.h>
 #include <Winternl.h>
+#include <suppress.h>
 
 // Conflicts in ntdef.h
 

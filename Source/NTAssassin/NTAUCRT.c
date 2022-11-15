@@ -1,8 +1,8 @@
-#include "include\NTAssassin\NTAUCRT.h"
+﻿#include "include\NTAssassin\NTAUCRT.h"
 
 #include "include\NTAssassin\NTANT.h"
 
-#pragma warning(disable: 6001)
+#pragma warning(disable: __WARNING_USING_UNINIT_VAR)
 
 typedef _Check_return_ size_t(__cdecl* PFNwcslen)(
     _In_z_ wchar_t const* _String
@@ -170,4 +170,4 @@ errno_t __CRTDECL UCRT_memcpy_s(
     return pfnmemcpy_s(_Destination, _DestinationSize, _Source, _SourceSize);
 }
 
-#pragma warning(default: 6001)
+#pragma warning(default: __WARNING_USING_UNINIT_VAR)

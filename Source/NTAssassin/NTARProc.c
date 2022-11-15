@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTARProc.h"
+﻿#include "include\NTAssassin\NTARProc.h"
 
 #include <UserEnv.h>
 
@@ -316,7 +316,7 @@ UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ ULONGLONG Address
     return uRet;
 }
 
-#pragma warning(disable: 6054)
+#pragma warning(disable: __WARNING_MISSING_ZERO_TERMINATION2)
 _Success_(return > 0)
 UINT NTAPI RProc_ReadMemStringExW(HANDLE ProcessHandle, _In_ PVOID Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch) {
     UINT    i = 0;
@@ -352,7 +352,7 @@ UINT NTAPI RProc_ReadMemStringExA(HANDLE ProcessHandle, _In_ PVOID Address, _Out
     } while (i < OutputStringCch - 1);
     return 0;
 }
-#pragma warning(default: 6054)
+#pragma warning(default: __WARNING_MISSING_ZERO_TERMINATION2)
 
 VOID NTAPI RProc_InitMap(_Out_ PRPROC_MAP RemoteMemMap, _In_ PVOID LocalAddress, _In_ SIZE_T LocalSize, _In_opt_ PVOID RemoteAddress, _In_ ULONG RemotePageProtect) {
     RemoteMemMap->Local = LocalAddress;
