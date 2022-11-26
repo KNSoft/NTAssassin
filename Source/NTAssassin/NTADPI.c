@@ -46,7 +46,8 @@ typedef HRESULT(STDAPICALLTYPE* PFNGetDpiForMonitor)(
 
 static PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
 
-BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY) {
+BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY)
+{
     PKUSER_SHARED_DATA pKUSD = NT_GetKUSD();
     if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3)) {
         if (!pfnGetDpiForMonitor) {
@@ -67,22 +68,26 @@ BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY) {
     return FALSE;
 }
 
-VOID NTAPI DPI_ScaleInt(_Inout_ PINT Value, _In_ UINT OldDPI, _In_ UINT NewDPI) {
+VOID NTAPI DPI_ScaleInt(_Inout_ PINT Value, _In_ UINT OldDPI, _In_ UINT NewDPI)
+{
     *Value = Math_RoundInt(*Value * ((FLOAT)NewDPI / OldDPI));
 }
 
-VOID NTAPI DPI_ScaleUInt(_Inout_ PUINT Value, _In_ UINT OldDPI, _In_ UINT NewDPI) {
+VOID NTAPI DPI_ScaleUInt(_Inout_ PUINT Value, _In_ UINT OldDPI, _In_ UINT NewDPI)
+{
     *Value = Math_RoundUInt(*Value * ((FLOAT)NewDPI / OldDPI));
 }
 
-VOID NTAPI DPI_ScaleRect(_Inout_ PRECT Rect, _In_ UINT OldDPIX, _In_ UINT NewDPIX, _In_ UINT OldDPIY, _In_ UINT NewDPIY) {
+VOID NTAPI DPI_ScaleRect(_Inout_ PRECT Rect, _In_ UINT OldDPIX, _In_ UINT NewDPIX, _In_ UINT OldDPIY, _In_ UINT NewDPIY)
+{
     DPI_ScaleInt(&Rect->left, OldDPIX, NewDPIX);
     DPI_ScaleInt(&Rect->right, OldDPIX, NewDPIX);
     DPI_ScaleInt(&Rect->top, OldDPIY, NewDPIY);
     DPI_ScaleInt(&Rect->bottom, OldDPIY, NewDPIY);
 }
 
-static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam) {
+static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam)
+{
     PDPI_APPLYTOCHILD_REF pstRef = (PDPI_APPLYTOCHILD_REF)lParam;
     BOOL bNeedsRedraw = FALSE;
     if (pstRef->bUpdateFont) {
@@ -118,7 +123,8 @@ static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam)
     return TRUE;
 }
 
-static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
     if (uMsg == WM_DPICHANGED) {
         PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;
@@ -176,7 +182,8 @@ static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, 
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-BOOL NTAPI DPI_SetAutoAdjustSubclass(_In_ HWND Dialog, _In_opt_ PENUMLOGFONTEXDVW FontInfo) {
+BOOL NTAPI DPI_SetAutoAdjustSubclass(_In_ HWND Dialog, _In_opt_ PENUMLOGFONTEXDVW FontInfo)
+{
     PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef;
     RECT rcDlg;
     UINT DPIX, DPIY;
@@ -219,7 +226,8 @@ BOOL NTAPI DPI_SetAutoAdjustSubclass(_In_ HWND Dialog, _In_opt_ PENUMLOGFONTEXDV
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI DPI_GetAutoAdjustSubclass(_In_ HWND Dialog, _Out_opt_ PDWORD NewDPIX, _Out_opt_ PDWORD NewDPIY, _Out_opt_ HFONT * Font) {
+BOOL NTAPI DPI_GetAutoAdjustSubclass(_In_ HWND Dialog, _Out_opt_ PDWORD NewDPIX, _Out_opt_ PDWORD NewDPIY, _Out_opt_ HFONT * Font)
+{
     PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef;
     if (GetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (PDWORD_PTR)&pstRef)) {
         if (NewDPIX) {

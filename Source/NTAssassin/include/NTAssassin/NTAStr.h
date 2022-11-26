@@ -1,12 +1,12 @@
 ﻿/**
   * @brief Native library of NTAssassin provides basic string functions.
   * @details Functions are named in pattern: Str_[I][Len|Cat|Copy|...][Ex]
-  * 
+  *
   *  ***The terminating null character was included in buffer size, not included in string length and returnd length***
   *
   * Comparision:
   *  I: Insensitive of case;
-  * 
+  *
   * Operation:
   *  Len: Gets length of string;
   *  Cat: Catches strings;

@@ -6,7 +6,8 @@
 #pragma strict_gs_check( push, off )
 #pragma runtime_checks( "", off )
 
-NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
+NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam)
+{
     PVOID*      ppProc;
     PWSTR       pszLib;
     PSTR        pszProc;
@@ -77,11 +78,9 @@ NTSTATUS WINAPI Hijack_LoadProcAddr_InjectThread(LPVOID lParam) {
     do {
         if (pLdrNode->BaseDllName.MaximumLength == iCchLib * sizeof(WCHAR)) {
             for (iCch = 0; iCch < iCchLib; iCch++) {
-                if (
-                    pszLib[iCch] != pLdrNode->BaseDllName.Buffer[iCch] && (
-                    (pszLib[iCch] >= 'a' && pszLib[iCch] <= 'z' && pszLib[iCch] - ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch]) ||
-                    (pszLib[iCch] >= 'A' && pszLib[iCch] <= 'Z' && pszLib[iCch] + ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch])
-                    )
+                if (pszLib[iCch] != pLdrNode->BaseDllName.Buffer[iCch] &&
+                    ((pszLib[iCch] >= 'a' && pszLib[iCch] <= 'z' && pszLib[iCch] - ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch]) ||
+                     (pszLib[iCch] >= 'A' && pszLib[iCch] <= 'Z' && pszLib[iCch] + ('a' - 'A') != pLdrNode->BaseDllName.Buffer[iCch]))
                     )
                     break;
             }

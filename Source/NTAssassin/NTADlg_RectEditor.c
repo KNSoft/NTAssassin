@@ -31,18 +31,21 @@ typedef struct _DLG_RECTEDITOR {
     PRECT   Rect;
 } DLG_RECTEDITOR, *PDLG_RECTEDITOR;
 
-static BOOL Dlg_RectEditor_GetValue(HWND hDlg, INT iCtlID, PINT pValue) {
+static BOOL Dlg_RectEditor_GetValue(HWND hDlg, INT iCtlID, PINT pValue)
+{
     WCHAR szNum[DRE_MAX_NUM_CCH];
     return UI_GetDlgItemText(hDlg, iCtlID, szNum) && Str_ToIntW(szNum, pValue);
 }
 
-static VOID Dlg_RectEditor_SetValue(HWND hCtl, INT iNum) {
+static VOID Dlg_RectEditor_SetValue(HWND hCtl, INT iNum)
+{
     WCHAR szNum[DRE_MAX_NUM_CCH];
     BOOL bSucc = Str_DecFromInt(iNum, szNum);
     UI_SendMsg(hCtl, WM_SETTEXT, 0, bSucc ? szNum : NULL);
 }
 
-static VOID Dlg_RectEditor_CreateCtl(HWND hDlg, INT nIDText, INT nIDEdit, LPCWSTR lpszText, INT iX, INT iY, INT iNum) {
+static VOID Dlg_RectEditor_CreateCtl(HWND hDlg, INT nIDText, INT nIDEdit, LPCWSTR lpszText, INT iX, INT iY, INT iNum)
+{
     HWND    hCtl;
 
     // Create text control
@@ -77,7 +80,8 @@ static VOID Dlg_RectEditor_CreateCtl(HWND hDlg, INT nIDText, INT nIDEdit, LPCWST
     UI_SendMsg(hCtl, EM_SETLIMITTEXT, DRE_MAX_NUM_CCH - 1, 0);
 }
 
-static INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
     if (uMsg == WM_INITDIALOG) {
         PDLG_RECTEDITOR lpstDRE;
         RECT            rcClient;
@@ -212,7 +216,8 @@ static INT_PTR CALLBACK Dlg_RectEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPar
     return 0;
 }
 
-BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR* Strings, _Inout_ PRECT Rect) {
+BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR* Strings, _Inout_ PRECT Rect)
+{
     DLG_RECTEDITOR  stDRD = { Owner, Strings, Rect };
     DLG_TEMPLATE    stDlgTemplate;
     BOOL bRet = DialogBoxIndirectParam(

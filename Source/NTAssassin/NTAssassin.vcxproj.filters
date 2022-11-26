@@ -103,7 +103,7 @@
     <ClInclude Include="include\NTAssassin\NTAI18N.h" />
     <ClInclude Include="include\NTAssassin\NTAIO.h" />
     <ClInclude Include="include\NTAssassin\NTAKNS.h" />
-    <ClInclude Include="include\NTAssassin\NTAList.h" />
+    <ClInclude Include="include\NTAssassin\NTAData_List.h" />
     <ClInclude Include="include\NTAssassin\NTAMath.h" />
     <ClInclude Include="include\NTAssassin\NTAMem.h" />
     <ClInclude Include="include\NTAssassin\NTAOpCode.h" />

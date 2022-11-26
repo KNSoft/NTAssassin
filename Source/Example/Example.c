@@ -3,6 +3,7 @@
 
 #pragma comment (lib, "NTAssassin.lib")
 
-int main1() {
+int main1()
+{
     return 0;
 }

@@ -1,20 +1,23 @@
-#include "include\NTAssassin\NTAStr.h"
+﻿#include "include\NTAssassin\NTAStr.h"
 
 #include "include\NTAssassin\NTAUCRT.h"
 
 // String Length and Size
 
-SIZE_T NTAPI Str_LenW(_In_ PCWSTR String) {
+SIZE_T NTAPI Str_LenW(_In_ PCWSTR String)
+{
     return UCRT_wcslen(String);
 }
 
-SIZE_T NTAPI Str_LenA(_In_ PCSTR String) {
+SIZE_T NTAPI Str_LenA(_In_ PCSTR String)
+{
     return UCRT_strlen(String);
 }
 
 // String Copy
 
-SIZE_T NTAPI Str_CopyExW(_Out_writes_z_(DestCchSize) PWSTR Dest, SIZE_T DestCchSize, _In_ PCWSTR Src) {
+SIZE_T NTAPI Str_CopyExW(_Out_writes_z_(DestCchSize) PWSTR Dest, SIZE_T DestCchSize, _In_ PCWSTR Src)
+{
     SIZE_T i = 0;
     while (i < DestCchSize) {
         if ((Dest[i] = Src[i]) == UNICODE_NULL) {
@@ -25,7 +28,8 @@ SIZE_T NTAPI Str_CopyExW(_Out_writes_z_(DestCchSize) PWSTR Dest, SIZE_T DestCchS
     return 0;
 }
 
-SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T DestCchSize, _In_ PCSTR Src) {
+SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T DestCchSize, _In_ PCSTR Src)
+{
     SIZE_T i = 0;
     while (i < DestCchSize) {
         if ((Dest[i] = Src[i]) == ANSI_NULL) {
@@ -38,15 +42,18 @@ SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T DestCchSi
 
 // String Compare
 
-INT NTAPI Str_CmpW(_In_ PCWSTR String1, _In_ PCWSTR String2) {
+INT NTAPI Str_CmpW(_In_ PCWSTR String1, _In_ PCWSTR String2)
+{
     return UCRT_wcscmp(String1, String2);
 }
 
-INT NTAPI Str_CmpA(_In_ PCSTR String1, _In_ PCSTR String2) {
+INT NTAPI Str_CmpA(_In_ PCSTR String1, _In_ PCSTR String2)
+{
     return UCRT_strcmp(String1, String2);
 }
 
-INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2) {
+INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2)
+{
     SIZE_T	i = 0;
     INT		iRes;
     do {
@@ -56,7 +63,8 @@ INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2) {
     return iRes;
 }
 
-INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2) {
+INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2)
+{
     SIZE_T	i = 0;
     INT		iRes;
     do {
@@ -68,17 +76,20 @@ INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2) {
 
 // String Format
 _Success_(return >= 0)
-INT NTAPI Str_VPrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList) {
+INT NTAPI Str_VPrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList)
+{
     return UCRT_vswprintf_s(Dest, DestCchSize, Format, ArgList);
 }
 
 _Success_(return >= 0)
-INT NTAPI Str_VPrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
+INT NTAPI Str_VPrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList)
+{
     return UCRT__vsnprintf(Dest, DestCchSize, Format, ArgList);
 }
 
 _Success_(return >= 0)
-INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, ...) {
+INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, ...)
+{
     va_list args;
     va_start(args, Format);
     INT i = UCRT_vswprintf_s(Dest, DestCchSize, Format, args);
@@ -87,7 +98,8 @@ INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestC
 }
 
 _Success_(return >= 0)
-INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, ...) {
+INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, ...)
+{
     va_list args;
     va_start(args, Format);
     INT i = UCRT__vsnprintf(Dest, DestCchSize, Format, args);
@@ -103,7 +115,8 @@ INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCc
 // String Index
 
 // Algorithm: BF
-INT NTAPI Str_Index_BFW(_In_ PCWSTR String, _In_ PCWSTR Pattern) {
+INT NTAPI Str_Index_BFW(_In_ PCWSTR String, _In_ PCWSTR Pattern)
+{
     INT     i;
     PCWSTR  pszSrc = String;
     BOOL    bMatched;
@@ -131,7 +144,8 @@ INT NTAPI Str_Index_BFW(_In_ PCWSTR String, _In_ PCWSTR Pattern) {
     return -1;
 }
 
-INT NTAPI Str_Index_BFA(_In_ PCSTR String, _In_ PCSTR Pattern) {
+INT NTAPI Str_Index_BFA(_In_ PCSTR String, _In_ PCSTR Pattern)
+{
     INT     i;
     PCSTR   pszSrc = String;
     BOOL    bMatched;
@@ -159,13 +173,15 @@ INT NTAPI Str_Index_BFA(_In_ PCSTR String, _In_ PCSTR Pattern) {
     return -1;
 }
 
-ULONG NTAPI Str_U2AEx(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ ULONG DestCchSize, _In_ PCWSTR Src) {
+ULONG NTAPI Str_U2AEx(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ ULONG DestCchSize, _In_ PCWSTR Src)
+{
     ULONG ulANSIBytes = 0;
     RtlUnicodeToMultiByteN(Dest, DestCchSize * sizeof(CHAR), &ulANSIBytes, Src, (ULONG)Str_SizeW(Src) + 1);
     return ulANSIBytes / sizeof(CHAR);
 }
 
-ULONG NTAPI Str_A2UEx(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ ULONG DestCchSize, _In_ PCSTR Src) {
+ULONG NTAPI Str_A2UEx(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ ULONG DestCchSize, _In_ PCSTR Src)
+{
     ULONG ulUnicodeBytes = 0;
     RtlMultiByteToUnicodeN(Dest, DestCchSize * sizeof(WCHAR), &ulUnicodeBytes, Src, (ULONG)Str_SizeA(Src) + 1);
     return ulUnicodeBytes / sizeof(WCHAR);
@@ -179,7 +195,8 @@ ULONG NTAPI Str_A2UEx(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ ULONG DestCch
     0000 0800-0000 FFFF | 1110xxxx 10xxxxxx 10xxxxxx
     0001 0000-0010 FFFF | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 */
-SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize, _In_ PCWSTR Src) {
+SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize, _In_ PCWSTR Src)
+{
     UINT        cChDest = 0, cChSrc = 0;
     PSTR        psz = Dest;
     ULONG       ch;
@@ -235,7 +252,8 @@ SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZ
     return (SIZE_T)(psz - Dest);
 }
 
-VOID NTAPI Str_UpperW(_Inout_ PWSTR String) {
+VOID NTAPI Str_UpperW(_Inout_ PWSTR String)
+{
     while (*String != UNICODE_NULL) {
         if (*String >= 'a' && *String <= 'z')
             *String -= 'a' - 'A';
@@ -243,7 +261,8 @@ VOID NTAPI Str_UpperW(_Inout_ PWSTR String) {
     }
 }
 
-VOID NTAPI Str_UpperA(_Inout_ PSTR String) {
+VOID NTAPI Str_UpperA(_Inout_ PSTR String)
+{
     while (*String != ANSI_NULL) {
         if (*String >= 'a' && *String <= 'z')
             *String -= 'a' - 'A';
@@ -251,7 +270,8 @@ VOID NTAPI Str_UpperA(_Inout_ PSTR String) {
     }
 }
 
-VOID NTAPI Str_LowerW(_Inout_ PWSTR String) {
+VOID NTAPI Str_LowerW(_Inout_ PWSTR String)
+{
     while (*String != UNICODE_NULL) {
         if (*String >= 'A' && *String <= 'Z')
             *String += 'a' - 'A';
@@ -259,7 +279,8 @@ VOID NTAPI Str_LowerW(_Inout_ PWSTR String) {
     }
 }
 
-VOID NTAPI Str_LowerA(_Inout_ PSTR String) {
+VOID NTAPI Str_LowerA(_Inout_ PSTR String)
+{
     while (*String != ANSI_NULL) {
         if (*String >= 'A' && *String <= 'Z')
             *String += 'a' - 'A';
@@ -269,14 +290,16 @@ VOID NTAPI Str_LowerA(_Inout_ PSTR String) {
 
 // String Initialize
 
-VOID NTAPI Str_InitW(_Out_ PUNICODE_STRING NTString, _In_ PWSTR String) {
+VOID NTAPI Str_InitW(_Out_ PUNICODE_STRING NTString, _In_ PWSTR String)
+{
     SIZE_T uLen = Str_SizeW(String);
     NTString->Length = (USHORT)uLen;
     NTString->MaximumLength = (USHORT)(uLen + sizeof(WCHAR));
     NTString->Buffer = String;
 }
 
-VOID NTAPI Str_InitA(_Out_ PSTRING NTString, _In_ PSTR String) {
+VOID NTAPI Str_InitA(_Out_ PSTRING NTString, _In_ PSTR String)
+{
     SIZE_T uLen = Str_SizeA(String);
     NTString->Length = (USHORT)uLen;
     NTString->MaximumLength = (USHORT)(uLen + sizeof(CHAR));
@@ -285,7 +308,8 @@ VOID NTAPI Str_InitA(_Out_ PSTRING NTString, _In_ PSTR String) {
 
 // String Convert
 _Success_(return != FALSE)
-BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_writes_bytes_(ValueSize) PVOID Value, _In_ SIZE_T ValueSize) {
+BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_writes_bytes_(ValueSize) PVOID Value, _In_ SIZE_T ValueSize)
+{
     PCWSTR  psz = StrValue;
     UINT64  uTotal;
 
@@ -421,7 +445,8 @@ Label_Output:
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writes_bytes_(ValueSize) PVOID Value, _In_ SIZE_T ValueSize) {
+BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writes_bytes_(ValueSize) PVOID Value, _In_ SIZE_T ValueSize)
+{
     PCSTR  psz = StrValue;
 
     // Minus
@@ -553,7 +578,8 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(DestCchSize) PWSTR StrValue, _In_ ULONG DestCchSize) {
+BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(DestCchSize) PWSTR StrValue, _In_ ULONG DestCchSize)
+{
     PWSTR psz = StrValue;
     UINT64  uTotal, uDivisor, uPowerFlag;
 
@@ -614,7 +640,8 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(DestCchSize) PSTR StrValue, _In_ ULONG DestCchSize) {
+BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(DestCchSize) PSTR StrValue, _In_ ULONG DestCchSize)
+{
     PSTR psz = StrValue;
     UINT64  uTotal, uDivisor, uPowerFlag;
 
@@ -675,7 +702,8 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
 }
 
 _Success_(return == TRUE)
-BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Dest, _In_ SIZE_T DestCchSize) {
+BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Dest, _In_ SIZE_T DestCchSize)
+{
     PWSTR   psz;
     WCHAR   ch;
     UINT    uCh;
@@ -695,7 +723,8 @@ BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Des
 }
 
 _Success_(return == TRUE)
-BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize) {
+BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize)
+{
     PSTR    psz;
     CHAR    ch;
     UINT    uCh;
@@ -718,7 +747,8 @@ static CHAR arrSizeUnitPrefix[] = {
     '\0', 'K', 'M', 'G', 'T', 'P', 'E' // , 'Z', 'Y'
 };
 
-DOUBLE NTAPI Str_SimplifySize(UINT64 Size, _Out_opt_ PCHAR Unit) {
+DOUBLE NTAPI Str_SimplifySize(UINT64 Size, _Out_opt_ PCHAR Unit)
+{
     UINT64 uTotal = Size, uDivisor, uDivisorTemp = 1;
     UINT uTimes = 0;
     do {
@@ -735,7 +765,8 @@ DOUBLE NTAPI Str_SimplifySize(UINT64 Size, _Out_opt_ PCHAR Unit) {
 
 // String Hash
 
-DWORD NTAPI Str_HashW(_In_ PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
+DWORD NTAPI Str_HashW(_In_ PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm)
+{
     PCWSTR  psz = String;
     DWORD   dwHash = 0;
     if (HashAlgorithm == StrHashAlgorithmSDBM) {
@@ -788,7 +819,8 @@ DWORD NTAPI Str_HashW(_In_ PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
     return dwHash;
 }
 
-DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
+DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorithm)
+{
     PCSTR   psz = String;
     DWORD   dwHash = 0;
     if (HashAlgorithm == StrHashAlgorithmSDBM) {
@@ -841,7 +873,8 @@ DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorithm) {
     return dwHash;
 }
 
-PWSTR NTAPI Str_NameOfPath(_In_ PWSTR Path, _In_opt_ ULONG LengthOfPath) {
+PWSTR NTAPI Str_NameOfPath(_In_ PWSTR Path, _In_opt_ ULONG LengthOfPath)
+{
     ULONG ulLen = LengthOfPath ? LengthOfPath : (ULONG)Str_LenW(Path);
     while (ulLen && Path[--ulLen] != L'\\');
     return ulLen ? Path + ulLen + 1 : NULL;

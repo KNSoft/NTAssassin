@@ -1,8 +1,9 @@
-#include "include\NTAssassin\NTAMem.h"
+﻿#include "include\NTAssassin\NTAMem.h"
 #include "include\NTAssassin\NTAEH.h"
 
 _Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(Size)
-PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect) {
+PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect)
+{
     PVOID       pBase = NULL;
     SIZE_T      sSize = Size;
     NTSTATUS    lStatus = NtAllocateVirtualMemory(CURRENT_PROCESS_HANDLE, &pBase, 0, &sSize, MEM_COMMIT | MEM_RESERVE, Protect);
@@ -14,7 +15,8 @@ PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect) {
     }
 }
 
-BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect, _Out_ PULONG OldProtect) {
+BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect, _Out_ PULONG OldProtect)
+{
     PVOID       pBase = BaseAddress;
     SIZE_T      sSize = Size;
     NTSTATUS    lStatus = NtProtectVirtualMemory(CURRENT_PROCESS_HANDLE, &pBase, &sSize, Protect, OldProtect);
@@ -26,7 +28,8 @@ BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect,
     }
 }
 
-BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) PVOID BaseAddress) {
+BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) _Frees_ptr_ PVOID BaseAddress)
+{
     PVOID       pBase = BaseAddress;
     SIZE_T      uSize = 0;
     NTSTATUS    lStatus = NtFreeVirtualMemory(CURRENT_PROCESS_HANDLE, &pBase, &uSize, MEM_RELEASE);

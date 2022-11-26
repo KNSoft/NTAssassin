@@ -13,7 +13,8 @@
 static PFNCreateProcessInternalW pfnCreateProcessInternalW = NULL;
 
 _Check_return_
-HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles, _In_opt_ PCWSTR CurrentDirectory, _In_opt_ LPSTARTUPINFOW StartupInfo) {
+HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles, _In_opt_ PCWSTR CurrentDirectory, _In_opt_ LPSTARTUPINFOW StartupInfo)
+{
     HANDLE hProc = NULL;
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = NORMAL_PRIORITY_CLASS | CREATE_NEW_CONSOLE | CREATE_DEFAULT_ERROR_MODE;
@@ -50,7 +51,8 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
     return hProc;
 }
 
-BOOL NTAPI RProc_EnumDlls64(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC64 DllEnumProc, LPARAM Param) {
+BOOL NTAPI RProc_EnumDlls64(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC64 DllEnumProc, LPARAM Param)
+{
     NTSTATUS                    lStatus;
     PROCESS_BASIC_INFORMATION   stProcInfo;
     PPEB64                      pPEB;
@@ -92,23 +94,24 @@ Label_0:
     return FALSE;
 }
 
-BOOL NTAPI RProc_EnumDlls32(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC32 DllEnumProc, LPARAM Param) {
+BOOL NTAPI RProc_EnumDlls32(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC32 DllEnumProc, LPARAM Param)
+{
     NTSTATUS                    lStatus;
     PVOID                       p;
     LDR_DATA_TABLE_ENTRY32      *pHead, *pNode, stCurrentEntry;
 
-#ifdef _WIN64
+    #ifdef _WIN64
     if (!RProc_GetWow64PEB(ProcessHandle, (PPEB32*)&p)) {
         return FALSE;
     }
-#else
+    #else
     PROCESS_BASIC_INFORMATION stProcInfo;
     lStatus = NtQueryInformationProcess(ProcessHandle, ProcessBasicInformation, &stProcInfo, sizeof(stProcInfo), NULL);
     if (!NT_SUCCESS(lStatus)) {
         goto Label_0;
     }
     p = stProcInfo.PebBaseAddress;
-#endif
+    #endif
 
     lStatus = NtReadVirtualMemory(ProcessHandle, MOVE_PTR(p, UFIELD_OFFSET(PEB32, Ldr), VOID), &p, sizeof(p), NULL);
     if (!NT_SUCCESS(lStatus)) {
@@ -139,7 +142,8 @@ Label_0:
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI RProc_CreateThread(_In_ HANDLE ProcessHandle, _In_ LPTHREAD_START_ROUTINE StartAddress, _In_opt_ __drv_aliasesMem PVOID Param, BOOL CreateSuspended, _Out_opt_ PHANDLE ThreadHandle) {
+BOOL NTAPI RProc_CreateThread(_In_ HANDLE ProcessHandle, _In_ LPTHREAD_START_ROUTINE StartAddress, _In_opt_ __drv_aliasesMem PVOID Param, BOOL CreateSuspended, _Out_opt_ PHANDLE ThreadHandle)
+{
     NTSTATUS lStatus = RtlCreateUserThread(ProcessHandle, NULL, CreateSuspended, 0, 0, 0, StartAddress, Param, ThreadHandle, NULL);
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
@@ -150,7 +154,8 @@ BOOL NTAPI RProc_CreateThread(_In_ HANDLE ProcessHandle, _In_ LPTHREAD_START_ROU
 }
 
 _Success_(return > 0)
-SIZE_T NTAPI RProc_ReadMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _Out_writes_bytes_(Size) PVOID Buffer, _In_ SIZE_T Size) {
+SIZE_T NTAPI RProc_ReadMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _Out_writes_bytes_(Size) PVOID Buffer, _In_ SIZE_T Size)
+{
     SIZE_T sBytesWritten;
     NTSTATUS lStatus = NtReadVirtualMemory(ProcessHandle, BaseAddress, Buffer, Size, &sBytesWritten);
     if (NT_SUCCESS(lStatus)) {
@@ -162,7 +167,8 @@ SIZE_T NTAPI RProc_ReadMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress,
 }
 
 _Success_(return > 0)
-SIZE_T NTAPI RProc_WriteMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _In_reads_bytes_(Size) LPCVOID Buffer, _In_ SIZE_T Size) {
+SIZE_T NTAPI RProc_WriteMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress, _In_reads_bytes_(Size) LPCVOID Buffer, _In_ SIZE_T Size)
+{
     SIZE_T sBytesRead;
     NTSTATUS lStatus = NtWriteVirtualMemory(ProcessHandle, BaseAddress, (PVOID)Buffer, Size, &sBytesRead);
     if (NT_SUCCESS(lStatus)) {
@@ -173,7 +179,8 @@ SIZE_T NTAPI RProc_WriteMemory(_In_ HANDLE ProcessHandle, _In_ PVOID BaseAddress
     }
 }
 
-HANDLE NTAPI RProc_Open(DWORD DesiredAccess, DWORD ProcessId) {
+HANDLE NTAPI RProc_Open(DWORD DesiredAccess, DWORD ProcessId)
+{
     HANDLE              hProc = NULL;
     OBJECT_ATTRIBUTES   stObjectAttr;
     CLIENT_ID           stClientId;
@@ -188,7 +195,8 @@ HANDLE NTAPI RProc_Open(DWORD DesiredAccess, DWORD ProcessId) {
     return hProc;
 }
 
-HANDLE NTAPI RProc_OpenThread(DWORD DesiredAccess, DWORD ThreadId) {
+HANDLE NTAPI RProc_OpenThread(DWORD DesiredAccess, DWORD ThreadId)
+{
     HANDLE              hThread = NULL;
     OBJECT_ATTRIBUTES   stObjectAttr;
     CLIENT_ID           stClientId;
@@ -203,7 +211,8 @@ HANDLE NTAPI RProc_OpenThread(DWORD DesiredAccess, DWORD ThreadId) {
     return hThread;
 }
 
-BOOL NTAPI RProc_AdjustPrivilege(_In_ HANDLE ProcessHandle, _In_ SE_PRIVILEGE Privilege, _In_ DWORD Attributes) {
+BOOL NTAPI RProc_AdjustPrivilege(_In_ HANDLE ProcessHandle, _In_ SE_PRIVILEGE Privilege, _In_ DWORD Attributes)
+{
     HANDLE      hToken;
     NTSTATUS    Status;
     Status = NtOpenProcessToken(ProcessHandle, TOKEN_ADJUST_PRIVILEGES, &hToken);
@@ -218,7 +227,8 @@ BOOL NTAPI RProc_AdjustPrivilege(_In_ HANDLE ProcessHandle, _In_ SE_PRIVILEGE Pr
 }
 
 _Success_(return > 0)
-UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, _Out_writes_z_(FilePathCch) PWSTR FilePath, _In_ UINT FilePathCch) {
+UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, _Out_writes_z_(FilePathCch) PWSTR FilePath, _In_ UINT FilePathCch)
+{
     BYTE stString[sizeof(UNICODE_STRING) + MAX_PATH * sizeof(WCHAR)];
     NTSTATUS lStatus = NtQueryInformationProcess(ProcessHandle, ProcessImageFileNameWin32, &stString, sizeof(stString), NULL);
     if (NT_SUCCESS(lStatus)) {
@@ -250,7 +260,8 @@ typedef struct _RPROC_TRANSLATEADDRESS32 {
     UINT    CchOutput;
 } RPROC_TRANSLATEADDRESS32, *PRPROC_TRANSLATEADDRESS32;
 
-static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc64(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY64 DllLdrEntry, LPARAM Param) {
+static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc64(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY64 DllLdrEntry, LPARAM Param)
+{
     PRPROC_TRANSLATEADDRESS64 pst = (PRPROC_TRANSLATEADDRESS64)Param;
     WCHAR                   szDllName[MAX_PATH];
     SIZE_T                  sNameBytes, sReadBytes;
@@ -270,7 +281,8 @@ static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc64(HANDLE ProcessHandle, 
     }
 }
 
-static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc32(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY32 DllLdrEntry, LPARAM Param) {
+static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc32(HANDLE ProcessHandle, PLDR_DATA_TABLE_ENTRY32 DllLdrEntry, LPARAM Param)
+{
     PRPROC_TRANSLATEADDRESS32 pst = (PRPROC_TRANSLATEADDRESS32)Param;
     WCHAR                   szDllName[MAX_PATH];
     SIZE_T                  sNameBytes, sReadBytes;
@@ -291,16 +303,17 @@ static BOOL CALLBACK RProc_TranslateAddress_EnumDllProc32(HANDLE ProcessHandle, 
 }
 
 _Success_(return > 0)
-UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ ULONGLONG Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch) {
+UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ ULONGLONG Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch)
+{
     UINT uRet = 0;
     BOOL b32Proc;
-#ifdef _WIN64
+    #ifdef _WIN64
     if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
         return 0;
     }
-#else
+    #else
     b32Proc = TRUE;
-#endif
+    #endif
 
     if (!b32Proc) {
         RPROC_TRANSLATEADDRESS64 st = { Address, OutputString, OutputStringCch, 0 };
@@ -318,7 +331,8 @@ UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ ULONGLONG Address
 
 #pragma warning(disable: __WARNING_MISSING_ZERO_TERMINATION2)
 _Success_(return > 0)
-UINT NTAPI RProc_ReadMemStringExW(HANDLE ProcessHandle, _In_ PVOID Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch) {
+UINT NTAPI RProc_ReadMemStringExW(HANDLE ProcessHandle, _In_ PVOID Address, _Out_writes_z_(OutputStringCch) PWSTR OutputString, _In_ UINT OutputStringCch)
+{
     UINT    i = 0;
     PWCHAR  pSrcChar = Address, pDstChar = OutputString;
     do {
@@ -336,7 +350,8 @@ UINT NTAPI RProc_ReadMemStringExW(HANDLE ProcessHandle, _In_ PVOID Address, _Out
 }
 
 _Success_(return > 0)
-UINT NTAPI RProc_ReadMemStringExA(HANDLE ProcessHandle, _In_ PVOID Address, _Out_writes_z_(OutputStringCch) PSTR OutputString, _In_ UINT OutputStringCch) {
+UINT NTAPI RProc_ReadMemStringExA(HANDLE ProcessHandle, _In_ PVOID Address, _Out_writes_z_(OutputStringCch) PSTR OutputString, _In_ UINT OutputStringCch)
+{
     UINT    i = 0;
     PCHAR   pSrcChar = Address, pDstChar = OutputString;
     do {
@@ -354,7 +369,8 @@ UINT NTAPI RProc_ReadMemStringExA(HANDLE ProcessHandle, _In_ PVOID Address, _Out
 }
 #pragma warning(default: __WARNING_MISSING_ZERO_TERMINATION2)
 
-VOID NTAPI RProc_InitMap(_Out_ PRPROC_MAP RemoteMemMap, _In_ PVOID LocalAddress, _In_ SIZE_T LocalSize, _In_opt_ PVOID RemoteAddress, _In_ ULONG RemotePageProtect) {
+VOID NTAPI RProc_InitMap(_Out_ PRPROC_MAP RemoteMemMap, _In_ PVOID LocalAddress, _In_ SIZE_T LocalSize, _In_opt_ PVOID RemoteAddress, _In_ ULONG RemotePageProtect)
+{
     RemoteMemMap->Local = LocalAddress;
     RemoteMemMap->LocalSize = LocalSize;
     RemoteMemMap->Remote = RemoteAddress;
@@ -362,7 +378,8 @@ VOID NTAPI RProc_InitMap(_Out_ PRPROC_MAP RemoteMemMap, _In_ PVOID LocalAddress,
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI RProc_MemMap(HANDLE ProcessHandle, _Inout_ PRPROC_MAP RemoteMemMap) {
+BOOL NTAPI RProc_MemMap(HANDLE ProcessHandle, _Inout_ PRPROC_MAP RemoteMemMap)
+{
     NTSTATUS    lStatus;
     ULONG       ulProtect = 0;
 
@@ -405,7 +422,8 @@ Label_0:
     return FALSE;
 }
 
-BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap) {
+BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap)
+{
     PVOID       pBase = RemoteMemMap->Remote;
     SIZE_T      uSize = 0;
     NTSTATUS    lStatus = NtFreeVirtualMemory(ProcessHandle, &pBase, &uSize, MEM_RELEASE);
@@ -418,7 +436,8 @@ BOOL NTAPI RProc_MemUnmap(HANDLE ProcessHandle, _In_ PRPROC_MAP RemoteMemMap) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI RProc_GetWow64PEB(_In_ HANDLE hProcess, _Out_ PPEB32 * Wow64PEB) {
+BOOL NTAPI RProc_GetWow64PEB(_In_ HANDLE hProcess, _Out_ PPEB32 * Wow64PEB)
+{
     NTSTATUS lStatus = NtQueryInformationProcess(hProcess, ProcessWow64Information, Wow64PEB, sizeof(*Wow64PEB), NULL);
     if (NT_SUCCESS(lStatus)) {
         return TRUE;
@@ -429,7 +448,8 @@ BOOL NTAPI RProc_GetWow64PEB(_In_ HANDLE hProcess, _Out_ PPEB32 * Wow64PEB) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI RProc_IsWow64(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process) {
+BOOL NTAPI RProc_IsWow64(_In_ HANDLE hProcess, _Out_ PBOOL Wow64Process)
+{
     PPEB32 Wow64PEB;
     if (RProc_GetWow64PEB(hProcess, &Wow64PEB)) {
         *Wow64Process = Wow64PEB != NULL;

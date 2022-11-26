@@ -120,6 +120,13 @@ RtlCreateUserThread(
 NTSYSAPI
 VOID
 NTAPI
+RtlExitUserThread(
+    _In_ NTSTATUS Status
+);
+
+NTSYSAPI
+VOID
+NTAPI
 RtlInitializeCriticalSection(
     _Out_ LPCRITICAL_SECTION lpCriticalSection
 );
@@ -587,6 +594,12 @@ NtSetContextThread(
     IN PCONTEXT ThreadContext
 );
 
+NTSTATUS
+NTAPI
+NtSuspendThread(
+    _In_ HANDLE ThreadHandle,
+    _Out_opt_ PULONG SuspendCount
+);
 
 NTSTATUS
 NTAPI

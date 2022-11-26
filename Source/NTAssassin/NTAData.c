@@ -2,7 +2,8 @@
 
 #include "include\NTAssassin\NTAMem.h"
 
-_Check_return_ PVOID WINAPIV Data_StructCombineEx(_In_ UINT GroupCount, _In_ UINT Size, ...) {
+_Check_return_ PVOID WINAPIV Data_StructCombineEx(_In_ UINT GroupCount, _In_ UINT Size, ...)
+{
     va_list args;
     SIZE_T  i, u, uStructCount = 0;
     PVOID   pBuffer, pDst, pSrc;

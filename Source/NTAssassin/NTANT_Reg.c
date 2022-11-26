@@ -1,7 +1,8 @@
-#include "include\NTAssassin\NTANT.h"
+﻿#include "include\NTAssassin\NTANT.h"
 #include "include\NTAssassin\NTAEH.h"
 
-HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK DesiredAccess) {
+HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK DesiredAccess)
+{
     HANDLE hKey;
     OBJECT_ATTRIBUTES RegObj = RTL_CONSTANT_OBJECT_ATTRIBUTES(KeyPath, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE);
     NTSTATUS Status = NtOpenKey(&hKey, DesiredAccess, &RegObj);
@@ -14,7 +15,8 @@ HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK Desire
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI NT_RegGetDword(_In_ HANDLE KeyHandle, _In_ PUNICODE_STRING KeyName, _Out_ PDWORD Value) {
+BOOL NTAPI NT_RegGetDword(_In_ HANDLE KeyHandle, _In_ PUNICODE_STRING KeyName, _Out_ PDWORD Value)
+{
     BOOL Ret = FALSE;
     DEFINE_ANYSIZE_STRUCT(ValueInfo, KEY_VALUE_PARTIAL_INFORMATION, UCHAR, sizeof(DWORD));
     ULONG Length;
