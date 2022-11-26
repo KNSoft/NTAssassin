@@ -5,14 +5,16 @@
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAUI.h"
 
-BOOL NTAPI GDI_FillSolidRect(HDC DC, _In_ PRECT Rect, COLORREF Color) {
+BOOL NTAPI GDI_FillSolidRect(HDC DC, _In_ PRECT Rect, COLORREF Color)
+{
     COLORREF crPrev = SetBkColor(DC, Color);
     BOOL bRet = ExtTextOut(DC, 0, 0, ETO_OPAQUE, Rect, NULL, 0, NULL);
     SetBkColor(DC, crPrev);
     return bRet;
 }
 
-BOOL NTAPI GDI_FrameRect(HDC DC, PRECT Rect, INT Width, DWORD ROP) {
+BOOL NTAPI GDI_FrameRect(HDC DC, PRECT Rect, INT Width, DWORD ROP)
+{
     return Width >= 0
         ?
         PatBlt(DC, Rect->left - Width, Rect->top - Width, Width, Rect->bottom - Rect->top + Width * 2, ROP) &&
@@ -26,7 +28,8 @@ BOOL NTAPI GDI_FrameRect(HDC DC, PRECT Rect, INT Width, DWORD ROP) {
         PatBlt(DC, Rect->left - Width, Rect->bottom + Width, Rect->right - Rect->left + Width * 2, -Width, ROP);
 }
 
-UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(BufferSize) PVOID Buffer, UINT BufferSize) {
+UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(BufferSize) PVOID Buffer, UINT BufferSize)
+{
     BITMAP              bmp;
     ULONG               cClrBits;
     PBITMAPFILEHEADER   pbmfh;
@@ -85,7 +88,8 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(Buffer
     return uFileSize;
 }
 
-static VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW FontInfo) {
+static VOID NTAPI GDI_InitInternalFontInfo(_Out_ PENUMLOGFONTEXDVW FontInfo)
+{
     FontInfo->elfEnumLogfontEx.elfFullName[0] = FontInfo->elfEnumLogfontEx.elfStyle[0] = FontInfo->elfEnumLogfontEx.elfScript[0] = '\0';
     FontInfo->elfDesignVector.dvReserved = STAMP_DESIGNVECTOR;
     FontInfo->elfDesignVector.dvNumAxes = 0;
@@ -106,7 +110,8 @@ VOID NTAPI GDI_InitFontInfoEx(
     BYTE ClipPrecision,
     BYTE Quality,
     BYTE PitchAndFamily,
-    _In_opt_z_ PCWSTR Name) {
+    _In_opt_z_ PCWSTR Name)
+{
     GDI_InitInternalFontInfo(FontInfo);
     PLOGFONTW pFontInfo = &FontInfo->elfEnumLogfontEx.elfLogFont;
     pFontInfo->lfHeight = Height;
@@ -130,7 +135,8 @@ VOID NTAPI GDI_InitFontInfoEx(
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI GDI_GetDefaultFont(_Out_ PENUMLOGFONTEXDVW FontInfo, _In_opt_ LONG Height) {
+BOOL NTAPI GDI_GetDefaultFont(_Out_ PENUMLOGFONTEXDVW FontInfo, _In_opt_ LONG Height)
+{
     BOOL bRet;
     NONCLIENTMETRICSW ncm;
     ncm.cbSize = sizeof(ncm);
@@ -146,7 +152,8 @@ BOOL NTAPI GDI_GetDefaultFont(_Out_ PENUMLOGFONTEXDVW FontInfo, _In_opt_ LONG He
     return bRet;
 }
 
-HFONT NTAPI GDI_CreateDefaultFont() {
+HFONT NTAPI GDI_CreateDefaultFont()
+{
     HFONT hFont = NULL;
     ENUMLOGFONTEXDVW FontInfo;
     if (GDI_GetDefaultFont(&FontInfo, 0)) {
@@ -156,14 +163,16 @@ HFONT NTAPI GDI_CreateDefaultFont() {
 }
 
 _Success_(return > 0)
-INT NTAPI GDI_GetFont(_In_ HFONT Font, _Out_ PENUMLOGFONTEXDVW FontInfo) {
+INT NTAPI GDI_GetFont(_In_ HFONT Font, _Out_ PENUMLOGFONTEXDVW FontInfo)
+{
     GDI_InitInternalFontInfo(FontInfo);
     INT i = GetObjectW(Font, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont), &FontInfo->elfEnumLogfontEx.elfLogFont);
     i = i > 0 ? sizeof(*FontInfo) : 0;
     return i;
 }
 
-BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY) {
+BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY)
+{
     ICONINFO    stIconInfo;
     BITMAP      stBmp;
     RECT        rcDst;
@@ -212,7 +221,8 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY) {
     return bRet;
 }
 
-BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot) {
+BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot)
+{
     HDC     hDC;
     BOOL    bRet;
     if (Window) {
@@ -233,7 +243,8 @@ BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot) {
     return bRet;
 }
 
-BOOL NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot) {
+BOOL NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot)
+{
     BOOL bRet;
     bRet = DeleteDC(Snapshot->DC);
     bRet &= DeleteObject(Snapshot->Bitmap);

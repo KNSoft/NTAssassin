@@ -46,7 +46,7 @@ NTA_API BOOL NTAPI Data_ListPushFront(_In_ PDATA_LIST List, PVOID NodeValue);
 /// <param name="List">Pointer to the DATA_LIST structure</param>
 /// <param name="NodeValue">Pointer to a buffer to receive node value to be removed</param>
 /// <returns>TRUE if succeeded, or FALSE if failed</returns>
-_Success_(return != FALSE) NTA_API BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST List, _Out_opt_ PVOID* NodeValue);
+_Success_(return != FALSE) NTA_API BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue);
 
 /// <summary>
 /// Removes node in the beginning of list
@@ -54,7 +54,7 @@ _Success_(return != FALSE) NTA_API BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST L
 /// <param name="List">Pointer to the DATA_LIST structure</param>
 /// <param name="NodeValue">Pointer to a buffer to receive node value to be removed</param>
 /// <returns>TRUE if succeeded, or FALSE if failed</returns>
-_Success_(return != FALSE) NTA_API BOOL NTAPI Data_ListPopFront(_In_ PDATA_LIST List, _Out_opt_ PVOID* NodeValue);
+_Success_(return != FALSE) NTA_API BOOL NTAPI Data_ListPopFront(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue);
 
 /// <summary>
 /// Inserts node before specified node

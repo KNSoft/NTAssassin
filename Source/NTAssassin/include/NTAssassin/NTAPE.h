@@ -76,7 +76,7 @@ NTA_API PVOID NTAPI PE_RVA2Ptr(_In_ PPE_STRUCT PEStruct, DWORD RVA);
 /// <param name="Ptr">Pointer</param>
 /// <param name="RVA">Pointer to a DWORD variable to receive the RVA converted</param>
 /// <returns>TRUE if succeeded, or FALSE if failed</returns>
-_Success_(return != FALSE) NTA_API BOOL NTAPI PE_Ptr2RVA(_In_ PPE_STRUCT PEStruct,_In_  PVOID Ptr, _Out_ PDWORD RVA);
+_Success_(return != FALSE) NTA_API BOOL NTAPI PE_Ptr2RVA(_In_ PPE_STRUCT PEStruct, _In_  PVOID Ptr, _Out_ PDWORD RVA);
 
 /// <summary>
 /// Converts pointer to offset

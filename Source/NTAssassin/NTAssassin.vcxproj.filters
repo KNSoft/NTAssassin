@@ -1,10 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
     <Filter Include="NTDef">
       <UniqueIdentifier>{3cece7a0-828d-4d20-90b2-daa1fd49a902}</UniqueIdentifier>
     </Filter>
@@ -103,7 +99,7 @@
     <ClInclude Include="include\NTAssassin\NTAI18N.h" />
     <ClInclude Include="include\NTAssassin\NTAIO.h" />
     <ClInclude Include="include\NTAssassin\NTAKNS.h" />
-    <ClInclude Include="include\NTAssassin\NTAList.h" />
+    <ClInclude Include="include\NTAssassin\NTAData_List.h" />
     <ClInclude Include="include\NTAssassin\NTAMath.h" />
     <ClInclude Include="include\NTAssassin\NTAMem.h" />
     <ClInclude Include="include\NTAssassin\NTAOpCode.h" />

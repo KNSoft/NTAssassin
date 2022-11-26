@@ -1,14 +1,16 @@
-﻿#include "include\NTAssassin\NTAList.h"
+﻿#include "include\NTAssassin\NTAData_List.h"
 
 #include "include\NTAssassin\NTAMem.h"
 
-VOID NTAPI Data_ListInit(_Out_ PDATA_LIST List) {
+VOID NTAPI Data_ListInit(_Out_ PDATA_LIST List)
+{
     List->First = List->Last = NULL;
     List->Length = 0;
     List->Lock = (RTL_SRWLOCK)RTL_SRWLOCK_INIT;
 }
 
-BOOL NTAPI Data_ListPushBack(_In_ PDATA_LIST List, PVOID NodeValue) {
+BOOL NTAPI Data_ListPushBack(_In_ PDATA_LIST List, PVOID NodeValue)
+{
     PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
     if (!pNode) {
         return FALSE;
@@ -29,7 +31,8 @@ BOOL NTAPI Data_ListPushBack(_In_ PDATA_LIST List, PVOID NodeValue) {
     return TRUE;
 }
 
-BOOL NTAPI Data_ListPushFront(_In_ PDATA_LIST List, PVOID NodeValue) {
+BOOL NTAPI Data_ListPushFront(_In_ PDATA_LIST List, PVOID NodeValue)
+{
     PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
     if (!pNode) {
         return FALSE;
@@ -51,7 +54,8 @@ BOOL NTAPI Data_ListPushFront(_In_ PDATA_LIST List, PVOID NodeValue) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue) {
+BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue)
+{
     PDATA_LIST_NODE pNodeTemp;
     if (!List->Last) {
         return FALSE;
@@ -71,7 +75,8 @@ BOOL NTAPI Data_ListPopBack(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Data_ListPopFront(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue) {
+BOOL NTAPI Data_ListPopFront(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue)
+{
     PDATA_LIST_NODE pNodeTemp;
     if (!List->First) {
         return FALSE;
@@ -90,7 +95,8 @@ BOOL NTAPI Data_ListPopFront(_In_ PDATA_LIST List, _Out_opt_ PVOID * NodeValue) 
     return TRUE;
 }
 
-BOOL NTAPI Data_ListInsertBefore(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE DestNode, PVOID NodeValue) {
+BOOL NTAPI Data_ListInsertBefore(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE DestNode, PVOID NodeValue)
+{
     PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
     if (!pNode) {
         return FALSE;
@@ -110,7 +116,8 @@ BOOL NTAPI Data_ListInsertBefore(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE Dest
     return TRUE;
 }
 
-BOOL NTAPI Data_ListInsertAfter(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE DestNode, PVOID NodeValue) {
+BOOL NTAPI Data_ListInsertAfter(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE DestNode, PVOID NodeValue)
+{
     PDATA_LIST_NODE pNode = Mem_Alloc(sizeof(DATA_LIST_NODE));
     if (!pNode) {
         return FALSE;
@@ -130,7 +137,8 @@ BOOL NTAPI Data_ListInsertAfter(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE DestN
     return TRUE;
 }
 
-BOOL NTAPI Data_ListRemove(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE Node) {
+BOOL NTAPI Data_ListRemove(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE Node)
+{
     RtlAcquireSRWLockExclusive(&List->Lock);
     if (Node->Blink) {
         Node->Blink->Flink = Node->Flink;
@@ -148,7 +156,8 @@ BOOL NTAPI Data_ListRemove(_In_ PDATA_LIST List, _In_ PDATA_LIST_NODE Node) {
     return TRUE;
 }
 
-VOID NTAPI Data_ListReset(_In_ PDATA_LIST List, BOOL FreeValuePtr) {
+VOID NTAPI Data_ListReset(_In_ PDATA_LIST List, BOOL FreeValuePtr)
+{
     PDATA_LIST_NODE pNode, pNodeNext;
     RtlAcquireSRWLockExclusive(&List->Lock);
     pNode = List->First;

@@ -25,7 +25,8 @@ typedef struct _DLG_VALUEEDITOR {
     QWORD                   PreviousValue;  // Reserved, do not use
 } DLG_VALUEEDITOR, *PDLG_VALUEEDITOR;
 
-static INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR pstDVE, PWSTR pszBuff, INT iCchBuff, QWORD qwValue) {
+static INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR pstDVE, PWSTR pszBuff, INT iCchBuff, QWORD qwValue)
+{
     INT iTemp;
     if (pstDVE->Flags & DVE_VALUE_HEXQWORD) {
         iTemp = Str_PrintfExW(pszBuff, iCchBuff, L"0x%016llX", qwValue);
@@ -39,7 +40,8 @@ static INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR pstDVE, PWSTR pszBuff,
 
 #define Dlg_ValueEditor_FormatValue(pstDVE, pszBuff, qwValue) Dlg_ValueEditor_FormatValueEx(pstDVE, pszBuff, ARRAYSIZE(pszBuff), qwValue)
 
-static VOID Dlg_ValueEditor_SetValue(PDLG_VALUEEDITOR pstDVE, HWND hDlg, QWORD qwValue) {
+static VOID Dlg_ValueEditor_SetValue(PDLG_VALUEEDITOR pstDVE, HWND hDlg, QWORD qwValue)
+{
     WCHAR szValue[MAX_QWORD_IN_HEX_CCH + 2];
     UI_SetDlgItemText(
         hDlg,
@@ -48,7 +50,8 @@ static VOID Dlg_ValueEditor_SetValue(PDLG_VALUEEDITOR pstDVE, HWND hDlg, QWORD q
     pstDVE->PreviousValue = qwValue;
 }
 
-static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE) {
+static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE)
+{
     LVITEMW stLVI;
     WCHAR   szValue[MAX_QWORD_IN_HEX_CCH + 2];
     QWORD   qwTemp = pstDVE->Value;
@@ -93,7 +96,8 @@ static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE) {
     }
 }
 
-static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
     if (uMsg == WM_INITDIALOG) {
         PDLG_VALUEEDITOR    lpstDVE;
         RECT                rcClient;
@@ -255,7 +259,8 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
     return 0;
 }
 
-BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Strings, _Inout_ PQWORD Value, _In_ PDLG_VALUEEDITOR_CONST Consts, _In_ UINT ConstCount) {
+BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Strings, _Inout_ PQWORD Value, _In_ PDLG_VALUEEDITOR_CONST Consts, _In_ UINT ConstCount)
+{
     DLG_VALUEEDITOR stDVE = { Owner, Flags, Strings, Consts, ConstCount, *Value, *Value };
     DLG_TEMPLATE    stDlgTemplate;
     BOOL bRet = DialogBoxIndirectParam(

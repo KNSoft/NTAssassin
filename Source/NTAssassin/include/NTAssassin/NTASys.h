@@ -43,8 +43,5 @@ NTA_API PVOID NTAPI Sys_LoadAPI(SYS_DLL_NAME SysDll, _In_z_ PCSTR APIName);
 /// <returns>Pointer to the message string, or NULL if failed</returns>
 NTA_API PCWSTR NTAPI Sys_GetMessage(HMODULE ModuleHandle, DWORD MessageId);
 
-/// <seealso cref="IsProcessorFeaturePresent"/>
-#define Sys_TestCPUFeature(Feature) ((Feature) < PROCESSOR_FEATURE_MAX ? (BOOL)NT_GetKUSD()->ProcessorFeatures[(Feature)] : FALSE)
-
 /// <seealso cref="IsEqualGUID"/>
 NTA_API BOOL NTAPI Sys_EqualGUID(REFGUID GUID1, REFGUID GUID2);

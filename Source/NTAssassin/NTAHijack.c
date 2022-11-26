@@ -20,7 +20,8 @@
 // Fixme: Patches C6101, in fact, beginning bytes unaligned will be ignored
 #pragma warning(disable: 6101)
 _Ret_notnull_
-PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE) PVOID Buffer, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _Out_opt_ _When_(ProcName != NULL, _Notnull_) PVOID64** ProcAddrPointer) {
+PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE) PVOID Buffer, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _Out_opt_ _When_(ProcName != NULL, _Notnull_) PVOID64** ProcAddrPointer)
+{
     SIZE_T  iCcb;
     WORD    wProcOrdinal;
     PVOID   pStruct, pTemp;
@@ -45,9 +46,9 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR
         pTemp = (PVOID)BYTE_ALIGN((ULONG_PTR)pTemp, STRING_ALIGNMENT);
         if (ProcName) {
             // Fixme: Patches C6387, in fact, ProcName won't be NULL here
-        #pragma warning(disable: 6387)
+            #pragma warning(disable: 6387)
             iCcb = Str_CopyExA((PSTR)pTemp, MAX_CIDENTIFIERNAME_CCH, ProcName);
-        #pragma warning(default: 6387)
+            #pragma warning(default: 6387)
         } else {
             ((PSTR)pTemp)[0] = '\0';
             iCcb = 0;
@@ -69,7 +70,8 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR
 #pragma warning(default: 6101)
 
 _Success_(return != FALSE)
-BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(ShellCodeSize) PVOID ShellCode, SIZE_T ShellCodeSize, _In_reads_bytes_opt_(ParamSize) PVOID Param, SIZE_T ParamSize, _Out_opt_ PDWORD ExitCode, DWORD Timeout) {
+BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(ShellCodeSize) PVOID ShellCode, SIZE_T ShellCodeSize, _In_reads_bytes_opt_(ParamSize) PVOID Param, SIZE_T ParamSize, _Out_opt_ PDWORD ExitCode, DWORD Timeout)
+{
     BOOL        bRet = FALSE;
     RPROC_MAP   ProcMap, ParamMap;
     PVOID       pParam;
@@ -138,20 +140,21 @@ Label_0:
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _Out_opt_ _When_(ProcName != NULL, _Notnull_) PVOID64 * ProcAddr, DWORD Timeout) {
+BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName, _In_opt_z_ PCSTR ProcName, _Out_opt_ _When_(ProcName != NULL, _Notnull_) PVOID64 * ProcAddr, DWORD Timeout)
+{
     BYTE    Buffer[HIJACK_LOADPROCADDR_MAXPARAMBUFFERSIZE];
     LPVOID  pParam;
     PVOID64 *pProc;
     DWORD   ExitCode;
     BOOL    b32Proc;
-#ifdef _WIN64
+    #ifdef _WIN64
     if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
         return FALSE;
     }
-#else
+    #else
     b32Proc = TRUE;
-#endif
-    // Initialize parameter
+    #endif
+        // Initialize parameter
     pParam = Hijack_LoadProcAddr_InitParam(Buffer, LibName, ProcName, &pProc);
     // Create remote thread and execute
     if (Hijack_ExecShellcode(
@@ -175,7 +178,8 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
 }
 
 // TODO 重写
-BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHEADER CallProcHeader, _In_opt_ PHIJACK_CALLPROCPARAM Params, DWORD Timeout) {
+BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHEADER CallProcHeader, _In_opt_ PHIJACK_CALLPROCPARAM Params, DWORD Timeout)
+{
     BOOL                    bRet = FALSE;
     NTSTATUS                lStatus;
     SIZE_T                  usTotalSize, usPageSize;
@@ -188,15 +192,15 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     BOOL                    b32Proc;
     BOOL                    bKeepMem = FALSE;
 
-#ifdef _WIN64
+    #ifdef _WIN64
     if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
         return FALSE;
     }
-#else
+    #else
     b32Proc = TRUE;
-#endif
+    #endif
 
-    // Calculate size of remote buffer and allocate memory
+        // Calculate size of remote buffer and allocate memory
     uParamCount = CallProcHeader->ParamCount;
     usTotalSize = sizeof(HIJACK_CALLPROCHEADER) + sizeof(HIJACK_CALLPROCPARAM) * uParamCount;
     pParam = Params;

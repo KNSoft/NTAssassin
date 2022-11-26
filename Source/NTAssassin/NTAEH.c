@@ -3,33 +3,39 @@
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTADlg.h"
 
-DWORD NTAPI EH_SetLastNTError(NTSTATUS Status) {
+DWORD NTAPI EH_SetLastNTError(NTSTATUS Status)
+{
     DWORD dwErrCode;
     dwErrCode = RtlNtStatusToDosErrorNoTeb(Status);
     EH_SetLastError(dwErrCode);
     return dwErrCode;
 }
 
-PCWSTR NTAPI EH_GetErrorInfo(DWORD Error) {
+PCWSTR NTAPI EH_GetErrorInfo(DWORD Error)
+{
     DWORD dwError = Error;
     if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
-        HRESULT_FACILITY(dwError) == FACILITY_WIN32)
+        HRESULT_FACILITY(dwError) == FACILITY_WIN32) {
         dwError = HRESULT_CODE(dwError);
+    }
     return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
 }
 
-PCWSTR NTAPI EH_GetStatusInfo(NTSTATUS Status) {
+PCWSTR NTAPI EH_GetStatusInfo(NTSTATUS Status)
+{
     return Sys_GetMessage(NT_GetNtdllHandle(), Status);
 }
 
-PCWSTR NTAPI EH_GetStatusErrorInfo(NTSTATUS Status) {
+PCWSTR NTAPI EH_GetStatusErrorInfo(NTSTATUS Status)
+{
     DWORD dwError = RtlNtStatusToDosErrorNoTeb(Status);
     if (dwError == ERROR_MR_MID_NOT_FOUND)
         return EH_GetStatusInfo(Status);
     return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
 }
 
-VOID NTAPI EH_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
+VOID NTAPI EH_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error)
+{
     DWORD dwError = Error;
     if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
         HRESULT_FACILITY(dwError) == FACILITY_WIN32)
@@ -42,7 +48,8 @@ VOID NTAPI EH_ErrorMsgBox(HWND Owner, PCWSTR Title, DWORD Error) {
     );
 }
 
-VOID NTAPI EH_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status) {
+VOID NTAPI EH_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status)
+{
     UINT uType;
     if (NT_INFORMATION(Status))
         uType = MB_ICONINFORMATION;
@@ -52,15 +59,14 @@ VOID NTAPI EH_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status) {
         uType = MB_ICONERROR;
     else
         uType = 0;
-    Dlg_MsgBox(
-        Owner,
-        EH_GetStatusInfo(Status),
-        Title,
-        uType
-    );
+    Dlg_MsgBox(Owner,
+               EH_GetStatusInfo(Status),
+               Title,
+               uType);
 }
 
-DWORD NTAPI EH_HrToWin32(HRESULT hr) {
+DWORD NTAPI EH_HrToWin32(HRESULT hr)
+{
     DWORD dwError = HRESULT_CODE(hr);
     if (hr != MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, dwError)) {
         if (!IS_ERROR(hr)) {

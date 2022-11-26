@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAKNS.h"
+﻿#include "include\NTAssassin\NTAKNS.h"
 
 #include <WindowsX.h>
 
@@ -25,7 +25,8 @@ static HCURSOR     hCurArrow, hCurPointer;
 static HICON       hIconDefault = NULL;
 static WCHAR       szVersion[KNS_MAX_VER_CCH];
 
-BOOL NTAPI KNS_GetVersionStringEx(PWSTR StrVersion, UINT ChCount) {
+BOOL NTAPI KNS_GetVersionStringEx(PWSTR StrVersion, UINT ChCount)
+{
     PKNS_VERSION_INFO   lpstVer = &lpKNSInfo->Version;
     LPWSTR              lpszEdition;
     if (lpstVer->Type == KNS_VERSION_ALPHA)
@@ -43,7 +44,8 @@ BOOL NTAPI KNS_GetVersionStringEx(PWSTR StrVersion, UINT ChCount) {
     return Str_PrintfExW(StrVersion, ChCount, L"V%u.%u.%u.%u %s", lpstVer->Major, lpstVer->Minor, lpstVer->Revision, lpstVer->Build, lpszEdition) > 0;
 }
 
-HICON NTAPI KNS_GetIcon() {
+HICON NTAPI KNS_GetIcon()
+{
     return hIconDefault;
 }
 
@@ -59,7 +61,8 @@ typedef struct _KNS_SETBANNERSUBCLASS_REF {
     LPCWSTR     lpszComment;
 } KNS_SETBANNERSUBCLASS_REF, * PKNS_SETBANNERSUBCLASS_REF;
 
-static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
     PKNS_SETBANNERSUBCLASS_REF  pstRef = (PKNS_SETBANNERSUBCLASS_REF)dwRefData;
     RECT                        rcText;
     if (uMsg == WM_PAINT) {
@@ -141,7 +144,8 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
     return DefSubclassProc(hWnd, uMsg, wParam, lParam);
 }
 
-VOID KNS_SetBannerSubclass(HWND hBanner) {
+VOID KNS_SetBannerSubclass(HWND hBanner)
+{
     PKNS_SETBANNERSUBCLASS_REF  pstRef;
     RECT                        rcBanner;
     WINDOWPOS                   stWndPos;
@@ -164,7 +168,8 @@ VOID KNS_SetBannerSubclass(HWND hBanner) {
     UI_Redraw(hBanner);
 }
 
-static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
     if (uMsg == WM_INITDIALOG) {
         if (hIconDefault) {
             SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)hIconDefault);
@@ -176,14 +181,16 @@ static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
     return lpfnMainDlgProc(hDlg, uMsg, wParam, lParam);
 }
 
-VOID NTAPI KNS_SetDialogSubclass(HWND Dialog, DLG_RESIZEDPROC ResizedProc) {
+VOID NTAPI KNS_SetDialogSubclass(HWND Dialog, DLG_RESIZEDPROC ResizedProc)
+{
     DPI_SetAutoAdjustSubclass(Dialog, NULL);
     if (ResizedProc) {
         Dlg_SetResizingSubclass(Dialog, TRUE, ResizedProc);
     }
 }
 
-UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
+UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo)
+{
     lpKNSInfo = KNSInfo;
     lpfnMainDlgProc = KNSInfo->UI.DlgProc;
     hCurArrow = LoadImageW(NULL, MAKEINTRESOURCE(OCR_NORMAL), IMAGE_CURSOR, 0, 0, LR_DEFAULTSIZE | LR_SHARED);
@@ -225,7 +232,8 @@ UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo) {
     return ulRet;
 }
 
-INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type) {
+INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type)
+{
     return Dlg_MsgBox(
         Owner ? Owner : hMainDlg,
         IS_INTRESOURCE(Text) ? I18N_GetString((UINT_PTR)Text) : Text,
@@ -233,23 +241,28 @@ INT NTAPI KNS_MsgBox(HWND Owner, PCWSTR Text, PCWSTR Title, UINT Type) {
         Type);
 }
 
-VOID NTAPI KNS_ErrorMsgBox(HWND Owner, DWORD Error) {
+VOID NTAPI KNS_ErrorMsgBox(HWND Owner, DWORD Error)
+{
     EH_ErrorMsgBox(Owner, lpKNSInfo->Name, Error);
 }
 
-VOID NTAPI KNS_StatusMsgBox(HWND Owner, NTSTATUS Status) {
+VOID NTAPI KNS_StatusMsgBox(HWND Owner, NTSTATUS Status)
+{
     EH_StatusMsgBox(Owner, lpKNSInfo->Name, Status);
 }
 
-VOID NTAPI KNS_LastErrorMsgBox(HWND Owner) {
+VOID NTAPI KNS_LastErrorMsgBox(HWND Owner)
+{
     EH_LastErrorMsgBox(Owner, lpKNSInfo->Name);
 }
 
-VOID NTAPI KNS_LastStatusMsgBox(HWND Owner) {
+VOID NTAPI KNS_LastStatusMsgBox(HWND Owner)
+{
     EH_LastStatusMsgBox(Owner, lpKNSInfo->Name);
 }
 
-VOID NTAPI KNS_OpenHomePage() {
+VOID NTAPI KNS_OpenHomePage()
+{
     Shell_Exec(lpKNSInfo->OnlineService.HomePage, NULL, ShellExecOpen, SW_SHOWNORMAL, NULL);
 }
 
@@ -258,7 +271,8 @@ VOID NTAPI KNS_OpenHomePage() {
 
 static RECT rcDlgAbout, rcHomePage;
 
-static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
     if (uMsg == WM_INITDIALOG) {
         GetClientRect(hDlg, &rcDlgAbout);
         rcHomePage.left = PADDING_X;
@@ -310,7 +324,8 @@ static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wPara
     return 0;
 }
 
-VOID NTAPI KNS_DlgAbout(HWND hwndOwner) {
+VOID NTAPI KNS_DlgAbout(HWND hwndOwner)
+{
     DLG_TEMPLATE stDlgTemplate;
     DialogBoxIndirectParamW(
         NULL,

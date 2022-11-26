@@ -2,7 +2,8 @@
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAMem.h"
 
-HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions) {
+HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, ULONG CreateOptions)
+{
     UNICODE_STRING      stString;
     OBJECT_ATTRIBUTES   stObject;
     IO_STATUS_BLOCK     stIOStatus;
@@ -19,7 +20,8 @@ HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MA
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size) {
+BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size)
+{
     IO_STATUS_BLOCK stIOStatus;
     FILE_STANDARD_INFORMATION fsi;
     NTSTATUS        lStatus;
@@ -34,7 +36,8 @@ BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size) {
 }
 
 _Success_(return > 0)
-ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PVOID Buffer, _In_ ULONG BytesToRead, PLARGE_INTEGER ByteOffset) {
+ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PVOID Buffer, _In_ ULONG BytesToRead, PLARGE_INTEGER ByteOffset)
+{
     IO_STATUS_BLOCK stIOStatus;
     NTSTATUS        lStatus;
     lStatus = NtReadFile(FileHandle, NULL, NULL, NULL, &stIOStatus, Buffer, BytesToRead, ByteOffset, NULL);
@@ -47,7 +50,8 @@ ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PV
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI File_IsDirectory(_In_z_ PCWSTR FilePath, _Out_ PBOOL Result) {
+BOOL NTAPI File_IsDirectory(_In_z_ PCWSTR FilePath, _Out_ PBOOL Result)
+{
     UNICODE_STRING                  stString;
     OBJECT_ATTRIBUTES               stObjectAttr;
     FILE_NETWORK_OPEN_INFORMATION   stFileInfo;
@@ -66,7 +70,8 @@ BOOL NTAPI File_IsDirectory(_In_z_ PCWSTR FilePath, _Out_ PBOOL Result) {
     return FALSE;
 }
 
-BOOL NTAPI File_Delete(_In_z_ PCWSTR FilePath) {
+BOOL NTAPI File_Delete(_In_z_ PCWSTR FilePath)
+{
     UNICODE_STRING      stString;
     OBJECT_ATTRIBUTES   stObjectAttr;
     IO_STATUS_BLOCK     stIOStatus;
@@ -86,7 +91,8 @@ BOOL NTAPI File_Delete(_In_z_ PCWSTR FilePath) {
     return FALSE;
 }
 
-BOOL NTAPI File_Dispose(HANDLE FileHandle) {
+BOOL NTAPI File_Dispose(HANDLE FileHandle)
+{
     IO_STATUS_BLOCK                 stIOStatus;
     FILE_DISPOSITION_INFORMATION    fdi = { TRUE };
     NTSTATUS                        lStatus;
@@ -99,7 +105,8 @@ BOOL NTAPI File_Dispose(HANDLE FileHandle) {
     }
 }
 
-BOOL NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize) {
+BOOL NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize)
+{
     IO_STATUS_BLOCK                 stIOStatus;
     FILE_END_OF_FILE_INFORMATION    feofi;
     NTSTATUS                        lStatus;
@@ -114,7 +121,8 @@ BOOL NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI File_ReadOnlyMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap) {
+BOOL NTAPI File_ReadOnlyMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap)
+{
     BOOL bRet = FALSE;
     HANDLE hFile, hSection;
     SIZE_T sFileSize;
@@ -145,7 +153,8 @@ BOOL NTAPI File_ReadOnlyMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, BOOL UseCache, SIZE_T MaximumSize) {
+BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, BOOL UseCache, SIZE_T MaximumSize)
+{
     BOOL bRet = FALSE;
     HANDLE hFile, hSection;
     SIZE_T sFileSize;
@@ -184,7 +193,8 @@ BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, ULONGLONG MaximumSize, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, BOOL NoCache, SECTION_INHERIT InheritDisposition) {
+BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, ULONGLONG MaximumSize, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, BOOL NoCache, SECTION_INHERIT InheritDisposition)
+{
     ULONG           CreateOptions;
     HANDLE          hFile;
     HANDLE          hSection;
@@ -225,7 +235,8 @@ BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MA
     }
 }
 
-VOID NTAPI File_Unmap(_In_ PFILE_MAP FileMap) {
+VOID NTAPI File_Unmap(_In_ PFILE_MAP FileMap)
+{
     NtUnmapViewOfSection(CURRENT_PROCESS_HANDLE, FileMap->Map);
     NtClose(FileMap->SectionHandle);
     NtClose(FileMap->FileHandle);

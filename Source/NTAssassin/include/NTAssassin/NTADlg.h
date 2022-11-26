@@ -134,7 +134,7 @@ NTA_API _Success_(return != FALSE) BOOL NTAPI Dlg_MessageLoop(_In_opt_ HWND Wind
 /// <param name="Strings">String table to display text on the dialog, default strings is ["Title", "Reset", "OK", "Left", "Top", "Right", "Bottom", "Width", "Height"]</param>
 /// <param name="Rect">Pointer to the RECT structure to set initial values and receive the result values</param>
 /// <returns>TRUE if a RECT was confirmed, or FALSE if user canceled or an error occured</returns>
-NTA_API BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR* Strings, _Inout_ PRECT Rect);
+NTA_API BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR * Strings, _Inout_ PRECT Rect);
 
 #define DVE_TYPE_COMBINATION    0x1
 #define DVE_TYPE_ENUMERATION    0x2
@@ -158,6 +158,6 @@ typedef struct _DLG_VALUEEDITOR_CONST {
 /// <param name="Consts">Pointer to a DLG_VALUEEDITOR_CONST structures array, contains constant members of value</param>
 /// <param name="ConstCount">Number of constants in Consts parameter</param>
 /// <returns>TRUE if a value was confirmed, or FALSE if user canceled or an error occured</returns>
-NTA_API BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Strings, _Inout_ PQWORD Value, _In_ PDLG_VALUEEDITOR_CONST Consts, _In_ UINT ConstCount);
+NTA_API BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR * Strings, _Inout_ PQWORD Value, _In_ PDLG_VALUEEDITOR_CONST Consts, _In_ UINT ConstCount);
 
 #define Dlg_ValueEditor(Owner, Flags, Strings, Value, Consts) Dlg_ValueEditorEx(Owner, Flags, Strings, Value, Consts, ARRAYSIZE(Consts))

@@ -1,7 +1,8 @@
-#include "include\NTAssassin\NTAPE.h"
+﻿#include "include\NTAssassin\NTAPE.h"
 
 _Success_(return != FALSE)
-BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap, SIZE_T OfflineMapFileSize) {
+BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap, SIZE_T OfflineMapFileSize)
+{
     BOOL bRet = FALSE;
     __try {
         PIMAGE_DOS_HEADER   pDosHdr = (PIMAGE_DOS_HEADER)Image;
@@ -47,7 +48,8 @@ BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineM
     return bRet;
 }
 
-UINT NTAPI PE_GetBits(_In_ PPE_STRUCT PEStruct) {
+UINT NTAPI PE_GetBits(_In_ PPE_STRUCT PEStruct)
+{
     UINT uBits = 0;
     __try {
         if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
@@ -59,7 +61,8 @@ UINT NTAPI PE_GetBits(_In_ PPE_STRUCT PEStruct) {
     return uBits;
 }
 
-ULONGLONG NTAPI PE_GetOptionalHeaderValueEx(_In_ PPE_STRUCT PEStruct, ULONG FieldOffset, ULONG FieldSize) {
+ULONGLONG NTAPI PE_GetOptionalHeaderValueEx(_In_ PPE_STRUCT PEStruct, ULONG FieldOffset, ULONG FieldSize)
+{
     ULONGLONG ull = 0;
     __try {
         PBYTE p = (PBYTE)PEStruct->OptionalHeader;
@@ -77,7 +80,8 @@ ULONGLONG NTAPI PE_GetOptionalHeaderValueEx(_In_ PPE_STRUCT PEStruct, ULONG Fiel
     return ull;
 }
 
-PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(_In_ PPE_STRUCT PEStruct, UINT Index) {
+PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(_In_ PPE_STRUCT PEStruct, UINT Index)
+{
     PIMAGE_DATA_DIRECTORY pDataDirectory = NULL;
     __try {
         if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
@@ -89,7 +93,8 @@ PIMAGE_DATA_DIRECTORY NTAPI PE_GetDataDirectory(_In_ PPE_STRUCT PEStruct, UINT I
     return pDataDirectory;
 }
 
-PCWSTR PE_GetMachineName(_In_ PPE_STRUCT PEStruct) {
+PCWSTR PE_GetMachineName(_In_ PPE_STRUCT PEStruct)
+{
     PCWSTR psz = NULL;
     WORD wMachine = PEStruct->FileHeader->Machine;
     if (wMachine == IMAGE_FILE_MACHINE_I386) {
@@ -106,7 +111,8 @@ PCWSTR PE_GetMachineName(_In_ PPE_STRUCT PEStruct) {
     return psz;
 }
 
-PCWSTR PE_GetSubsystemName(_In_ PPE_STRUCT PEStruct) {
+PCWSTR PE_GetSubsystemName(_In_ PPE_STRUCT PEStruct)
+{
     WORD wSubsystem;
     if (PEStruct->OptionalHeader->Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC) {
         wSubsystem = PEStruct->OptionalHeader32->Subsystem;
@@ -141,7 +147,8 @@ PCWSTR PE_GetSubsystemName(_In_ PPE_STRUCT PEStruct) {
     return psz;
 }
 
-PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(_In_ PPE_STRUCT PEStruct, DWORD RVA) {
+PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(_In_ PPE_STRUCT PEStruct, DWORD RVA)
+{
     USHORT u, uSections;
     PIMAGE_SECTION_HEADER pTargetSection, pSection;
     pTargetSection = NULL;
@@ -161,7 +168,8 @@ PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByRVA(_In_ PPE_STRUCT PEStruct, DWORD R
     return pTargetSection;
 }
 
-PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByOffset(_In_ PPE_STRUCT PEStruct, DWORD Offset) {
+PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByOffset(_In_ PPE_STRUCT PEStruct, DWORD Offset)
+{
     USHORT u, uSections;
     PIMAGE_SECTION_HEADER pTargetSection, pSection;
     pTargetSection = NULL;
@@ -181,7 +189,8 @@ PIMAGE_SECTION_HEADER NTAPI PE_GetSectionByOffset(_In_ PPE_STRUCT PEStruct, DWOR
     return pTargetSection;
 }
 
-PVOID NTAPI PE_RVA2Ptr(_In_ PPE_STRUCT PEStruct, DWORD RVA) {
+PVOID NTAPI PE_RVA2Ptr(_In_ PPE_STRUCT PEStruct, DWORD RVA)
+{
     PVOID   Ptr = NULL;
     if (PEStruct->OfflineMap) {
         PIMAGE_SECTION_HEADER pSection = PE_GetSectionByRVA(PEStruct, RVA);
@@ -194,7 +203,8 @@ PVOID NTAPI PE_RVA2Ptr(_In_ PPE_STRUCT PEStruct, DWORD RVA) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI PE_Ptr2RVA(_In_ PPE_STRUCT PEStruct, _In_  PVOID Ptr, _Out_ PDWORD RVA) {
+BOOL NTAPI PE_Ptr2RVA(_In_ PPE_STRUCT PEStruct, _In_  PVOID Ptr, _Out_ PDWORD RVA)
+{
     DWORD dwDelta = (DWORD)((ULONG_PTR)Ptr - (ULONG_PTR)PEStruct->Image);
     if (PEStruct->OfflineMap) {
         PIMAGE_SECTION_HEADER pSection = PE_GetSectionByOffset(PEStruct, dwDelta);
@@ -210,7 +220,8 @@ BOOL NTAPI PE_Ptr2RVA(_In_ PPE_STRUCT PEStruct, _In_  PVOID Ptr, _Out_ PDWORD RV
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI PE_Ptr2Offset(_In_ PPE_STRUCT PEStruct, _In_ PVOID Ptr, _Out_ PDWORD Offset) {
+BOOL NTAPI PE_Ptr2Offset(_In_ PPE_STRUCT PEStruct, _In_ PVOID Ptr, _Out_ PDWORD Offset)
+{
     DWORD dwDelta = (DWORD)((ULONG_PTR)Ptr - (ULONG_PTR)PEStruct->Image);
     if (PEStruct->OfflineMap) {
         *Offset = dwDelta;
@@ -226,7 +237,8 @@ BOOL NTAPI PE_Ptr2Offset(_In_ PPE_STRUCT PEStruct, _In_ PVOID Ptr, _Out_ PDWORD 
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI PE_GetExportedName(_In_ PPE_STRUCT PEStruct, _In_ PVOID Function, _Out_ PZPCSTR Name) {
+BOOL NTAPI PE_GetExportedName(_In_ PPE_STRUCT PEStruct, _In_ PVOID Function, _Out_ PZPCSTR Name)
+{
     BOOL bRet = FALSE;
     DWORD dwFuncRVA;
     if (PE_Ptr2RVA(PEStruct, Function, &dwFuncRVA)) {

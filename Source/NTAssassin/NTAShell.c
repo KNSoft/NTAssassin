@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAShell.h"
+﻿#include "include\NTAssassin\NTAShell.h"
 
 #include <Shlobj.h>
 
@@ -6,7 +6,8 @@
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAEH.h"
 
-BOOL NTAPI Shell_Locate(_In_ PCWSTR Path) {
+BOOL NTAPI Shell_Locate(_In_ PCWSTR Path)
+{
     WCHAR               szFile[MAX_PATH];
     SFGAOF              dwAttr;
     PIDLIST_ABSOLUTE    pidlDir, pidlFile;
@@ -39,7 +40,8 @@ BOOL NTAPI Shell_Locate(_In_ PCWSTR Path) {
     return FALSE;
 }
 
-BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle) {
+BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle)
+{
     SHELLEXECUTEINFOW   stSEIW = { sizeof(SHELLEXECUTEINFOW) };
     BOOL                bRet;
     stSEIW.fMask = (ProcessHandle ? SEE_MASK_NOCLOSEPROCESS : SEE_MASK_DEFAULT) | SEE_MASK_INVOKEIDLIST;
@@ -71,7 +73,8 @@ BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB V
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Shell_GetLinkPath(_In_ PCWSTR LinkFile, _Out_writes_z_(PathCchSize) PWSTR Path, _In_ INT PathCchSize) {
+BOOL NTAPI Shell_GetLinkPath(_In_ PCWSTR LinkFile, _Out_writes_z_(PathCchSize) PWSTR Path, _In_ INT PathCchSize)
+{
     BOOL bRet = FALSE;
     IShellLinkW* psl;
     HRESULT hr = CoCreateInstance(&CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, &IID_IShellLinkW, &psl);

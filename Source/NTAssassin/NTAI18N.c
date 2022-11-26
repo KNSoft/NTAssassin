@@ -9,7 +9,8 @@ static PI18N_ITEM  pI18NStringTable = NULL;
 static PI18N_ITEM  pI18NDefaultStringTable = NULL;
 static USHORT      usI18NStringCount = 0;
 
-PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT ItemCount, PCWSTR LangName) {
+PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT ItemCount, PCWSTR LangName)
+{
     usI18NStringCount = ItemCount;
     pI18NDefaultStringTable = Langs[0]->StringTable;
     PI18N_LANGUAGE lpLang = I18N_FindLangEx(Langs, LangCount, LangName);
@@ -17,13 +18,15 @@ PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT I
     return lpLang;
 }
 
-VOID NTAPI I18N_SetLocale(PI18N_LANGUAGE Lang) {
+VOID NTAPI I18N_SetLocale(PI18N_LANGUAGE Lang)
+{
     pI18NFontName = Lang->FontName;
     bI18NRTLReading = Lang->RTLReading;
     pI18NStringTable = Lang->StringTable;
 }
 
-PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR LangName) {
+PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR LangName)
+{
     WCHAR   wcName[LOCALE_NAME_MAX_LENGTH];
     PCWSTR  pszLangName;
     int     iCchName;
@@ -69,7 +72,8 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR Lan
     return Langs[0];
 }
 
-PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
+PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex)
+{
     if (IS_INTRESOURCE(StrIndex)) {
         PCWSTR  psz = NULL;
         USHORT  usIndex = LOWORD(StrIndex);
@@ -97,14 +101,16 @@ PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex) {
     return NULL;
 }
 
-HWND NTAPI I18N_InitCtlText(HWND Dialog, INT CtlID, UINT_PTR StrIndex) {
+HWND NTAPI I18N_InitCtlText(HWND Dialog, INT CtlID, UINT_PTR StrIndex)
+{
     HWND hCtl = GetDlgItem(Dialog, CtlID);
     UI_EnableWindowStyle(hCtl, GWL_EXSTYLE, WS_EX_RTLREADING, bI18NRTLReading);
     I18N_SetWndText(hCtl, StrIndex);
     return hCtl;
 }
 
-VOID NTAPI I18N_InitCtlTextsEx(HWND Dialog, PI18N_CTLTEXT CtlTexts, UINT CtlTextCount) {
+VOID NTAPI I18N_InitCtlTextsEx(HWND Dialog, PI18N_CTLTEXT CtlTexts, UINT CtlTextCount)
+{
     HWND hCtl;
     UINT i;
     for (i = 0; i < CtlTextCount; i++) {

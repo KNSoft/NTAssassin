@@ -1,4 +1,4 @@
-#include "include\NTAssassin\NTAUI.h"
+﻿#include "include\NTAssassin\NTAUI.h"
 
 #include <dwmapi.h>
 
@@ -8,7 +8,8 @@
 #pragma comment(lib, "Dwmapi.lib")
 #pragma comment(lib, "UxTheme.lib")
 
-HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint) {
+HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint)
+{
     Paint->DC = CreateCompatibleDC(BeginPaint(Window, &Paint->Paint));
     GetClientRect(Window, &Paint->Rect);
     Paint->Bitmap = CreateCompatibleBitmap(Paint->Paint.hdc, Paint->Rect.right, Paint->Rect.bottom);
@@ -16,19 +17,22 @@ HDC NTAPI UI_BeginPaint(HWND Window, _Out_ PUI_WINDBPAINT Paint) {
     return Paint->DC;
 }
 
-VOID NTAPI UI_EndPaint(HWND Window, _In_ PUI_WINDBPAINT Paint) {
+VOID NTAPI UI_EndPaint(HWND Window, _In_ PUI_WINDBPAINT Paint)
+{
     BitBlt(Paint->Paint.hdc, 0, 0, Paint->Rect.right, Paint->Rect.bottom, Paint->DC, 0, 0, SRCCOPY);
     DeleteDC(Paint->DC);
     DeleteObject(Paint->Bitmap);
     EndPaint(Window, &Paint->Paint);
 }
 
-BOOL NTAPI UI_GetWindowRect(HWND Window, _Out_ PRECT Rect) {
+BOOL NTAPI UI_GetWindowRect(HWND Window, _Out_ PRECT Rect)
+{
     return DwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, Rect, sizeof(*Rect)) == S_OK ||
         GetWindowRect(Window, Rect);
 }
 
-BOOL NTAPI UI_SetWindowRect(HWND Window, _In_ PRECT Rect) {
+BOOL NTAPI UI_SetWindowRect(HWND Window, _In_ PRECT Rect)
+{
     RECT rcDwmDiff, rcOrgDiff;
     return DwmGetWindowAttribute(Window, DWMWA_EXTENDED_FRAME_BOUNDS, &rcDwmDiff, sizeof(rcDwmDiff)) == S_OK &&
         GetWindowRect(Window, &rcOrgDiff) ?
@@ -51,7 +55,8 @@ BOOL NTAPI UI_SetWindowRect(HWND Window, _In_ PRECT Rect) {
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, _Out_ PRECT Rect) {
+BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, _Out_ PRECT Rect)
+{
     POINT   pt;
     HANDLE  hParent;
     RECT    rcWnd;
@@ -72,29 +77,34 @@ BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, _Out_ PRECT Rect) {
     return bRet;
 }
 
-VOID NTAPI UI_EnumChildWindows(HWND ParentWindow, _In_ WNDENUMPROC WindowEnumProc, LPARAM Param) {
+VOID NTAPI UI_EnumChildWindows(HWND ParentWindow, _In_ WNDENUMPROC WindowEnumProc, LPARAM Param)
+{
     HWND hWndChild = GetWindow(ParentWindow, GW_CHILD);
     while (hWndChild && WindowEnumProc(hWndChild, Param))
         hWndChild = GetWindow(hWndChild, GW_HWNDNEXT);
 }
 
-BOOL NTAPI UI_IsDWMComposited() {
+BOOL NTAPI UI_IsDWMComposited()
+{
     BOOL bEnabled;
     return SUCCEEDED(DwmIsCompositionEnabled(&bEnabled)) && bEnabled;
 }
 
-DWORD NTAPI UI_GetWindowCloackedState(HWND Window) {
+DWORD NTAPI UI_GetWindowCloackedState(HWND Window)
+{
     DWORD dwCloackedState;
     return (NT_GetKUSD()->NtMajorVersion > 6 ||
         (NT_GetKUSD()->NtMajorVersion == 6 && NT_GetKUSD()->NtMinorVersion > 1)) &&
         DwmGetWindowAttribute(Window, DWMWA_CLOAKED, &dwCloackedState, sizeof(dwCloackedState)) == S_OK ? dwCloackedState : 0;
 }
 
-BOOL NTAPI UI_SetTheme(HWND Window) {
+BOOL NTAPI UI_SetTheme(HWND Window)
+{
     return SetWindowTheme(Window, L"Explorer", NULL) == S_OK;
 }
 
-BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag, BOOL EnableState) {
+BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag, BOOL EnableState)
+{
     LONG_PTR    lStyle;
     BOOL        bRet;
     bRet = FALSE;
@@ -110,23 +120,27 @@ BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag,
     return bRet;
 }
 
-HANDLE NTAPI UI_OpenProc(DWORD DesiredAccess, HWND Window) {
+HANDLE NTAPI UI_OpenProc(DWORD DesiredAccess, HWND Window)
+{
     DWORD dwProcessId;
     GetWindowThreadProcessId(Window, &dwProcessId);
     return RProc_Open(DesiredAccess, dwProcessId);
 }
 
-BOOL NTAPI UI_SetNoNotifyFlag(HWND Window, BOOL EnableState) {
+BOOL NTAPI UI_SetNoNotifyFlag(HWND Window, BOOL EnableState)
+{
     return EnableState ?
         SetProp(Window, UI_NONOTIFYPROP, (HANDLE)TRUE) :
         (BOOL)(DWORD_PTR)RemoveProp(Window, UI_NONOTIFYPROP);
 }
 
-BOOL NTAPI UI_GetNoNotifyFlag(HWND Window) {
+BOOL NTAPI UI_GetNoNotifyFlag(HWND Window)
+{
     return (BOOL)(DWORD_PTR)GetProp(Window, UI_NONOTIFYPROP);
 }
 
-LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, _In_opt_ PCWSTR Text) {
+LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, _In_opt_ PCWSTR Text)
+{
     LRESULT lResult;
     UI_SetNoNotifyFlag(Window, TRUE);
     lResult = SendMessageW(Window, WM_SETTEXT, 0, (LPARAM)Text);
@@ -134,7 +148,8 @@ LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, _In_opt_ PCWSTR Text) {
     return lResult;
 }
 
-UINT _Success_(return > 0) NTAPI UI_GetWindowTextExW(HWND Window, _Out_writes_z_(TextCch) PWSTR Text, UINT TextCch) {
+UINT _Success_(return > 0) NTAPI UI_GetWindowTextExW(HWND Window, _Out_writes_z_(TextCch) PWSTR Text, UINT TextCch)
+{
     UINT cCh = (UINT)SendMessageW(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
     if (cCh >= TextCch)
         cCh = 0;
@@ -142,7 +157,8 @@ UINT _Success_(return > 0) NTAPI UI_GetWindowTextExW(HWND Window, _Out_writes_z_
     return cCh;
 }
 
-UINT _Success_(return > 0) NTAPI UI_GetWindowTextExA(HWND Window, _Out_writes_z_(TextCch) PSTR Text, UINT TextCch) {
+UINT _Success_(return > 0) NTAPI UI_GetWindowTextExA(HWND Window, _Out_writes_z_(TextCch) PSTR Text, UINT TextCch)
+{
     UINT cCh = (UINT)SendMessageA(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
     if (cCh >= TextCch)
         cCh = 0;
@@ -150,7 +166,8 @@ UINT _Success_(return > 0) NTAPI UI_GetWindowTextExA(HWND Window, _Out_writes_z_
     return cCh;
 }
 
-_Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, _Out_ PLONG_PTR Result) {
+_Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, _Out_ PLONG_PTR Result)
+{
     LONG_PTR    lResult;
     BOOL        bRet;
     // GetWindowLongPtr may crash in some cases
@@ -177,7 +194,8 @@ _Success_(return != FALSE) BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLo
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode) {
+BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode)
+{
     BOOL    bRet;
     MSG     stMsg;
     while (TRUE) {
@@ -195,7 +213,8 @@ BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode) {
     }
 }
 
-VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size) {
+VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size)
+{
     if (Point) {
         Point->x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         Point->y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -206,7 +225,8 @@ VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size) {
     }
 }
 
-BOOL NTAPI UI_AllowDrop(HWND Window) {
+BOOL NTAPI UI_AllowDrop(HWND Window)
+{
     return ChangeWindowMessageFilter(WM_DROPFILES, MSGFLT_ADD) &&
         ChangeWindowMessageFilter(WM_COPYGLOBALDATA, MSGFLT_ADD);
 }

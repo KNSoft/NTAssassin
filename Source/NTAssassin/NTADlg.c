@@ -8,7 +8,8 @@
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(_Out_ PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height) {
+LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(_Out_ PDLG_TEMPLATE Template, DWORD Style, DWORD ExtendedStyle, INT X, INT Y, INT Width, INT Height)
+{
     Template->wMenu = Template->wClass = Template->wTitle = Template->Template.cdit = 0;
     Template->Template.style = Style;
     Template->Template.dwExtendedStyle = ExtendedStyle;
@@ -19,7 +20,8 @@ LPDLGTEMPLATEW NTAPI Dlg_InitTemplate(_Out_ PDLG_TEMPLATE Template, DWORD Style,
     return &Template->Template;
 }
 
-BOOL NTAPI Dlg_GetOpenFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD CchFile, PCWSTR DefExt) {
+BOOL NTAPI Dlg_GetOpenFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD CchFile, PCWSTR DefExt)
+{
     OPENFILENAMEW   stOpenOFNW = { sizeof(OPENFILENAMEW) };
     stOpenOFNW.hwndOwner = Owner;
     stOpenOFNW.lpstrFilter = Filter;
@@ -30,7 +32,8 @@ BOOL NTAPI Dlg_GetOpenFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD Cc
     return GetOpenFileNameW(&stOpenOFNW);
 }
 
-BOOL NTAPI Dlg_GetSaveFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD MaxFile, PCWSTR DefExt) {
+BOOL NTAPI Dlg_GetSaveFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD MaxFile, PCWSTR DefExt)
+{
     OPENFILENAMEW   stSaveOFNW = { sizeof(OPENFILENAMEW) };
     stSaveOFNW.hwndOwner = Owner;
     stSaveOFNW.lpstrFilter = Filter;
@@ -41,7 +44,8 @@ BOOL NTAPI Dlg_GetSaveFileNameEx(HWND Owner, PCWSTR Filter, PWSTR File, DWORD Ma
     return GetSaveFileNameW(&stSaveOFNW);
 }
 
-BOOL NTAPI Dlg_ChooseColor(HWND Owner, _Inout_ LPCOLORREF Color) {
+BOOL NTAPI Dlg_ChooseColor(HWND Owner, _Inout_ LPCOLORREF Color)
+{
     COLORREF acrCustClr[16] = {
         RGB(255, 255, 255),
         RGB(255, 255, 255),
@@ -70,7 +74,8 @@ BOOL NTAPI Dlg_ChooseColor(HWND Owner, _Inout_ LPCOLORREF Color) {
     return bRet;
 }
 
-BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt_ LPCOLORREF Color) {
+BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt_ LPCOLORREF Color)
+{
     CHOOSEFONTW stChooseFontW = { sizeof(CHOOSEFONTW) };
     BOOL        bRet;
     stChooseFontW.hwndOwner = Owner;
@@ -88,7 +93,8 @@ BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt_ LPCOLO
     return bRet;
 }
 
-BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot) {
+BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot)
+{
     WNDCLASSEXW stWndClsExCaptureW = { sizeof(WNDCLASSEXW), 0, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, L"NTAssassin.Dlg.ScreenSnapshotClass", NULL };
     ATOM        atomClass;
     HWND        hWnd;
@@ -133,7 +139,8 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
     DLG_RESIZEDPROC pfnResizedProc;
 } DLG_SETRESIZINGSUBCLASS_REF, * PDLG_SETRESIZINGSUBCLASS_REF;
 
-static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
     if (uMsg == WM_DPICHANGED) {
         PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;
@@ -172,7 +179,8 @@ static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WP
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC ResizedProc) {
+BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC ResizedProc)
+{
     PDLG_SETRESIZINGSUBCLASS_REF pstRef;
     RECT rcClient, rcWnd;
     pstRef = Mem_Alloc(sizeof(DLG_SETRESIZINGSUBCLASS_REF));
@@ -201,7 +209,8 @@ typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF {
     UINT                        Count;
 } DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF, * PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF;
 
-static LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
     if (uMsg == WM_NOTIFY) {
         PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef = (PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF)dwRefData;
         LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)lParam;
@@ -216,7 +225,8 @@ static LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, 
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-VOID Dlg_SetTreeViewPropertySheetSubclass_InitSheet(PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef, HTREEITEM TreeItem, PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count) {
+VOID Dlg_SetTreeViewPropertySheetSubclass_InitSheet(PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef, HTREEITEM TreeItem, PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count)
+{
     TVINSERTSTRUCT stTVIInsert = { 0, TVI_LAST, { TVIF_TEXT | TVIF_PARAM } };
     UINT i;
     for (i = 0; i < Count; i++) {
@@ -246,7 +256,8 @@ VOID Dlg_SetTreeViewPropertySheetSubclass_InitSheet(PDLG_SETTREEVIEWPROPERTYSHEE
     }
 }
 
-BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PRECT SheetRect, _In_ PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count) {
+BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PRECT SheetRect, _In_ PDLG_TREEVIEWPROPSHEETPAGE Sheets, UINT Count)
+{
     PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef;
     pstRef = Mem_Alloc(sizeof(DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF));
     if (!pstRef) {
@@ -265,7 +276,8 @@ BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PREC
 }
 
 _Success_(return != FALSE)
-BOOL NTAPI Dlg_MessageLoop(_In_opt_ HWND Window, _In_ HWND Dialog, _In_opt_ HACCEL Accelerator, _Out_opt_ PUINT_PTR ExitCode) {
+BOOL NTAPI Dlg_MessageLoop(_In_opt_ HWND Window, _In_ HWND Dialog, _In_opt_ HACCEL Accelerator, _Out_opt_ PUINT_PTR ExitCode)
+{
     BOOL    bRet;
     MSG     stMsg;
     while (TRUE) {

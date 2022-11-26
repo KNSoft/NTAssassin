@@ -218,3 +218,6 @@ NTA_API HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefTok
 /// <seealso cref="NtQuerySystemInformation"/>
 /// <returns>Pointer to a new allocated buffer contains information, should be freed by <c>Mem_Free</c></returns>
 NTA_API PVOID NTAPI NT_GetSystemInfo(_In_ SYSTEM_INFORMATION_CLASS SystemInformationClass);
+
+/// <seealso cref="IsProcessorFeaturePresent"/>
+#define NT_TestCPUFeature(Feature) ((Feature) < PROCESSOR_FEATURE_MAX ? (BOOL)NT_GetKUSD()->ProcessorFeatures[(Feature)] : FALSE)

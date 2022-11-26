@@ -8,7 +8,8 @@
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-HMENU NTAPI Ctl_CreateMenuEx(_Inout_ PCTL_MENU Menus, _In_ UINT Count, _In_opt_ HMENU Parent) {
+HMENU NTAPI Ctl_CreateMenuEx(_Inout_ PCTL_MENU Menus, _In_ UINT Count, _In_opt_ HMENU Parent)
+{
     HMENU hMenu = Parent ? Parent : CreateMenu();
     if (hMenu) {
         UINT        i, uFlags;
@@ -44,7 +45,8 @@ HMENU NTAPI Ctl_CreateMenuEx(_Inout_ PCTL_MENU Menus, _In_ UINT Count, _In_opt_ 
     return hMenu;
 }
 
-VOID NTAPI Ctl_DestroyMenuEx(_In_ PCTL_MENU Menus, _In_ UINT Count, HMENU Menu) {
+VOID NTAPI Ctl_DestroyMenuEx(_In_ PCTL_MENU Menus, _In_ UINT Count, HMENU Menu)
+{
     UINT i;
     if (Menu) {
         DestroyMenu(Menu);
@@ -54,7 +56,8 @@ VOID NTAPI Ctl_DestroyMenuEx(_In_ PCTL_MENU Menus, _In_ UINT Count, HMENU Menu) 
     }
 }
 
-static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData) {
+static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
+{
     if (uMsg == WM_NOTIFY) {
         LPNMHDR lpnmhdr = (LPNMHDR)lParam;
         INT     iSelected;
@@ -83,7 +86,8 @@ static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wP
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
 }
 
-BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEETPAGE Sheets, _In_ UINT SheetCount, LPARAM Param) {
+BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEETPAGE Sheets, _In_ UINT SheetCount, LPARAM Param)
+{
     BOOL    bRet = TRUE;
     HWND    hTab = GetDlgItem(Dialog, TabCtlID);
     UINT    i;
@@ -118,7 +122,8 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
     return bRet;
 }
 
-BOOL NTAPI Ctl_InitListCtlEx(HWND List, _In_ PCTL_LISTCTL_COLUME Cols, _In_ UINT ColCount, LONG_PTR ExStyle) {
+BOOL NTAPI Ctl_InitListCtlEx(HWND List, _In_ PCTL_LISTCTL_COLUME Cols, _In_ UINT ColCount, LONG_PTR ExStyle)
+{
     BOOL        bRet = TRUE;
     UINT        i;
     LVCOLUMN    stLVCol = { LVCF_TEXT | LVCF_WIDTH };
@@ -137,7 +142,8 @@ BOOL NTAPI Ctl_InitListCtlEx(HWND List, _In_ PCTL_LISTCTL_COLUME Cols, _In_ UINT
     return bRet;
 }
 
-BOOL NTAPI Ctl_InitComboBoxEx(HWND ComboBox, _In_ PCTL_COMBOBOXCTL_ITEM Items, _In_ UINT ItemCount, BOOL SetParam) {
+BOOL NTAPI Ctl_InitComboBoxEx(HWND ComboBox, _In_ PCTL_COMBOBOXCTL_ITEM Items, _In_ UINT ItemCount, BOOL SetParam)
+{
     PCTSTR      psz;
     UINT        u;
     LONG_PTR    i;
@@ -159,7 +165,8 @@ BOOL NTAPI Ctl_InitComboBoxEx(HWND ComboBox, _In_ PCTL_COMBOBOXCTL_ITEM Items, _
     return !(u < ItemCount);
 }
 
-HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param) {
+HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param)
+{
     UINT        uDepth = 0;
     HTREEITEM   hItem, hItemTemp;
     hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_ROOT, 0);
@@ -189,7 +196,8 @@ HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEW
     return NULL;
 }
 
-LRESULT NTAPI Ctl_ComboBoxSetSelect(HWND ComboBox, INT ItemIndex) {
+LRESULT NTAPI Ctl_ComboBoxSetSelect(HWND ComboBox, INT ItemIndex)
+{
     LRESULT lResult = SendMessage(ComboBox, CB_SETCURSEL, ItemIndex, 0);
     INT_PTR iID;
     if (UI_GetWindowLong(ComboBox, FALSE, GWLP_ID, &iID))
