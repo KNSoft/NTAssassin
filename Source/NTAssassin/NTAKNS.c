@@ -263,7 +263,7 @@ VOID NTAPI KNS_LastStatusMsgBox(HWND Owner)
 
 VOID NTAPI KNS_OpenHomePage()
 {
-    Shell_Exec(lpKNSInfo->OnlineService.HomePage, NULL, ShellExecOpen, SW_SHOWNORMAL, NULL);
+    Shell_Exec(lpKNSInfo->OnlineService.HomePage, NULL, L"open", SW_SHOWNORMAL, NULL);
 }
 
 #define PADDING_X   14

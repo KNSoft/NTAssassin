@@ -255,8 +255,9 @@ SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZ
 VOID NTAPI Str_UpperW(_Inout_ PWSTR String)
 {
     while (*String != UNICODE_NULL) {
-        if (*String >= 'a' && *String <= 'z')
-            *String -= 'a' - 'A';
+        if (Str_IsLowerChar(*String)) {
+            *String = Str_InverseCaseChar(*String);
+        }
         String++;
     }
 }
@@ -264,8 +265,9 @@ VOID NTAPI Str_UpperW(_Inout_ PWSTR String)
 VOID NTAPI Str_UpperA(_Inout_ PSTR String)
 {
     while (*String != ANSI_NULL) {
-        if (*String >= 'a' && *String <= 'z')
-            *String -= 'a' - 'A';
+        if (Str_IsLowerChar(*String)) {
+            *String = Str_InverseCaseChar(*String);
+        }
         String++;
     }
 }
@@ -273,8 +275,9 @@ VOID NTAPI Str_UpperA(_Inout_ PSTR String)
 VOID NTAPI Str_LowerW(_Inout_ PWSTR String)
 {
     while (*String != UNICODE_NULL) {
-        if (*String >= 'A' && *String <= 'Z')
-            *String += 'a' - 'A';
+        if (Str_IsUpperChar(*String)) {
+            *String = Str_InverseCaseChar(*String);
+        }
         String++;
     }
 }
@@ -282,8 +285,9 @@ VOID NTAPI Str_LowerW(_Inout_ PWSTR String)
 VOID NTAPI Str_LowerA(_Inout_ PSTR String)
 {
     while (*String != ANSI_NULL) {
-        if (*String >= 'A' && *String <= 'Z')
-            *String += 'a' - 'A';
+        if (Str_IsUpperChar(*String)) {
+            *String = Str_InverseCaseChar(*String);
+        }
         String++;
     }
 }
@@ -298,7 +302,7 @@ VOID NTAPI Str_InitW(_Out_ PUNICODE_STRING NTString, _In_ PWSTR String)
     NTString->Buffer = String;
 }
 
-VOID NTAPI Str_InitA(_Out_ PSTRING NTString, _In_ PSTR String)
+VOID NTAPI Str_InitA(_Out_ PANSI_STRING NTString, _In_ PSTR String)
 {
     SIZE_T uLen = Str_SizeA(String);
     NTString->Length = (USHORT)uLen;

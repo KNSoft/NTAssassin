@@ -2,18 +2,8 @@
 
 #include "NTADef.h"
 
-typedef enum _SHELL_EXEC_VERB {
-    ShellExecEdit,
-    ShellExecExplore,
-    ShellExecFind,
-    ShellExecOpen,
-    ShellExecPrint,
-    ShellExecProperties,
-    ShellExecRunAs
-} SHELL_EXEC_VERB, *PSHELL_EXEC_VERB;
-
 /// <seealso cref="ShellExecute"/>
-NTA_API BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle);
+NTA_API BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, PCWSTR Verb, INT ShowCmd, PHANDLE ProcessHandle);
 
 /// <summary>
 /// Locates specified file or directory in explorer

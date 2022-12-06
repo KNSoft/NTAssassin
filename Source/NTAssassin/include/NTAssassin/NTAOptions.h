@@ -9,6 +9,19 @@
 #if NTA_DLL
 #ifdef NTA_EXPORTS
 #define NTA_API DECLSPEC_EXPORT
+#if defined(_M_IX86)
+#if defined(_DEBUG)
+#pragma comment (lib, "x86\\Debug\\SlimCRT.lib")
+#else
+#pragma comment (lib, "x86\\Release\\SlimCRT.lib")
+#endif
+#elif defined(_M_X64)
+#if defined(_DEBUG)
+#pragma comment (lib, "x64\\Debug\\SlimCRT.lib")
+#else
+#pragma comment (lib, "x64\\Release\\SlimCRT.lib")
+#endif
+#endif
 #else
 #define NTA_API DECLSPEC_IMPORT
 #endif
@@ -21,14 +34,14 @@
 #pragma comment(linker, "/ENTRY:" NTA_CUSTOMENTRY)
 #endif
 
-#if defined(NTA_CUSTOMENTRY) || defined(NTA_NOENTRY) || (NTA_DLL && defined(NTA_EXPORTS))
+#if !defined(NTA_EXPORTS) && (defined(NTA_CUSTOMENTRY) || defined(NTA_NOENTRY))
 #if _DEBUG
 #if _DLL
 #pragma comment(lib, "msvcrtd.lib")
 #pragma comment(lib, "vcruntimed.lib")
 #pragma comment(lib, "ucrtd.lib")
 #ifdef __cplusplus
-#pragma comment(lib, "msvcprtd.lib)
+#pragma comment(lib, "msvcprtd.lib")
 #endif
 #else
 #pragma comment(lib, "libcmtd.lib")
@@ -44,7 +57,7 @@
 #pragma comment(lib, "vcruntime.lib")
 #pragma comment(lib, "ucrt.lib")
 #ifdef __cplusplus
-#pragma comment(lib, "msvcprt.lib)
+#pragma comment(lib, "msvcprt.lib")
 #endif
 #else
 #pragma comment(lib, "libcmt.lib")

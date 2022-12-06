@@ -59,7 +59,8 @@ EXTERN_C_START
 #define GetModuleHandleW(NULL) NT_GetImageBase()
 
 _Ret_maybenull_ _Post_writable_byte_size_(dwSize)
-static LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD flAllocationType, _In_ DWORD flProtect) {
+static LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD flAllocationType, _In_ DWORD flProtect)
+{
     NTSTATUS lStatus = NtAllocateVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, 0, &dwSize, flAllocationType, flProtect);
     if (!NT_SUCCESS(lStatus)) {
         EH_SetLastNTError(lStatus);
@@ -68,7 +69,8 @@ static LPVOID WINAPI NTAHookIntl_VirtualAlloc(_In_opt_ LPVOID lpAddress, _In_ SI
     return lpAddress;
 }
 
-static SIZE_T WINAPI NTAHookIntl_VirtualQueryEx(_In_ HANDLE hProcess, _In_opt_ LPCVOID lpAddress, _Out_writes_bytes_to_(dwLength,return) PMEMORY_BASIC_INFORMATION lpBuffer, _In_ SIZE_T dwLength) {
+static SIZE_T WINAPI NTAHookIntl_VirtualQueryEx(_In_ HANDLE hProcess, _In_opt_ LPCVOID lpAddress, _Out_writes_bytes_to_(dwLength, return) PMEMORY_BASIC_INFORMATION lpBuffer, _In_ SIZE_T dwLength)
+{
     NTSTATUS lStatus;
     SIZE_T ResultLength = 0;
     lStatus = NtQueryVirtualMemory(hProcess, (LPVOID)lpAddress, MemoryBasicInformation, lpBuffer, dwLength, &ResultLength);
@@ -79,7 +81,8 @@ static SIZE_T WINAPI NTAHookIntl_VirtualQueryEx(_In_ HANDLE hProcess, _In_opt_ L
 }
 
 _Success_(return != FALSE)
-static BOOL WINAPI NTAHookIntl_VirtualProtectEx(_In_ HANDLE hProcess, _In_ LPVOID lpAddress, _In_  SIZE_T dwSize, _In_  DWORD flNewProtect, PDWORD lpflOldProtect) {
+static BOOL WINAPI NTAHookIntl_VirtualProtectEx(_In_ HANDLE hProcess, _In_ LPVOID lpAddress, _In_  SIZE_T dwSize, _In_  DWORD flNewProtect, PDWORD lpflOldProtect)
+{
     NTSTATUS lStatus = NtProtectVirtualMemory(hProcess, &lpAddress, &dwSize, flNewProtect, lpflOldProtect);
     if (!NT_SUCCESS(lStatus)) {
         EH_SetLastNTError(lStatus);
@@ -95,7 +98,8 @@ _When_(((dwFreeType & (MEM_RELEASE | MEM_DECOMMIT))) == (MEM_RELEASE | MEM_DECOM
     _When_(((dwFreeType & MEM_RELEASE)) != 0 && dwSize != 0,
         __drv_reportError("Passing MEM_RELEASE and a non-zero dwSize parameter to VirtualFree is not allowed. This results in the failure of this call"))
     _Success_(return != FALSE)
-    static BOOL WINAPI NTAHookIntl_VirtualFree(LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD dwFreeType) {
+    static BOOL WINAPI NTAHookIntl_VirtualFree(LPVOID lpAddress, _In_ SIZE_T dwSize, _In_ DWORD dwFreeType)
+{
     NTSTATUS lStatus;
     if (!(dwSize) || !(dwFreeType & MEM_RELEASE)) {
         lStatus = NtFreeVirtualMemory(CURRENT_PROCESS_HANDLE, &lpAddress, &dwSize, dwFreeType);
@@ -109,7 +113,8 @@ _When_(((dwFreeType & (MEM_RELEASE | MEM_DECOMMIT))) == (MEM_RELEASE | MEM_DECOM
     return FALSE;
 }
 
-static BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_reads_bytes_opt_(dwSize) LPCVOID lpBaseAddress, _In_ SIZE_T dwSize) {
+static BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_reads_bytes_opt_(dwSize) LPCVOID lpBaseAddress, _In_ SIZE_T dwSize)
+{
     NTSTATUS lStatus = NtFlushInstructionCache(hProcess, (PVOID)lpBaseAddress, dwSize);
     if (!NT_SUCCESS(lStatus)) {
         EH_SetLastNTError(lStatus);
@@ -118,7 +123,8 @@ static BOOL WINAPI NTAHookIntl_FlushInstructionCache(_In_ HANDLE hProcess, _In_r
     return TRUE;
 }
 
-static BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPCONTEXT lpContext) {
+static BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPCONTEXT lpContext)
+{
     NTSTATUS lStatus = NtGetContextThread(hThread, lpContext);
     if (!NT_SUCCESS(lStatus)) {
         EH_SetLastNTError(lStatus);
@@ -127,7 +133,8 @@ static BOOL WINAPI NTAHookIntl_GetThreadContext(_In_ HANDLE hThread, _Inout_ LPC
     return TRUE;
 }
 
-static BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST CONTEXT* lpContext) {
+static BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST CONTEXT * lpContext)
+{
     NTSTATUS lStatus = NtSetContextThread(hThread, (PCONTEXT)lpContext);
     if (!NT_SUCCESS(lStatus)) {
         EH_SetLastNTError(lStatus);
@@ -136,7 +143,8 @@ static BOOL WINAPI NTAHookIntl_SetThreadContext(_In_ HANDLE hThread, _In_ CONST 
     return TRUE;
 }
 
-static DWORD WINAPI NTAHookIntl_ResumeThread(_In_ HANDLE hThread) {
+static DWORD WINAPI NTAHookIntl_ResumeThread(_In_ HANDLE hThread)
+{
     ULONG PreviousResumeCount;
     NTSTATUS lStatus = NtResumeThread(hThread, &PreviousResumeCount);
     if (!NT_SUCCESS(lStatus)) {
@@ -146,7 +154,8 @@ static DWORD WINAPI NTAHookIntl_ResumeThread(_In_ HANDLE hThread) {
     return PreviousResumeCount;
 }
 
-static DWORD WINAPI NTAHookIntl_SuspendThread(_In_ HANDLE hThread) {
+static DWORD WINAPI NTAHookIntl_SuspendThread(_In_ HANDLE hThread)
+{
     ULONG PreviousSuspendCount;
     NTSTATUS lStatus = NtSuspendThread(hThread, &PreviousSuspendCount);
     if (!NT_SUCCESS(lStatus)) {
@@ -156,44 +165,41 @@ static DWORD WINAPI NTAHookIntl_SuspendThread(_In_ HANDLE hThread) {
     return PreviousSuspendCount;
 }
 
+int __cdecl _CrtDbgReport(
+        _In_       int         _ReportType,
+        _In_opt_z_ char const* _FileName,
+        _In_       int         _Linenumber,
+        _In_opt_z_ char const* _ModuleName,
+        _In_opt_z_ char const* _Format,
+        ...)
+{
+    return 0;
+}
+
 EXTERN_C_END
+
+void* __cdecl operator new(size_t _Size)
+{
+    return Mem_Alloc(_Size);
+}
+void __cdecl operator delete(void* _P, size_t _Size) noexcept
+{
+    Mem_Free(_P);
+}
 
 // Hook by using Detours
 
+// Rewrite detours functions
 EXTERN_C ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule)
 {
     PIMAGE_DOS_HEADER pDosHeader = (PIMAGE_DOS_HEADER)hModule;
     if (hModule == NULL) {
         pDosHeader = (PIMAGE_DOS_HEADER)GetModuleHandleW(NULL);
     }
-
-    __try {
-#pragma warning(suppress:6011) // GetModuleHandleW(NULL) never returns NULL.
-        if (pDosHeader->e_magic != IMAGE_DOS_SIGNATURE) {
-            SetLastError(ERROR_BAD_EXE_FORMAT);
-            return NULL;
-        }
-
-        PIMAGE_NT_HEADERS pNtHeader = (PIMAGE_NT_HEADERS)((PBYTE)pDosHeader +
-                                                          pDosHeader->e_lfanew);
-        if (pNtHeader->Signature != IMAGE_NT_SIGNATURE) {
-            SetLastError(ERROR_INVALID_EXE_SIGNATURE);
-            return NULL;
-        }
-        if (pNtHeader->FileHeader.SizeOfOptionalHeader == 0) {
-            SetLastError(ERROR_EXE_MARKED_INVALID);
-            return NULL;
-        }
-        SetLastError(NO_ERROR);
-
-        return (pNtHeader->OptionalHeader.SizeOfImage);
-    }
-    __except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ?
-             EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH) {
-        SetLastError(ERROR_EXE_MARKED_INVALID);
-        return NULL;
-    }
+    return MOVE_PTR(pDosHeader, pDosHeader->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.SizeOfImage;
 }
+
+
 
 #pragma warning(disable: 26495)
 #include "3rdParty\src\Detours\detours.cpp"

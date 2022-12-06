@@ -3,8 +3,8 @@
 #include "NTADef.h"
 
 typedef struct _PE_STRUCT {
-    PIMAGE_DOS_HEADER               Image;
-    BOOL                            OfflineMap;
+    PBYTE                           Image;
+    ULONG                           ImageSize;
     PIMAGE_FILE_HEADER              FileHeader;
     union {
         PIMAGE_OPTIONAL_HEADER      OptionalHeader;
@@ -13,10 +13,12 @@ typedef struct _PE_STRUCT {
         PIMAGE_ROM_OPTIONAL_HEADER  OptionalHeaderRom;
     };
     PIMAGE_SECTION_HEADER           SectionHeader;
+    BOOL                            OfflineMap;
     PVOID                           OverlayData;
-    SIZE_T                          OverlayDataSize;
+    ULONG                           OverlayDataSize;
 } PE_STRUCT, *PPE_STRUCT;
 
+#define PE_ProbeForRead(pe, ptr, size) ((PBYTE)(ptr) >= (pe)->Image && (PBYTE)(ptr) + (size) <= (pe)->Image + (pe)->ImageSize)
 #define PE_GetOptionalHeaderValue(pe, m) (PE_GetBits(pe) == 64 ? PE_GetOptionalHeaderValueEx(pe,  UFIELD_OFFSET(IMAGE_OPTIONAL_HEADER64, m), RTL_FIELD_SIZE(IMAGE_OPTIONAL_HEADER64, m)) : PE_GetOptionalHeaderValueEx(pe,  UFIELD_OFFSET(IMAGE_OPTIONAL_HEADER32, m), RTL_FIELD_SIZE(IMAGE_OPTIONAL_HEADER32, m)))
 
 /// <summary>

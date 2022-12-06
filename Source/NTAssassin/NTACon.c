@@ -15,11 +15,11 @@ DWORD NTAPI Con_Write(HANDLE ConHandle, _In_reads_bytes_opt_(Length) PVOID Buffe
     }
 }
 
-DWORD Con_WriteString(HANDLE ConHandle, _In_z_ PCSTR String) {
+DWORD NTAPI Con_WriteString(HANDLE ConHandle, _In_z_ PCSTR String) {
     return Con_Write(ConHandle, (PVOID)String, (ULONG)Str_SizeA(String));
 }
 
-DWORD Con_WriteLine(HANDLE ConHandle, _In_z_ PCSTR String) {
+DWORD NTAPI Con_WriteLine(HANDLE ConHandle, _In_z_ PCSTR String) {
     WORD dwEOL = EOLA;
     DWORD dwRet = Con_WriteString(ConHandle, String);
     if (dwRet) {
@@ -30,7 +30,7 @@ DWORD Con_WriteLine(HANDLE ConHandle, _In_z_ PCSTR String) {
     return dwRet;
 }
 
-DWORD Con_VPrintf(HANDLE ConHandle, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
+DWORD NTAPI Con_VPrintf(HANDLE ConHandle, _In_z_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList) {
     CHAR szContent[1024];
     INT  i = Str_VPrintfA(szContent, Format, ArgList);
     return i > 0 ? Con_Write(ConHandle, szContent, i) : 0;

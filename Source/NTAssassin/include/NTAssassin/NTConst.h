@@ -11,7 +11,3 @@
 #ifndef WM_COPYGLOBALDATA
 #define WM_COPYGLOBALDATA 0x49
 #endif
-
-// NTSTATUS
-#undef WIN32_NO_STATUS
-#include <ntstatus.h>

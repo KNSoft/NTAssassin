@@ -138,13 +138,16 @@ NTA_API VOID NTAPI Str_LowerA(_Inout_ PSTR String);
 #define Str_Upper Str_UpperA
 #define Str_Lower Str_LowerA
 #endif
-#define Str_UpperChar(Ch) ((Ch) >= 'a' && (Ch) <= 'z' ? (Ch ^ ASCII_CASE_MASK) : (Ch))
-#define Str_LowerChar(Ch) ((Ch) >= 'A' && (Ch) <= 'Z' ? (Ch ^ ASCII_CASE_MASK) : (Ch))
+#define Str_IsUpperChar(Ch) ((Ch) >= 'A' && (Ch) <= 'Z')
+#define Str_IsLowerChar(Ch) ((Ch) >= 'a' && (Ch) <= 'z')
+#define Str_InverseCaseChar(Ch) ((Ch) ^ ASCII_CASE_MASK)
+#define Str_LowerChar(Ch) (Str_IsUpperChar(Ch) ? Str_InverseCaseChar(Ch) : (Ch))
+#define Str_UpperChar(Ch) (Str_IsLowerChar(Ch) ? Str_InverseCaseChar(Ch) : (Ch))
 
 // String Initialize
 
 NTA_API VOID NTAPI Str_InitW(_Out_ PUNICODE_STRING NTString, _In_ PWSTR String);
-NTA_API VOID NTAPI Str_InitA(_Out_ PSTRING NTString, _In_ PSTR String);
+NTA_API VOID NTAPI Str_InitA(_Out_ PANSI_STRING NTString, _In_ PSTR String);
 #ifdef UNICODE
 #define Str_Init Str_InitW
 #else

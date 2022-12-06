@@ -40,30 +40,14 @@ BOOL NTAPI Shell_Locate(_In_ PCWSTR Path)
     return FALSE;
 }
 
-BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, SHELL_EXEC_VERB Verb, INT ShowCmd, PHANDLE ProcessHandle)
+BOOL NTAPI Shell_Exec(_In_ PCWSTR File, _In_opt_ PCWSTR Param, PCWSTR Verb, INT ShowCmd, PHANDLE ProcessHandle)
 {
     SHELLEXECUTEINFOW   stSEIW = { sizeof(SHELLEXECUTEINFOW) };
     BOOL                bRet;
     stSEIW.fMask = (ProcessHandle ? SEE_MASK_NOCLOSEPROCESS : SEE_MASK_DEFAULT) | SEE_MASK_INVOKEIDLIST;
     stSEIW.lpFile = File;
     stSEIW.lpParameters = Param;
-    if (Verb == ShellExecOpen) {
-        stSEIW.lpVerb = L"open";
-    } else if (Verb == ShellExecExplore) {
-        stSEIW.lpVerb = L"explore";
-    } else if (Verb == ShellExecRunAs) {
-        stSEIW.lpVerb = L"runas";
-    } else if (Verb == ShellExecProperties) {
-        stSEIW.lpVerb = L"properties";
-    } else if (Verb == ShellExecEdit) {
-        stSEIW.lpVerb = L"edit";
-    } else if (Verb == ShellExecPrint) {
-        stSEIW.lpVerb = L"print";
-    } else if (Verb == ShellExecFind) {
-        stSEIW.lpVerb = L"find";
-    } else {
-        return FALSE;
-    }
+    stSEIW.lpVerb = Verb;
     stSEIW.nShow = ShowCmd;
     bRet = ShellExecuteExW(&stSEIW);
     if (bRet && ProcessHandle) {

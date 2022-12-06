@@ -5,9 +5,6 @@
 #include "NTAConst.h"
 #include "NTATypes.h"
 
-// Windows
-#pragma comment(lib, "ntdll.lib")
-
 // Conflicts with NTAssassin
 #define _LDR_DATA_TABLE_ENTRY _MS_LDR_DATA_TABLE_ENTRY
 #define LDR_DATA_TABLE_ENTRY MS_LDR_DATA_TABLE_ENTRY
@@ -78,6 +75,10 @@
 #include <Windows.h>
 #include <Winternl.h>
 #include <suppress.h>
+
+// NTSTATUS
+#undef WIN32_NO_STATUS
+#include <ntstatus.h>
 
 // Conflicts in ntdef.h
 

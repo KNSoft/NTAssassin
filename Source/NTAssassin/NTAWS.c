@@ -42,7 +42,7 @@ SOCKET NTAPI WS_CreateIPv4ListenSocket(IPPROTO Protocol, PIN_ADDR Address, USHOR
         SOCKADDR_IN service;
         service.sin_family = AF_INET;
         service.sin_addr = *Address;
-        service.sin_port = _byteswap_ushort(Port);
+        service.sin_port = WS_Htons(Port);
         if (bind(s, (PSOCKADDR)&service, sizeof(service)) != 0 ||
             listen(s, SOMAXCONN) != 0) {
             closesocket(s);
