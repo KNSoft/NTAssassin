@@ -3,6 +3,8 @@
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTADlg.h"
 
+#pragma comment(lib, "user32.lib")
+
 DWORD NTAPI EH_SetLastNTError(NTSTATUS Status)
 {
     DWORD dwErrCode;

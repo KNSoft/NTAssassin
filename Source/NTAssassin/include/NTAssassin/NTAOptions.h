@@ -6,24 +6,27 @@
 #define NTA_DLL 0
 #endif
 
+#pragma comment(lib, "ntdll.lib")
+
 #if NTA_DLL
 #ifdef NTA_EXPORTS
 #define NTA_API DECLSPEC_EXPORT
 #if defined(_M_IX86)
 #if defined(_DEBUG)
-#pragma comment (lib, "x86\\Debug\\SlimCRT.lib")
+#pragma comment(lib, "x86\\Debug\\SlimCRT.lib")
 #else
-#pragma comment (lib, "x86\\Release\\SlimCRT.lib")
+#pragma comment(lib, "x86\\Release\\SlimCRT.lib")
 #endif
 #elif defined(_M_X64)
 #if defined(_DEBUG)
-#pragma comment (lib, "x64\\Debug\\SlimCRT.lib")
+#pragma comment(lib, "x64\\Debug\\SlimCRT.lib")
 #else
-#pragma comment (lib, "x64\\Release\\SlimCRT.lib")
+#pragma comment(lib, "x64\\Release\\SlimCRT.lib")
 #endif
 #endif
 #else
 #define NTA_API DECLSPEC_IMPORT
+
 #endif
 #else
 #define NTA_API
@@ -34,7 +37,7 @@
 #pragma comment(linker, "/ENTRY:" NTA_CUSTOMENTRY)
 #endif
 
-#if !defined(NTA_EXPORTS) && (defined(NTA_CUSTOMENTRY) || defined(NTA_NOENTRY))
+#if defined(NTA_CUSTOMENTRY) || defined(NTA_NOENTRY)
 #if _DEBUG
 #if _DLL
 #pragma comment(lib, "msvcrtd.lib")

@@ -158,7 +158,7 @@ BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
     BOOL bRet = FALSE;
     HANDLE hFile, hSection;
     SIZE_T sFileSize;
-    hFile = File_Create(FileName, RootDirectory, FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_OPEN, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | (UseCache ? 0 : FILE_NO_INTERMEDIATE_BUFFERING));
+    hFile = File_Create(FileName, RootDirectory, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_OVERWRITE_IF, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | (UseCache ? 0 : FILE_NO_INTERMEDIATE_BUFFERING));
     if (hFile) {
         if (File_GetSize(hFile, &sFileSize)) {
             NTSTATUS lStatus;
@@ -190,49 +190,6 @@ BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
         NtClose(hFile);
     }
     return bRet;
-}
-
-_Success_(return != FALSE)
-BOOL NTAPI File_Map(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ PFILE_MAP FileMap, ULONGLONG MaximumSize, ACCESS_MASK DesiredAccess, ULONG ShareAccess, ULONG CreateDisposition, BOOL NoCache, SECTION_INHERIT InheritDisposition)
-{
-    ULONG           CreateOptions;
-    HANDLE          hFile;
-    HANDLE          hSection;
-    PVOID           BaseAddress;
-    ULONG           PageProtection;
-    ULONG           AllocationAttributes;
-    LARGE_INTEGER   stMaxSize;
-    NTSTATUS        lStatus;
-    CreateOptions = NoCache ? FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_NO_INTERMEDIATE_BUFFERING : FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT;
-    hFile = File_Create(FileName, RootDirectory, DesiredAccess, ShareAccess, CreateDisposition, CreateOptions);
-    if (hFile) {
-        stMaxSize.QuadPart = MaximumSize;
-        PageProtection = DesiredAccess & FILE_WRITE_DATA ? PAGE_READWRITE : PAGE_READONLY;
-        AllocationAttributes = NoCache ? SEC_COMMIT | SEC_NOCACHE : SEC_COMMIT;
-        lStatus = NtCreateSection(&hSection, SECTION_ALL_ACCESS, NULL, &stMaxSize, PageProtection, AllocationAttributes, hFile);
-        if (NT_SUCCESS(lStatus)) {
-            BaseAddress = NULL;
-            lStatus = NtMapViewOfSection(hSection, CURRENT_PROCESS_HANDLE, &BaseAddress, 0, 0, 0, (PSIZE_T)&stMaxSize.QuadPart, InheritDisposition, 0, PageProtection);
-            if (NT_SUCCESS(lStatus)) {
-                FileMap->FileHandle = hFile;
-                FileMap->SectionHandle = hSection;
-                FileMap->Map = BaseAddress;
-                FileMap->MapSize = (SIZE_T)stMaxSize.QuadPart;
-            } else {
-                NtClose(hSection);
-                NtClose(hFile);
-            }
-        } else
-            NtClose(hFile);
-        if (NT_SUCCESS(lStatus)) {
-            return TRUE;
-        } else {
-            EH_SetLastStatus(lStatus);
-            return FALSE;
-        }
-    } else {
-        return FALSE;
-    }
 }
 
 VOID NTAPI File_Unmap(_In_ PFILE_MAP FileMap)

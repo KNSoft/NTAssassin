@@ -87,7 +87,7 @@ NTA_API DWORD NTAPI NT_GetLsaPid();
 /// <summary>
 /// Initializes OBJECT_ATTRIBUTES structure
 /// </summary>
-NTA_API VOID NTAPI NT_InitObject(_Out_ POBJECT_ATTRIBUTES Object, HANDLE RootDirectory, PUNICODE_STRING ObjectName, ULONG Attributes);
+#define NT_InitObject(Object, RootDirectory, ObjectName, Attributes) InitializeObjectAttributes(Object, ObjectName, Attributes, RootDirectory, NULL)
 
 /// <summary>
 /// Initializes OBJECT_ATTRIBUTES structure for a path

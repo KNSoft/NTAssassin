@@ -20,6 +20,8 @@
 
 #include "NTADef.h"
 
+#include "NTANT_UCRT.h"
+
 typedef enum _STR_HASH_ALGORITHM {
     StrHashAlgorithmSDBM,
     StrHashAlgorithmBKDR,
@@ -35,8 +37,8 @@ typedef enum _STR_HASH_ALGORITHM {
 
 // String Length and Size
 
-NTA_API SIZE_T NTAPI Str_LenW(_In_ PCWSTR String);
-NTA_API SIZE_T NTAPI Str_LenA(_In_ PCSTR String);
+#define Str_LenW NT_wcslen
+#define Str_LenA NT_strlen
 #ifdef UNICODE
 #define Str_Len Str_LenW
 #else
@@ -67,14 +69,14 @@ NTA_API SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T D
 
 // String Compare
 
-NTA_API INT NTAPI Str_CmpW(_In_ PCWSTR String1, _In_ PCWSTR String2);
-NTA_API INT NTAPI Str_CmpA(_In_ PCSTR String1, _In_ PCSTR String2);
+#define Str_CmpW NT_wcscmp
+#define Str_CmpA NT_strcmp
 NTA_API INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2);
 NTA_API INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2);
-#define Str_EqualW(String1, String2) (BOOL)(Str_CmpW(String1, String2) == 0)
-#define Str_EqualA(String1, String2) (BOOL)(Str_CmpA(String1, String2) == 0)
-#define Str_IEqualW(String1, String2) (BOOL)(Str_ICmpW(String1, String2) == 0)
-#define Str_IEqualA(String1, String2) (BOOL)(Str_ICmpA(String1, String2) == 0)
+#define Str_EqualW(String1, String2) ((BOOL)(Str_CmpW(String1, String2) == 0))
+#define Str_EqualA(String1, String2) ((BOOL)(Str_CmpA(String1, String2) == 0))
+#define Str_IEqualW(String1, String2) ((BOOL)(Str_ICmpW(String1, String2) == 0))
+#define Str_IEqualA(String1, String2) ((BOOL)(Str_ICmpA(String1, String2) == 0))
 #ifdef UNICODE
 #define Str_Cmp Str_CmpW
 #define Str_ICmp Str_ICmpW
@@ -89,8 +91,8 @@ NTA_API INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2);
 
 // String Printf
 
-_Success_(return >= 0) NTA_API INT NTAPI Str_VPrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList);
-_Success_(return >= 0) NTA_API INT NTAPI Str_VPrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList);
+#define Str_VPrintfExW NT_vswprintf_s
+#define Str_VPrintfExA NT_vsprintf_s
 _Success_(return >= 0) NTA_API INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, ...);
 _Success_(return >= 0) NTA_API INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, ...);
 #ifdef UNICODE
@@ -109,12 +111,20 @@ _Success_(return >= 0) NTA_API INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchS
 
 // String Index
 
-NTA_API INT NTAPI Str_Index_BFW(_In_ PCWSTR String, _In_ PCWSTR Pattern);
-NTA_API INT NTAPI Str_Index_BFA(_In_ PCSTR String, _In_ PCSTR Pattern);
+#define Str_StrW NT_wcsstr
+#define Str_StrA NT_strstr
+NTA_API INT NTAPI Str_IndexW(_In_ PCWSTR String, _In_ PCWSTR SubString);
+NTA_API INT NTAPI Str_IndexA(_In_ PCSTR String, _In_ PCSTR SubString);
+#define Str_StartsWithW(String, SubString) ((BOOL)(Str_IndexW(String, SubString) == 0))
+#define Str_StartsWithA(String, SubString) ((BOOL)(Str_IndexA(String, SubString) == 0))
 #ifdef UNICODE
-#define Str_Index_BF Str_Index_BFW
+#define Str_Str Str_StrW
+#define Str_Index Str_IndexW
+#define Str_StartsWith Str_StartsWithW
 #else
-#define Str_Index_BF Str_Index_BFA
+#define Str_Str Str_StrA
+#define Str_Index Str_IndexA
+#define Str_StartsWith Str_StartsWithA
 #endif
 
 // String Encode
@@ -256,8 +266,8 @@ _Success_(return != FALSE) BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned,
 #define Str_BinFromUInt Str_BinFromUIntA
 #endif
 
-_Success_(return == TRUE) NTA_API BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Dest, _In_ SIZE_T DestCchSize);
-_Success_(return == TRUE) NTA_API BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize);
+_Success_(return != FALSE) NTA_API BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Dest, _In_ SIZE_T DestCchSize);
+_Success_(return != FALSE) NTA_API BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize);
 #define Str_RGBToHexW(Color, Dest) Str_RGBToHexExW(Color, Dest, ARRAYSIZE(Dest))
 #define Str_RGBToHexA(Color, Dest) Str_RGBToHexExA(Color, Dest, ARRAYSIZE(Dest))
 #ifdef UNICODE
@@ -280,4 +290,18 @@ NTA_API DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorith
 #define Str_Hash Str_HashA
 #endif
 
-PWSTR NTAPI Str_NameOfPath(_In_ PWSTR Path, _In_opt_ ULONG LengthOfPath);
+NTA_API PCWSTR NTAPI Str_RCharW(_In_ PCWSTR Path, _In_ WCHAR Char, _In_opt_ ULONG LengthOfPath);
+NTA_API PCSTR NTAPI Str_RCharA(_In_ PCSTR Path, _In_ CHAR Char, _In_opt_ ULONG LengthOfPath);
+#define Str_NameOfPathW(Path, LengthOfPath) Str_RCharW(Path, L'\\', LengthOfPath)
+#define Str_NameOfPathA(Path, LengthOfPath) Str_RCharA(Path, '\\', LengthOfPath)
+#define Str_ExtensionOfPathW(Path, LengthOfPath) Str_RCharW(Path, '.', LengthOfPath)
+#define Str_ExtensionOfPathA(Path, LengthOfPath) Str_RCharA(Path, '.', LengthOfPath)
+#ifdef UNICODE
+#define Str_RChar Str_RCharW
+#define Str_NameOfPath Str_NameOfPathW
+#define Str_ExtensionOfPath Str_ExtensionOfPathW
+#else
+#define Str_RChar Str_RCharA
+#define Str_NameOfPath Str_NameOfPathA
+#define Str_ExtensionOfPath Str_ExtensionOfPathA
+#endif

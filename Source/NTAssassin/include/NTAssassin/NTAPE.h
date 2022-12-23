@@ -28,13 +28,14 @@ typedef struct _PE_STRUCT {
 /// <param name="Image">Pointer to the PE image</param>
 /// <param name="OfflineMap">TRUE if PE image is offline (like file map), or FALSE if PE image is loaded in memory as a module</param>
 /// <returns>TRUE if succeeded, or FALSE if failed</returns>
-_Success_(return != FALSE) NTA_API BOOL NTAPI PE_Resolve(_Out_ PPE_STRUCT PEStruct, _In_ PVOID Image, BOOL OfflineMap, SIZE_T OfflineMapFileSize);
+NTA_API VOID NTAPI PE_ResolveOnline(_Out_ PPE_STRUCT PEStruct, _In_ HMODULE Image);
+_Success_(return != FALSE) NTA_API BOOL NTAPI PE_ResolveOffline(_Out_ PPE_STRUCT PEStruct, _In_reads_bytes_(BufferSize) PVOID Buffer, _In_ ULONG BufferSize);
 
 /// <summary>
 /// Gets bits of PE image
 /// </summary>
 /// <param name="PEStruct"></param>
-/// <returns></returns>
+/// <returns>Bits of PE image, 32 or 64</returns>
 NTA_API UINT NTAPI PE_GetBits(_In_ PPE_STRUCT PEStruct);
 
 NTA_API ULONGLONG NTAPI PE_GetOptionalHeaderValueEx(_In_ PPE_STRUCT PEStruct, ULONG FieldOffset, ULONG FieldSize);

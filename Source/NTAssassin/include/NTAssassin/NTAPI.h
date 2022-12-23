@@ -32,38 +32,6 @@ LdrGetProcedureAddress(
     OUT PVOID* ProcedureAddress
 );
 
-// Rtl*
-
-#undef RtlMoveMemory
-#undef RtlFillMemory
-#undef RtlZeroMemory
-
-NTSYSAPI
-PVOID
-NTAPI
-RtlMoveMemory(
-    PVOID   Destination,
-    PVOID   Source,
-    SIZE_T  Length
-);
-
-NTSYSAPI
-PVOID
-NTAPI
-RtlFillMemory(
-    PVOID   Destination,
-    SIZE_T  Length,
-    INT     Fill
-);
-
-NTSYSAPI
-PVOID
-NTAPI
-RtlZeroMemory(
-    PVOID   Destination,
-    SIZE_T  Length
-);
-
 NTSYSAPI
 PVOID
 NTAPI
@@ -702,6 +670,25 @@ NTSTATUS
 NTAPI
 NtUnloadDriver(
     IN PUNICODE_STRING DriverServiceName
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtCreateEvent(
+   _Out_ PHANDLE EventHandle,
+   _In_ ACCESS_MASK DesiredAccess,
+   _In_opt_ POBJECT_ATTRIBUTES ObjectAttributes,
+   _In_ EVENT_TYPE EventType,
+   _In_ BOOLEAN InitialState
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+NtSetEvent(
+    _In_ HANDLE EventHandle,
+    _Out_opt_ PLONG PreviousState
 );
 
 // User32

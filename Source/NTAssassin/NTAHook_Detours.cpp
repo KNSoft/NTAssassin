@@ -165,7 +165,7 @@ static DWORD WINAPI NTAHookIntl_SuspendThread(_In_ HANDLE hThread)
     return PreviousSuspendCount;
 }
 
-int __cdecl _CrtDbgReport(
+static int __cdecl _CrtDbgReport(
         _In_       int         _ReportType,
         _In_opt_z_ char const* _FileName,
         _In_       int         _Linenumber,
@@ -198,8 +198,6 @@ EXTERN_C ULONG WINAPI DetourGetModuleSize(_In_opt_ HMODULE hModule)
     }
     return MOVE_PTR(pDosHeader, pDosHeader->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.SizeOfImage;
 }
-
-
 
 #pragma warning(disable: 26495)
 #include "3rdParty\src\Detours\detours.cpp"

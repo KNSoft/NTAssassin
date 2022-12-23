@@ -1,18 +1,6 @@
 ﻿#include "include\NTAssassin\NTAStr.h"
 
-#include "include\NTAssassin\NTAUCRT.h"
-
-// String Length and Size
-
-SIZE_T NTAPI Str_LenW(_In_ PCWSTR String)
-{
-    return UCRT_wcslen(String);
-}
-
-SIZE_T NTAPI Str_LenA(_In_ PCSTR String)
-{
-    return UCRT_strlen(String);
-}
+#include "include\NTAssassin\NTANT_UCRT.h"
 
 // String Copy
 
@@ -42,16 +30,6 @@ SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T DestCchSi
 
 // String Compare
 
-INT NTAPI Str_CmpW(_In_ PCWSTR String1, _In_ PCWSTR String2)
-{
-    return UCRT_wcscmp(String1, String2);
-}
-
-INT NTAPI Str_CmpA(_In_ PCSTR String1, _In_ PCSTR String2)
-{
-    return UCRT_strcmp(String1, String2);
-}
-
 INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2)
 {
     SIZE_T	i = 0;
@@ -75,26 +53,13 @@ INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2)
 }
 
 // String Format
-_Success_(return >= 0)
-INT NTAPI Str_VPrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, _In_ va_list ArgList)
-{
-    return UCRT_vswprintf_s(Dest, DestCchSize, Format, ArgList);
-}
-
-_Success_(return >= 0)
-INT NTAPI Str_VPrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, _In_ va_list ArgList)
-{
-    return UCRT__vsnprintf(Dest, DestCchSize, Format, ArgList);
-}
 
 _Success_(return >= 0)
 INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, ...)
 {
     va_list args;
     va_start(args, Format);
-    INT i = UCRT_vswprintf_s(Dest, DestCchSize, Format, args);
-    va_end(args);
-    return i;
+    return NT_vswprintf_s(Dest, DestCchSize, Format, args);
 }
 
 _Success_(return >= 0)
@@ -102,89 +67,41 @@ INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCc
 {
     va_list args;
     va_start(args, Format);
-    INT i = UCRT__vsnprintf(Dest, DestCchSize, Format, args);
-    if (i > DestCchSize) {
-        Dest[DestCchSize - 1] = ANSI_NULL;
-    } else if (i == -1) {
-        Dest[0] = ANSI_NULL;
-    }
-    va_end(args);
-    return i;
+    return NT_vsprintf_s(Dest, DestCchSize, Format, args);
 }
 
 // String Index
 
-// Algorithm: BF
-INT NTAPI Str_Index_BFW(_In_ PCWSTR String, _In_ PCWSTR Pattern)
+INT NTAPI Str_IndexW(_In_ PCWSTR String, _In_ PCWSTR SubString)
 {
-    INT     i;
-    PCWSTR  pszSrc = String;
-    BOOL    bMatched;
-    while (TRUE) {
-        bMatched = TRUE;
-        i = 0;
-        while (TRUE) {
-            if (pszSrc[i] != Pattern[i]) {
-                if (pszSrc[i] == UNICODE_NULL)
-                    return -1;
-                else if (Pattern[i] == UNICODE_NULL)
-                    return i == 0 ? -1 : (INT)(pszSrc - String);
-                else {
-                    bMatched = FALSE;
-                    break;
-                }
-            } else if (pszSrc[i] == UNICODE_NULL)
-                return (INT)(pszSrc - String);
-            i++;
-        }
-        if (bMatched)
-            return -1;
-        pszSrc++;
-    }
-    return -1;
+    PCWSTR pSubStr = NT_wcsstr(String, SubString);
+    return pSubStr ? (INT)(pSubStr - String) : -1;
 }
 
-INT NTAPI Str_Index_BFA(_In_ PCSTR String, _In_ PCSTR Pattern)
+INT NTAPI Str_IndexA(_In_ PCSTR String, _In_ PCSTR SubString)
 {
-    INT     i;
-    PCSTR   pszSrc = String;
-    BOOL    bMatched;
-    while (TRUE) {
-        bMatched = TRUE;
-        i = 0;
-        while (TRUE) {
-            if (pszSrc[i] != Pattern[i]) {
-                if (pszSrc[i] == ANSI_NULL)
-                    return -1;
-                else if (Pattern[i] == ANSI_NULL)
-                    return i == 0 ? -1 : (INT)(pszSrc - String);
-                else {
-                    bMatched = FALSE;
-                    break;
-                }
-            } else if (pszSrc[i] == ANSI_NULL)
-                return (INT)(pszSrc - String);
-            i++;
-        }
-        if (bMatched)
-            return -1;
-        pszSrc++;
-    }
-    return -1;
+    PCSTR pSubStr = NT_strstr(String, SubString);
+    return pSubStr ? (INT)(pSubStr - String) : -1;
 }
+
+// String Converts
 
 ULONG NTAPI Str_U2AEx(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ ULONG DestCchSize, _In_ PCWSTR Src)
 {
-    ULONG ulANSIBytes = 0;
+    ULONG ulANSIBytes = 0, iCch;
     RtlUnicodeToMultiByteN(Dest, DestCchSize * sizeof(CHAR), &ulANSIBytes, Src, (ULONG)Str_SizeW(Src) + 1);
-    return ulANSIBytes / sizeof(CHAR);
+    iCch = ulANSIBytes / sizeof(CHAR) - 1;
+    Dest[iCch] = ANSI_NULL;
+    return iCch;
 }
 
 ULONG NTAPI Str_A2UEx(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ ULONG DestCchSize, _In_ PCSTR Src)
 {
-    ULONG ulUnicodeBytes = 0;
+    ULONG ulUnicodeBytes = 0, iCch;
     RtlMultiByteToUnicodeN(Dest, DestCchSize * sizeof(WCHAR), &ulUnicodeBytes, Src, (ULONG)Str_SizeA(Src) + 1);
-    return ulUnicodeBytes / sizeof(WCHAR);
+    iCch = ulUnicodeBytes / sizeof(WCHAR) - 1;
+    Dest[iCch] = UNICODE_NULL;
+    return iCch;
 }
 
 /*
@@ -705,7 +622,7 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
     return bRet;
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Dest, _In_ SIZE_T DestCchSize)
 {
     PWSTR   psz;
@@ -726,7 +643,7 @@ BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Des
     return TRUE;
 }
 
-_Success_(return == TRUE)
+_Success_(return != FALSE)
 BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZE_T DestCchSize)
 {
     PSTR    psz;
@@ -877,9 +794,16 @@ DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorithm)
     return dwHash;
 }
 
-PWSTR NTAPI Str_NameOfPath(_In_ PWSTR Path, _In_opt_ ULONG LengthOfPath)
+PCWSTR NTAPI Str_RCharW(_In_ PCWSTR Path, _In_ WCHAR Char, _In_opt_ ULONG LengthOfPath)
 {
     ULONG ulLen = LengthOfPath ? LengthOfPath : (ULONG)Str_LenW(Path);
-    while (ulLen && Path[--ulLen] != L'\\');
+    while (ulLen && Path[--ulLen] != Char);
+    return ulLen ? Path + ulLen + 1 : NULL;
+}
+
+PCSTR NTAPI Str_RCharA(_In_ PCSTR Path, _In_ CHAR Char, _In_opt_ ULONG LengthOfPath)
+{
+    ULONG ulLen = LengthOfPath ? LengthOfPath : (ULONG)Str_LenA(Path);
+    while (ulLen && Path[--ulLen] != Char);
     return ulLen ? Path + ulLen + 1 : NULL;
 }

@@ -3,8 +3,10 @@
 EXTERN_C_START
 
 #include "include\NTAssassin\NTAGDIP.h"
+
 #include "include\NTAssassin\NTAMem.h"
 #include "include\NTAssassin\NTASys.h"
+#include "include\NTAssassin\NTAStr.h"
 
 EXTERN_C_END
 
@@ -277,6 +279,32 @@ BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, G
     BOOL bRet = GDIP_SaveImageToFileEx(Image, FileName, Gdiplus::ImageFormatTIFF, EncParams);
     if (EncParams) {
         Mem_Free(EncParams);
+    }
+    return bRet;
+}
+
+PCWSTR GDIP_SaveImageFilter = L"PNG (*.png)\0*.png\0"
+    L"JPEG (*.jpg;*.jpeg)\0*.jpg;*.jpeg\0"
+    L"BMP (*.bmp)\0*.bmp\0"
+    L"GIF (*.gif)\0*.gif\0"
+    L"TIFF (*.tif;*.tiff)\0*.tif;*.tiff\0";
+
+BOOL NTAPI GDIP_SaveImageToFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName)
+{
+    BOOL bRet = FALSE;
+    PCWSTR pszExt = (PCWSTR)Str_ExtensionOfPathW(FileName, 0);
+    if (pszExt) {
+        if (Str_IEqualW(pszExt, L"png")) {
+            bRet = GDIP_SaveImageToPNGFile(Image, FileName);
+        } else if (Str_IEqualW(pszExt, L"jpg") || Str_IEqualW(pszExt, L"jpeg")) {
+            bRet = GDIP_SaveImageToJPEGFile(Image, FileName, 95);
+        } else if (Str_IEqualW(pszExt, L"gif")) {
+            bRet = GDIP_SaveImageToGIFFile(Image, FileName);
+        } else if (Str_IEqualW(pszExt, L"bmp")) {
+            bRet = GDIP_SaveImageToBMPFile(Image, FileName);
+        } else if (Str_IEqualW(pszExt, L"tif") || Str_IEqualW(pszExt, L"tiff")) {
+            bRet = GDIP_SaveImageToTIFFFile(Image, FileName, TIFF_ParamValue_CompressionLZW, 32);
+        }
     }
     return bRet;
 }
