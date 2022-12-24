@@ -4,6 +4,8 @@
 
 #pragma warning(disable: __WARNING_USING_UNINIT_VAR)
 
+/* UCRT routines types */
+
 typedef _Check_return_ size_t(__cdecl* PFNwcslen)(
     _In_z_ wchar_t const* _String
     );
@@ -71,94 +73,159 @@ errno_t(__CRTDECL * PFNmemcpy_s)(
     _In_                                                     rsize_t     const _SourceSize
     );
 
-static HMODULE hNtDLL = NULL;
-static PIMAGE_DATA_DIRECTORY pExportDir = NULL;
-static PIMAGE_EXPORT_DIRECTORY pExportTable = NULL;
-static PDWORD padwNamesRVA = NULL;
+/* UCRT routine definitions */
 
-static PVOID NT_GetProcAddr(_In_z_ PCSTR ProcName)
+typedef struct _NT_UCRT_ROUTINE {
+    PCSTR FuncName;
+    PVOID Addr;
+} NT_UCRT_ROUTINE, *PNT_UCRT_ROUTINE;
+
+#define DEFINE_NT_UCRT_ROUTINE(x) { #x, NULL }
+#define CALL_NT_UCRT_ROUTINE(x) ((PFN##x)(g_UCRTRoutines[UCRT_##x].Addr))
+
+static NT_UCRT_ROUTINE g_UCRTRoutines[] = {
+    DEFINE_NT_UCRT_ROUTINE(wcslen),
+    DEFINE_NT_UCRT_ROUTINE(strlen),
+    DEFINE_NT_UCRT_ROUTINE(wcsstr),
+    DEFINE_NT_UCRT_ROUTINE(strstr),
+    DEFINE_NT_UCRT_ROUTINE(wcscmp),
+    DEFINE_NT_UCRT_ROUTINE(strcmp),
+    DEFINE_NT_UCRT_ROUTINE(vswprintf_s),
+    DEFINE_NT_UCRT_ROUTINE(vsprintf_s),
+    DEFINE_NT_UCRT_ROUTINE(memset),
+    DEFINE_NT_UCRT_ROUTINE(memcpy_s)
+};
+
+enum {
+    UCRT_wcslen = 0,
+    UCRT_strlen,
+    UCRT_wcsstr,
+    UCRT_strstr,
+    UCRT_wcscmp,
+    UCRT_strcmp,
+    UCRT_vswprintf_s,
+    UCRT_vsprintf_s,
+    UCRT_memset,
+    UCRT_memcpy_s
+};
+
+/* Initializate once */
+
+static ULONG g_UCRTRoutinesUninitialized = ARRAYSIZE(g_UCRTRoutines);
+static RTL_RUN_ONCE g_InitOnce = RTL_RUN_ONCE_INIT;
+
+static BOOL NT_InitUCRT_IsUCRTFirstLetter(CHAR ch)
 {
-    PVOID pFunc = NULL;
-    if (!hNtDLL) {
-        hNtDLL = NT_GetNtdllHandle();
-        pExportDir = &MOVE_PTR(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
-        pExportTable = MOVE_PTR(hNtDLL, pExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
-        padwNamesRVA = MOVE_PTR(hNtDLL, pExportTable->AddressOfNames, DWORD);
+    return ch == 'w' ||
+        ch == 's' ||
+        ch == 'v' ||
+        ch == 'm' ||
+        ch == '_';
+}
+
+static BOOL NT_InitUCRT_StrEqual(PCSTR String1, PCSTR String2)
+{
+    ULONG u = 0;
+    while (String1[u] == String2[u]) {
+        if (String1[u] == ANSI_NULL) {
+            return TRUE;
+        }
+        u++;
     }
-    UINT uIndex;
-    for (uIndex = 0; uIndex < pExportTable->NumberOfNames; uIndex++) {
-        PSTR pszFuncName = MOVE_PTR(hNtDLL, padwNamesRVA[uIndex], CHAR);
-        UINT u = 0;
-        while (pszFuncName[u] == ProcName[u] && pszFuncName[u] != '\0')
-            u++;
-        if (pszFuncName[u] == ProcName[u]) {
-            DWORD dwProcRVA = MOVE_PTR(hNtDLL, pExportTable->AddressOfFunctions, DWORD)[MOVE_PTR(hNtDLL, pExportTable->AddressOfNameOrdinals, WORD)[uIndex]];
-            if (dwProcRVA < pExportDir->VirtualAddress || dwProcRVA >= pExportDir->VirtualAddress + pExportDir->Size) {
-                pFunc = MOVE_PTR(hNtDLL, dwProcRVA, VOID);
-                break;
+    return FALSE;
+}
+
+static _Noreturn _Analysis_noreturn_ VOID NT_InitUCRT_Failed()
+{
+    #if defined(_DEBUG)
+    __debugbreak();
+    #endif
+    __fastfail(FAST_FAIL_FATAL_APP_EXIT);
+}
+
+static
+_Function_class_(RTL_RUN_ONCE_INIT_FN)
+_IRQL_requires_same_
+ULONG NTAPI NT_InitUCRTOnce(_Inout_ PRTL_RUN_ONCE RunOnce, _Inout_opt_ PVOID Parameter, _Inout_opt_ PVOID * Context)
+{
+    HMODULE hNtDLL = NT_GetNtdllHandle();
+    PIMAGE_DATA_DIRECTORY pExportDir = &MOVE_PTR(hNtDLL, ((PIMAGE_DOS_HEADER)hNtDLL)->e_lfanew, IMAGE_NT_HEADERS)->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+    PIMAGE_EXPORT_DIRECTORY pExportTable = MOVE_PTR(hNtDLL, pExportDir->VirtualAddress, IMAGE_EXPORT_DIRECTORY);
+    PDWORD padwNamesRVA = MOVE_PTR(hNtDLL, pExportTable->AddressOfNames, DWORD);
+
+    ULONG ulIndex;
+    for (ulIndex = 0; ulIndex < pExportTable->NumberOfNames; ulIndex++) {
+        PSTR pszFuncName = MOVE_PTR(hNtDLL, padwNamesRVA[ulIndex], CHAR);
+        if (NT_InitUCRT_IsUCRTFirstLetter(pszFuncName[0])) {
+            ULONG u;
+            for (u = 0; u < ARRAYSIZE(g_UCRTRoutines); u++) {
+                if (!g_UCRTRoutines[u].Addr && NT_InitUCRT_StrEqual(pszFuncName, g_UCRTRoutines[u].FuncName)) {
+                    g_UCRTRoutines[u].Addr = MOVE_PTR(hNtDLL, MOVE_PTR(hNtDLL, pExportTable->AddressOfFunctions, DWORD)[MOVE_PTR(hNtDLL, pExportTable->AddressOfNameOrdinals, WORD)[ulIndex]], VOID);
+                    g_UCRTRoutinesUninitialized--;
+                    if (!g_UCRTRoutinesUninitialized) {
+                        return TRUE;
+                    }
+                }
             }
         }
     }
-    return pFunc;
+    NT_InitUCRT_Failed();
 }
 
-static PFNwcslen pfnwcslen = NULL;
+static VOID NT_InitUCRT()
+{
+    if (!g_UCRTRoutinesUninitialized) {
+        return;
+    }
+    if (!NT_SUCCESS(RtlRunOnceExecuteOnce(&g_InitOnce, NT_InitUCRTOnce, NULL, NULL))) {
+        NT_InitUCRT_Failed();
+    }
+}
+
 _Check_return_ size_t __cdecl NT_wcslen(_In_z_ wchar_t const* _String)
 {
-    if (!pfnwcslen)
-        pfnwcslen = (PFNwcslen)NT_GetProcAddr("wcslen");
-    return pfnwcslen(_String);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(wcslen)(_String);
 }
 
-static PFNstrlen pfnstrlen = NULL;
 _Check_return_ size_t __cdecl NT_strlen(_In_z_ char const* _Str)
 {
-    if (!pfnstrlen)
-        pfnstrlen = (PFNstrlen)NT_GetProcAddr("strlen");
-    return pfnstrlen(_Str);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(strlen)(_Str);
 }
 
-static PFNwcsstr pfnwcsstr = NULL;
 _Check_return_ _Ret_maybenull_
 _When_(return != NULL, _Ret_range_(_Str, _Str + _String_length_(_Str) - 1))
 wchar_t _CONST_RETURN* __cdecl NT_wcsstr(
     _In_z_ wchar_t const* _Str,
     _In_z_ wchar_t const* _SubStr)
 {
-    if (!pfnwcsstr)
-        pfnwcsstr = (PFNwcsstr)NT_GetProcAddr("wcsstr");
-    return pfnwcsstr(_Str, _SubStr);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(wcsstr)(_Str, _SubStr);
 }
 
-static PFNstrstr pfnstrstr = NULL;
 _Check_return_ _Ret_maybenull_
 _When_(return != NULL, _Ret_range_(_Str, _Str + _String_length_(_Str) - 1))
 char _CONST_RETURN* __cdecl NT_strstr(
     _In_z_ char const* _Str,
     _In_z_ char const* _SubStr)
 {
-    if (!pfnstrstr)
-        pfnstrstr = (PFNstrstr)NT_GetProcAddr("strstr");
-    return pfnstrstr(_Str, _SubStr);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(strstr)(_Str, _SubStr);
 }
 
-static PFNwcscmp pfnwcscmp = NULL;
 _Check_return_ int __cdecl NT_wcscmp(_In_z_ wchar_t const* _String1, _In_z_ wchar_t const* _String2)
 {
-    if (!pfnwcscmp)
-        pfnwcscmp = (PFNwcscmp)NT_GetProcAddr("wcscmp");
-    return pfnwcscmp(_String1, _String2);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(wcscmp)(_String1, _String2);
 }
 
-static PFNstrcmp pfnstrcmp = NULL;
 _Check_return_ int __cdecl NT_strcmp(_In_z_ char const* _Str1, _In_z_ char const* _Str2)
 {
-    if (!pfnstrcmp)
-        pfnstrcmp = (PFNstrcmp)NT_GetProcAddr("strcmp");
-    return pfnstrcmp(_Str1, _Str2);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(strcmp)(_Str1, _Str2);
 }
 
-static PFNvswprintf_s pfnvswprintf_s = NULL;
 _Success_(return >= 0) _Check_return_ int __CRTDECL NT_vswprintf_s(
     _Out_writes_(_BufferCount) _Always_(_Post_z_) wchar_t* const _Buffer,
     _In_                                          size_t         const _BufferCount,
@@ -166,12 +233,10 @@ _Success_(return >= 0) _Check_return_ int __CRTDECL NT_vswprintf_s(
     va_list              _ArgList
 )
 {
-    if (!pfnvswprintf_s)
-        pfnvswprintf_s = (PFNvswprintf_s)NT_GetProcAddr("vswprintf_s");
-    return pfnvswprintf_s(_Buffer, _BufferCount, _Format, _ArgList);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(vswprintf_s)(_Buffer, _BufferCount, _Format, _ArgList);
 }
 
-static PFNvsprintf_s pfnvsprintf_s = NULL;
 _Success_(return >= 0) _Check_return_ int __CRTDECL NT_vsprintf_s(
     _Out_writes_(_BufferCount) _Always_(_Post_z_) char*       const _Buffer,
     _In_                                          size_t      const _BufferCount,
@@ -179,12 +244,10 @@ _Success_(return >= 0) _Check_return_ int __CRTDECL NT_vsprintf_s(
     va_list           _ArgList
 )
 {
-    if (!pfnvsprintf_s)
-        pfnvsprintf_s = (PFNvsprintf_s)NT_GetProcAddr("vsprintf_s");
-    return pfnvsprintf_s(_Buffer, _BufferCount, _Format, _ArgList);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(vsprintf_s)(_Buffer, _BufferCount, _Format, _ArgList);
 }
 
-static PFNmemset pfnmemset = NULL;
 _Post_equal_to_(_Dst)
 _At_buffer_(
     (unsigned char*)_Dst,
@@ -197,12 +260,10 @@ _At_buffer_(
     _In_                          size_t _Size
 )
 {
-    if (!pfnmemset)
-        pfnmemset = (PFNmemset)NT_GetProcAddr("memset");
-    return pfnmemset(_Dst, _Val, _Size);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(memset)(_Dst, _Val, _Size);
 }
 
-static PFNmemcpy_s pfnmemcpy_s = NULL;
 _Success_(return == 0)
 _Check_return_opt_
 errno_t __CRTDECL NT_memcpy_s(
@@ -212,9 +273,8 @@ errno_t __CRTDECL NT_memcpy_s(
     _In_                                                     rsize_t     const _SourceSize
 )
 {
-    if (!pfnmemcpy_s)
-        pfnmemcpy_s = (PFNmemcpy_s)NT_GetProcAddr("memcpy_s");
-    return pfnmemcpy_s(_Destination, _DestinationSize, _Source, _SourceSize);
+    NT_InitUCRT();
+    return CALL_NT_UCRT_ROUTINE(memcpy_s)(_Destination, _DestinationSize, _Source, _SourceSize);
 }
 
 #pragma warning(default: __WARNING_USING_UNINIT_VAR)

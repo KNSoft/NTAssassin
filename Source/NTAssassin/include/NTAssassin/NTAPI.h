@@ -172,6 +172,41 @@ RtlTryAcquireSRWLockShared(
 NTSYSAPI
 VOID
 NTAPI
+RtlRunOnceInitialize(
+  _Out_ PRTL_RUN_ONCE RunOnce
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlRunOnceExecuteOnce(
+  _Inout_ PRTL_RUN_ONCE         RunOnce,
+  _In_ PRTL_RUN_ONCE_INIT_FN    InitFn,
+  _Inout_opt_ PVOID             Parameter,
+  _Out_opt_ PVOID*              Context
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlRunOnceBeginInitialize(
+  _Inout_ PRTL_RUN_ONCE RunOnce,
+  _In_ ULONG            Flags,
+  _Out_opt_ PVOID*      Context
+);
+
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlRunOnceComplete(
+  _Inout_ PRTL_RUN_ONCE RunOnce,
+  _In_ ULONG            Flags,
+  _In_opt_ PVOID        Context
+);
+
+NTSYSAPI
+VOID
+NTAPI
 RtlInitializeBitMap(
     _Out_ PRTL_BITMAP BitMapHeader,
     _In_opt_ __drv_aliasesMem PULONG BitMapBuffer,

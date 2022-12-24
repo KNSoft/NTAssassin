@@ -7,12 +7,6 @@ ULONGLONG NTAPI Time_StopWatch100nm(ULONGLONG PrevTime)
     return li.QuadPart - PrevTime;
 }
 
-ULONGLONG NTAPI Time_StopWatch16ms(ULONGLONG PrevTime)
-{
-    ULONGLONG ullTime = GetTickCount64() >> 4;
-    return ullTime - PrevTime;
-}
-
 ULONGLONG NTAPI Time_StopWatch1ms(ULONGLONG PrevTime)
 {
     LARGE_INTEGER liCounter, liFreq;

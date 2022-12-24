@@ -6,24 +6,26 @@
 #define NTA_DLL 0
 #endif
 
-#pragma comment(lib, "ntdll.lib")
+// VS Project macros
+
+#if defined(_M_IX86)
+#define VS_PLATFORMTARGET "x86"
+#elif defined(_M_X64)
+#define VS_PLATFORMTARGET "x64"
+#endif
+
+#if defined(_DEBUG)
+#define VS_CONFIGURATION "Debug"
+#else
+#define VS_CONFIGURATION "Release"
+#endif
+
+#define LIB_PATH_WITH_CONFIG(LibName) VS_PLATFORMTARGET"\\"VS_CONFIGURATION"\\"LibName
 
 #if NTA_DLL
 #ifdef NTA_EXPORTS
 #define NTA_API DECLSPEC_EXPORT
-#if defined(_M_IX86)
-#if defined(_DEBUG)
-#pragma comment(lib, "x86\\Debug\\SlimCRT.lib")
-#else
-#pragma comment(lib, "x86\\Release\\SlimCRT.lib")
-#endif
-#elif defined(_M_X64)
-#if defined(_DEBUG)
-#pragma comment(lib, "x64\\Debug\\SlimCRT.lib")
-#else
-#pragma comment(lib, "x64\\Release\\SlimCRT.lib")
-#endif
-#endif
+#pragma comment(lib, LIB_PATH_WITH_CONFIG("SlimCRT.lib"))
 #else
 #define NTA_API DECLSPEC_IMPORT
 

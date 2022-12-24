@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#pragma comment(lib, "ntdll.lib")
+
 // NTAssassin
 #include "NTAMacro.h"
 #include "NTAConst.h"
