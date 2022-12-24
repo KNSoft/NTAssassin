@@ -1,5 +1,7 @@
 ﻿#include "include\NTAssassin\NTACtl.h"
 
+#include <Uxtheme.h>
+
 #include "include\NTAssassin\NTAI18N.h"
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"
@@ -64,7 +66,6 @@ static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wP
         TCITEM  stTCI;
         RECT    rcTab;
         if (lpnmhdr->idFrom == dwRefData) {
-            #pragma warning(disable: 26454)
             if (lpnmhdr->code == TCN_SELCHANGING || lpnmhdr->code == TCN_SELCHANGE) {
                 iSelected = (INT)SendMessage(lpnmhdr->hwndFrom, TCM_GETCURSEL, 0, 0);
                 if (iSelected != -1) {
@@ -80,7 +81,6 @@ static LRESULT NTAPI Ctl_PropertySheetDialogProc(HWND hDlg, UINT uMsg, WPARAM wP
                     }
                 }
             }
-            #pragma warning(default: 26454)
         }
     }
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
@@ -98,6 +98,7 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
     for (i = 0; i < SheetCount; i++) {
         Sheets[i].Handle = CreateDialogParam(Sheets[i].Instance, MAKEINTRESOURCE(Sheets[i].DlgResID), Dialog, Sheets[i].DlgProc, Param);
         if (Sheets[i].Handle) {
+            EnableThemeDialogTexture(Sheets[i].Handle, ETDT_ENABLETAB);
             stTCI.pszText = (LPTSTR)(IS_INTRESOURCE(Sheets[i].Title) ? I18N_GetString((DWORD_PTR)Sheets[i].Title) : Sheets[i].Title);
             stTCI.lParam = (LPARAM)Sheets[i].Handle;
             SendMessage(hTab, TCM_INSERTITEM, i, (LPARAM)&stTCI);
@@ -108,14 +109,12 @@ BOOL NTAPI Ctl_SetPropertySheetEx(HWND Dialog, INT TabCtlID, _In_ PCTL_PROPSHEET
     }
     if (bRet) {
         bRet = SetWindowSubclass(Dialog, Ctl_PropertySheetDialogProc, 0, TabCtlID);
-        if (SheetCount) {
+        if (bRet && SheetCount) {
             SetWindowPos(hTab, Sheets[i - 1].Handle, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE);
             SendMessage(hTab, TCM_SETCURSEL, 0, 0);
             stnmhdr.hwndFrom = hTab;
             stnmhdr.idFrom = TabCtlID;
-            #pragma warning(disable: 26454)
             stnmhdr.code = TCN_SELCHANGE;
-            #pragma warning(default: 26454)
             SendMessage(Dialog, WM_NOTIFY, TabCtlID, (LPARAM)&stnmhdr);
         }
     }

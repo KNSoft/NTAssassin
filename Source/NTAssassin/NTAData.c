@@ -23,7 +23,7 @@ _Check_return_ PVOID WINAPIV Data_StructCombineEx(_In_ UINT GroupCount, _In_ UIN
             pSrc = va_arg(args, PVOID);
             uStructCount = va_arg(args, UINT);
             if (pSrc) {
-                RtlMoveMemory(pDst, pSrc, uStructCount * Size);
+                RtlCopyMemory(pDst, pSrc, uStructCount * Size);
                 pDst = MOVE_PTR(pDst, uStructCount * Size, VOID);
             }
         }

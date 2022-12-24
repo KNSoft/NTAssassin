@@ -28,7 +28,7 @@ BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG Protect,
     }
 }
 
-BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) _Frees_ptr_ PVOID BaseAddress)
+BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) _Frees_ptr_ _In_ PVOID BaseAddress)
 {
     PVOID       pBase = BaseAddress;
     SIZE_T      uSize = 0;

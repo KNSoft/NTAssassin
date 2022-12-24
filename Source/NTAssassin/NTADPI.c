@@ -1,7 +1,6 @@
 ﻿#include "include\NTAssassin\NTADPI.h"
 
 #include <shellscalingapi.h>
-#include <CommCtrl.h>
 
 #include "include\NTAssassin\NTASys.h"
 #include "include\NTAssassin\NTANT.h"

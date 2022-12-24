@@ -5,7 +5,6 @@
 EXTERN_C_START
 
 #include "NTAOpCode.h"
-#include "NTANT_UCRT.h"
 #include "NTANT.h"
 #include "NTAEH.h"
 #include "NTAData.h"

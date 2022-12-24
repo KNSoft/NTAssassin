@@ -77,6 +77,7 @@
 #include <Windows.h>
 #include <Winternl.h>
 #include <suppress.h>
+#include <CommCtrl.h>
 
 // NTSTATUS
 #undef WIN32_NO_STATUS

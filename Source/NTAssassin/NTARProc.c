@@ -10,7 +10,9 @@
 
 #pragma comment(lib, "UserEnv.lib")
 
+#if !defined(SLIMCRT_USED)
 static PFNCreateProcessInternalW pfnCreateProcessInternalW = NULL;
+#endif
 
 _Check_return_
 HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles, _In_opt_ PCWSTR CurrentDirectory, _In_opt_ LPSTARTUPINFOW StartupInfo)
@@ -20,6 +22,7 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
     DWORD dwCreationFlags = NORMAL_PRIORITY_CLASS | CREATE_NEW_CONSOLE | CREATE_DEFAULT_ERROR_MODE;
     PVOID pEnv = NULL;
 
+    #if !defined(SLIMCRT_USED)
     if (!pfnCreateProcessInternalW) {
         pfnCreateProcessInternalW = (PFNCreateProcessInternalW)Proc_GetProcAddr(Sys_LoadDll(SysDllNameKernel32), "CreateProcessInternalW");
         if (!pfnCreateProcessInternalW) {
@@ -27,6 +30,7 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
             return NULL;
         }
     }
+    #endif
 
     if (TokenHandle) {
         if (CreateEnvironmentBlock(&pEnv, TokenHandle, FALSE)) {
@@ -40,7 +44,14 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
         STARTUPINFOW si = { sizeof(si), NULL, L"winsta0\\default" };
         psi = &si;
     }
-    if (pfnCreateProcessInternalW(TokenHandle, ApplicationName, CommandLine, NULL, NULL, InheritHandles, dwCreationFlags, pEnv, CurrentDirectory, psi, &pi, NULL)) {
+
+    if (
+    #if defined(SLIMCRT_USED)
+    CreateProcessInternalW
+    #else
+    pfnCreateProcessInternalW
+    #endif
+    (TokenHandle, ApplicationName, CommandLine, NULL, NULL, InheritHandles, dwCreationFlags, pEnv, CurrentDirectory, psi, &pi, NULL)) {
         NtClose(pi.hThread);
         hProc = pi.hProcess;
     }
@@ -139,7 +150,7 @@ BOOL NTAPI RProc_EnumDlls32(_In_ HANDLE ProcessHandle, _In_ RPROC_DLLENUMPROC32 
 Label_0:
     EH_SetLastStatus(lStatus);
     return FALSE;
-}
+    }
 
 _Success_(return != FALSE)
 BOOL NTAPI RProc_CreateThread(_In_ HANDLE ProcessHandle, _In_ LPTHREAD_START_ROUTINE StartAddress, _In_opt_ __drv_aliasesMem PVOID Param, BOOL CreateSuspended, _Out_opt_ PHANDLE ThreadHandle)
@@ -234,7 +245,7 @@ UINT NTAPI RProc_GetFullImageNameEx(HANDLE ProcessHandle, _Out_writes_z_(FilePat
     if (NT_SUCCESS(lStatus)) {
         USHORT usLen = ((PUNICODE_STRING)stString)->Length;
         if (usLen < FilePathCch * sizeof(WCHAR)) {
-            RtlMoveMemory(FilePath, ((PUNICODE_STRING)stString)->Buffer, usLen);
+            RtlCopyMemory(FilePath, ((PUNICODE_STRING)stString)->Buffer, usLen);
             usLen >>= 1;
             FilePath[usLen] = L'\0';
             return usLen;
@@ -327,7 +338,7 @@ UINT NTAPI RProc_TranslateAddressEx(HANDLE ProcessHandle, _In_ ULONGLONG Address
             0;
     }
     return uRet;
-}
+    }
 
 #pragma warning(disable: __WARNING_MISSING_ZERO_TERMINATION2)
 _Success_(return > 0)

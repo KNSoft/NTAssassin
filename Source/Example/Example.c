@@ -1,4 +1,4 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include "NTAssassin\NTAssassin.h"
 
 #pragma comment (lib, "NTAssassin.lib")

@@ -5,7 +5,7 @@
 
 /// <seealso cref="GetStdHandle"/>
 #define Con_GetStdHandle(i) (\
-    i == STD_INPUT_HANDLE ? ((NT_GetPEB()->ProcessParameters->StandardInput) : (\
+    i == STD_INPUT_HANDLE ? (NT_GetPEB()->ProcessParameters->StandardInput) : (\
         i == STD_OUTPUT_HANDLE ? (NT_GetPEB()->ProcessParameters->StandardOutput) : (\
             i == STD_ERROR_HANDLE ? (NT_GetPEB()->ProcessParameters->StandardError) : NULL\
         )\

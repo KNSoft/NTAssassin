@@ -10,7 +10,7 @@
 #pragma comment(lib, "ComCtl32.Lib")
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
-#define CTL_COLORPICKER_COLOR TEXT("NTAssassin.Ctl.ColorPicker")
+#define CTL_COLORPICKER_COLOR TEXT("NTAssassin.Ctl.ColorPicker.Color")
 
 static LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
@@ -25,7 +25,7 @@ static LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg,
         SelectBrush(ps.DC, GetStockBrush(BLACK_BRUSH));
         GDI_FrameRect(ps.DC, &ps.Rect, -1, PATCOPY);
         SetTextColor(ps.DC, UI_InverseRGB(cr));
-        if (cr == CTL_COLORPICKER_NOCOLOR) {
+        if (cr == CLR_INVALID) {
             szColor[0] = '?';
             szColor[1] = '\0';
         } else if (!Str_RGBToHex(cr, szColor))

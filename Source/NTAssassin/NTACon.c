@@ -1,4 +1,6 @@
-﻿#include "include\NTAssassin\NTACon.h"
+﻿#define _NO_CRT_STDIO_INLINE
+
+#include "include\NTAssassin\NTACon.h"
 
 #include "include\NTAssassin\NTAEH.h"
 #include "include\NTAssassin\NTAStr.h"

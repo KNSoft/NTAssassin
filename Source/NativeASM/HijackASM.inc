@@ -1,26 +1,3 @@
-INCLUDELIB OLDNAMES
-IFDEF _DEBUG
-    IFDEF _DLL
-        INCLUDELIB msvcrtd.lib
-        INCLUDELIB vcruntimed.lib
-        INCLUDELIB ucrtd.lib
-    ELSE
-        INCLUDELIB libcmtd.lib
-        INCLUDELIB libvcruntimed.lib
-        INCLUDELIB libucrtd.lib
-    ENDIF
-ELSE
-    IFDEF _DLL
-        INCLUDELIB msvcrt.lib
-        INCLUDELIB vcruntime.lib
-        INCLUDELIB ucrt.lib
-    ELSE
-        INCLUDELIB libcmt.lib
-        INCLUDELIB libvcruntime.lib
-        INCLUDELIB libucrt.lib
-    ENDIF
-ENDIF
-
 STATUS_NOT_IMPLEMENTED equ 0C0000002h
 
 CC_FASTCALL equ 0

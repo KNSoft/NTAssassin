@@ -25,7 +25,9 @@
 #if NTA_DLL
 #ifdef NTA_EXPORTS
 #define NTA_API DECLSPEC_EXPORT
+#define SLIMCRT_USED
 #pragma comment(lib, LIB_PATH_WITH_CONFIG("SlimCRT.lib"))
+#pragma comment(lib, LIB_PATH_WITH_CONFIG("SlimCRT_Kernel32_Lib.lib"))
 #else
 #define NTA_API DECLSPEC_IMPORT
 

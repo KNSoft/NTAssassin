@@ -2,8 +2,6 @@
 
 #include "NTADef.h"
 
-#include <CommCtrl.h>
-
 #include "NTAGDI.h"
 
 #define DLG_PADDING_X   14

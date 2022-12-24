@@ -1,12 +1,12 @@
-/Win32
+/x86
 /x64
-/Example/Win32
+/Example/x86
 /Example/x64
 /NativeASM/Hijack_x64/Debug
 /NativeASM/Hijack_x64/Release
 /NativeASM/Hijack_x86/Debug
 /NativeASM/Hijack_x86/Release
-/NTAssassin/Win32
+/NTAssassin/x86
 /NTAssassin/x64
 /NTAssassin/3rdParty/bin/Precomp4C/Precomp4C.pdb
 *.user

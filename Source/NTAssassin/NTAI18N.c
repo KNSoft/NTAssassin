@@ -82,7 +82,7 @@ PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex)
             return psz ? psz : pI18NDefaultStringTable[usIndex].Value;
         }
     } else {
-        DWORD       dwHash = Str_HashW((PCWSTR)StrIndex, StrHashAlgorithmX65599);
+        DWORD       dwHash = Str_Hash_X65599W((PCWSTR)StrIndex);
         PI18N_ITEM  lpItem = pI18NStringTable, lpEndItem = pI18NStringTable + usI18NStringCount;
         BOOL        bUseDefault = FALSE;
         while (TRUE) {

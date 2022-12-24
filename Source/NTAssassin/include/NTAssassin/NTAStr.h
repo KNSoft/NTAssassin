@@ -20,25 +20,13 @@
 
 #include "NTADef.h"
 
-#include "NTANT_UCRT.h"
-
-typedef enum _STR_HASH_ALGORITHM {
-    StrHashAlgorithmSDBM,
-    StrHashAlgorithmBKDR,
-    StrHashAlgorithmAP,
-    StrHashAlgorithmDJB,
-    StrHashAlgorithmJS,
-    StrHashAlgorithmRS,
-    StrHashAlgorithmELF,
-    StrHashAlgorithmPJW,
-    StrHashAlgorithmX65599 = StrHashAlgorithmSDBM,
-    StrHashAlgorithmFNV1a
-} STR_HASH_ALGORITHM, * PSTR_HASH_ALGORITHM;
+#include <stdio.h>
+#include <stdarg.h>
 
 // String Length and Size
 
-#define Str_LenW NT_wcslen
-#define Str_LenA NT_strlen
+#define Str_LenW wcslen
+#define Str_LenA strlen
 #ifdef UNICODE
 #define Str_Len Str_LenW
 #else
@@ -69,8 +57,8 @@ NTA_API SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T D
 
 // String Compare
 
-#define Str_CmpW NT_wcscmp
-#define Str_CmpA NT_strcmp
+#define Str_CmpW wcscmp
+#define Str_CmpA strcmp
 NTA_API INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2);
 NTA_API INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2);
 #define Str_EqualW(String1, String2) ((BOOL)(Str_CmpW(String1, String2) == 0))
@@ -91,8 +79,8 @@ NTA_API INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2);
 
 // String Printf
 
-#define Str_VPrintfExW NT_vswprintf_s
-#define Str_VPrintfExA NT_vsprintf_s
+#define Str_VPrintfExW vswprintf_s
+#define Str_VPrintfExA vsprintf_s
 _Success_(return >= 0) NTA_API INT WINAPIV Str_PrintfExW(_Out_writes_z_(DestCchSize) PWSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCWSTR Format, ...);
 _Success_(return >= 0) NTA_API INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ INT DestCchSize, _In_ _Printf_format_string_ PCSTR Format, ...);
 #ifdef UNICODE
@@ -111,8 +99,8 @@ _Success_(return >= 0) NTA_API INT WINAPIV Str_PrintfExA(_Out_writes_z_(DestCchS
 
 // String Index
 
-#define Str_StrW NT_wcsstr
-#define Str_StrA NT_strstr
+#define Str_StrW wcsstr
+#define Str_StrA strstr
 NTA_API INT NTAPI Str_IndexW(_In_ PCWSTR String, _In_ PCWSTR SubString);
 NTA_API INT NTAPI Str_IndexA(_In_ PCSTR String, _In_ PCSTR SubString);
 #define Str_StartsWithW(String, SubString) ((BOOL)(Str_IndexW(String, SubString) == 0))
@@ -282,13 +270,18 @@ NTA_API DOUBLE NTAPI Str_SimplifySize(UINT64 Size, _Out_opt_ PCHAR Unit);
 
 // String Hash
 
-NTA_API DWORD NTAPI Str_HashW(_In_ PCWSTR String, STR_HASH_ALGORITHM HashAlgorithm);
-NTA_API DWORD NTAPI Str_HashA(_In_ PCSTR String, STR_HASH_ALGORITHM HashAlgorithm);
+NTA_API DWORD NTAPI Str_Hash_X65599W(_In_ PCWSTR String);
+NTA_API DWORD NTAPI Str_Hash_X65599A(_In_ PCSTR String);
+NTA_API DWORD NTAPI Str_Hash_FNV1aW(_In_ PCWSTR String);
+NTA_API DWORD NTAPI Str_Hash_FNV1aA(_In_ PCSTR String);
 #ifdef UNICODE
-#define Str_Hash Str_HashW
+#define Str_Hash_X65599 Str_Hash_X65599W
+#define Str_Hash_FNV1a Str_Hash_FNV1aW
 #else
-#define Str_Hash Str_HashA
+#define Str_Hash_X65599 Str_Hash_X65599A
+#define Str_Hash_FNV1a Str_Hash_FNV1aA
 #endif
+#define Str_Hash Str_Hash_X65599
 
 NTA_API PCWSTR NTAPI Str_RCharW(_In_ PCWSTR Path, _In_ WCHAR Char, _In_opt_ ULONG LengthOfPath);
 NTA_API PCSTR NTAPI Str_RCharA(_In_ PCSTR Path, _In_ CHAR Char, _In_opt_ ULONG LengthOfPath);

@@ -46,7 +46,7 @@
 /// </summary>
 /// <returns>The the pointer to TEB</returns>
 /// <remarks> To obtain or modify member value of TEB, use "NT_GetTEBMember" or "NT_SetTEBMember" instead</remarks>
-#define NT_GetTEB() ((PTEB)NT_GetTEBMember(NtTib.Self))
+#define NT_GetTEB() ((PTEB)NtCurrentTeb())
 
 /// <summary>
 /// Gets the pointer to PEB

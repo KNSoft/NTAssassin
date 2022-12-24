@@ -143,7 +143,7 @@ BOOL NTAPI GDI_GetDefaultFont(_Out_ PENUMLOGFONTEXDVW FontInfo, _In_opt_ LONG He
     bRet = SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
     if (bRet) {
         GDI_InitInternalFontInfo(FontInfo);
-        RtlMoveMemory(&FontInfo->elfEnumLogfontEx.elfLogFont, &ncm.lfMessageFont, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont));
+        RtlCopyMemory(&FontInfo->elfEnumLogfontEx.elfLogFont, &ncm.lfMessageFont, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont));
         if (Height) {
             FontInfo->elfEnumLogfontEx.elfLogFont.lfHeight = Height;
             FontInfo->elfEnumLogfontEx.elfLogFont.lfWidth = 0;
@@ -223,31 +223,50 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY)
 
 BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot)
 {
-    HDC     hDC;
-    BOOL    bRet;
+    POINT   pt;
+    SIZE    size;
+    HDC     hDC, hMemDC;
+    HBITMAP hBmp;
     if (Window) {
         RECT rc;
         GetClientRect(Window, &rc);
-        Snapshot->Position.x = Snapshot->Position.y = 0;
-        Snapshot->Size.cx = rc.right;
-        Snapshot->Size.cy = rc.bottom;
+        pt.x = pt.y = 0;
+        size.cx = rc.right;
+        size.cy = rc.bottom;
     } else {
-        UI_GetScreenPos(&Snapshot->Position, &Snapshot->Size);
+        UI_GetScreenPos(&pt, &size);
     }
     hDC = GetDC(Window);
-    Snapshot->DC = CreateCompatibleDC(hDC);
-    Snapshot->Bitmap = CreateCompatibleBitmap(hDC, Snapshot->Size.cx, Snapshot->Size.cy);
-    Snapshot->OriginalBitmap = SelectObject(Snapshot->DC, Snapshot->Bitmap);
-    bRet = BitBlt(Snapshot->DC, 0, 0, Snapshot->Size.cx, Snapshot->Size.cy, hDC, Snapshot->Position.x, Snapshot->Position.y, SRCCOPY);
+    if (!hDC) {
+        goto _Error_0;
+    }
+    hMemDC = CreateCompatibleDC(hDC);
+    if (!hMemDC) {
+        goto _Error_1;
+    }
+    hBmp = CreateCompatibleBitmap(hDC, size.cx, size.cy);
+    if (!hBmp) {
+        goto _Error_2;
+    }
+    SelectObject(hMemDC, hBmp);
+    if (BitBlt(hMemDC, 0, 0, size.cx, size.cy, hDC, pt.x, pt.y, SRCCOPY)) {
+        Snapshot->DC = hMemDC;
+        Snapshot->Bitmap = hBmp;
+        Snapshot->Position = pt;
+        Snapshot->Size = size;
+        return TRUE;
+    }
+
+_Error_2:
+    DeleteDC(hMemDC);
+_Error_1:
     ReleaseDC(Window, hDC);
-    return bRet;
+_Error_0:
+    return FALSE;
 }
 
-BOOL NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot)
+VOID NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot)
 {
-    BOOL bRet;
-    bRet = DeleteDC(Snapshot->DC);
-    bRet &= DeleteObject(Snapshot->Bitmap);
-    bRet &= DeleteObject(Snapshot->OriginalBitmap);
-    return bRet;
+    DeleteDC(Snapshot->DC);
+    DeleteObject(Snapshot->Bitmap);
 }

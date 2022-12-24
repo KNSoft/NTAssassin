@@ -41,7 +41,7 @@ BOOL NTAPI PE_ResolveOffline(_Out_ PPE_STRUCT PEStruct, _In_reads_bytes_(BufferS
 
     /* Section Headers */
     PIMAGE_SECTION_HEADER pSecHeader = MOVE_PTR(pOptHeader, pFileHeader->SizeOfOptionalHeader, IMAGE_SECTION_HEADER);
-    PBYTE pSecHeaderEnd = MOVE_PTR(pSecHeader, sizeof(IMAGE_SECTION_HEADER) * (pFileHeader->NumberOfSections + 1), BYTE);
+    PBYTE pSecHeaderEnd = MOVE_PTR(pSecHeader, sizeof(IMAGE_SECTION_HEADER) * ((SIZE_T)pFileHeader->NumberOfSections + 1), BYTE);
     if (pSecHeaderEnd > pEndOfMap ||
         (pOptHeader->Magic != IMAGE_NT_OPTIONAL_HDR32_MAGIC && pOptHeader->Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC)) {
         return FALSE;

@@ -36,7 +36,7 @@ NTA_API BOOL NTAPI Mem_PageProt(_In_ PVOID BaseAddress, _In_ SIZE_T Size, ULONG 
 /// </summary>
 /// <seealso cref="VirtualFree"/>
 /// <return>Error code storaged in last STATUS</return>
-NTA_API BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) _Frees_ptr_ PVOID BaseAddress);
+NTA_API BOOL NTAPI Mem_PageFree(__drv_freesMem(Mem) _Frees_ptr_ _In_ PVOID BaseAddress);
 
 // Alias of "Mem_HeapAlloc"
 #define Mem_Alloc Mem_HeapAlloc

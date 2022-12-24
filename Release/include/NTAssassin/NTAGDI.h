@@ -5,7 +5,6 @@
 typedef struct _GDI_SNAPSHOT {
     HDC     DC;
     HBITMAP Bitmap;
-    HBITMAP OriginalBitmap;
     POINT   Position;
     SIZE    Size;
 } GDI_SNAPSHOT, *PGDI_SNAPSHOT;
@@ -104,5 +103,4 @@ NTA_API BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot)
 /// Deletes snapshot created by <c>GDI_CreateSnapshot</c>
 /// </summary>
 /// <param name="Snapshot">Pointer to a GDI_SNAPSHOT structure to delete</param>
-/// <returns>TRUE if succeeded, or FALSE if failed</returns>
-NTA_API BOOL NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot);
+NTA_API VOID NTAPI GDI_DeleteSnapshot(_In_ PGDI_SNAPSHOT Snapshot);

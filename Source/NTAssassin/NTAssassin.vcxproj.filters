@@ -43,7 +43,6 @@
     <ClCompile Include="NTANT.c" />
     <ClCompile Include="NTANT_Reg.c" />
     <ClCompile Include="NTANT_Sec.c" />
-    <ClCompile Include="NTANT_UCRT.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\NTAssassin\NTAPI.h">
@@ -117,7 +116,6 @@
     <ClInclude Include="include\NTAssassin\NTADlg.h" />
     <ClInclude Include="include\NTAssassin\NTAData.h" />
     <ClInclude Include="include\NTAssassin\NTANT.h" />
-    <ClInclude Include="include\NTAssassin\NTANT_UCRT.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

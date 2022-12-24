@@ -22,7 +22,7 @@ NTSTATUS NTAPI NT_CopySid(_In_ ULONG Size, _Out_ PSID SidDst, _In_ PSID SidSrc)
     if (Size < Length) {
         return STATUS_BUFFER_TOO_SMALL;
     } else {
-        RtlMoveMemory(SidDst, SidSrc, Length);
+        RtlCopyMemory(SidDst, SidSrc, Length);
         return STATUS_SUCCESS;
     }
 }
