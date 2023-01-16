@@ -1,9 +1,9 @@
 ﻿#include "include\NTAssassin\NTAI18N.h"
+
 #include "include\NTAssassin\NTAStr.h"
 #include "include\NTAssassin\NTAGDI.h"
 #include "include\NTAssassin\NTAUI.h"
 
-static LPWSTR      pI18NFontName = NULL;
 static BOOL        bI18NRTLReading = FALSE;
 static PI18N_ITEM  pI18NStringTable = NULL;
 static PI18N_ITEM  pI18NDefaultStringTable = NULL;
@@ -20,7 +20,6 @@ PI18N_LANGUAGE NTAPI I18N_InitEx(PI18N_LANGUAGE *Langs, UINT LangCount, USHORT I
 
 VOID NTAPI I18N_SetLocale(PI18N_LANGUAGE Lang)
 {
-    pI18NFontName = Lang->FontName;
     bI18NRTLReading = Lang->RTLReading;
     pI18NStringTable = Lang->StringTable;
 }

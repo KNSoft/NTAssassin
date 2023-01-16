@@ -8,16 +8,15 @@
 typedef struct _I18N_ITEM {
     DWORD   KeyHash;
     LPCWSTR Value;
-} I18N_ITEM, * PI18N_ITEM;
+} I18N_ITEM, *PI18N_ITEM;
 
-typedef struct _I18N_LANGUAGE I18N_LANGUAGE, * PI18N_LANGUAGE;
+typedef struct _I18N_LANGUAGE I18N_LANGUAGE, *PI18N_LANGUAGE;
 
 struct _I18N_LANGUAGE {
     QWORD           Name[3];        // Each parts of name
     LCID            dwLangId;       // LCID
     PI18N_LANGUAGE  Parent;         // Pointer to parent
     LPWSTR          NativeName;     // Native name
-    LPWSTR          FontName;       // Font name prefered
     BOOL            RTLReading;     // Set to TRUE if the language has RTL reading order
     PI18N_ITEM      StringTable;    // Pointer to the string table
 };

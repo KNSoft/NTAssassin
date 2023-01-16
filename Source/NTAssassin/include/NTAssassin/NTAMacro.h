@@ -1,6 +1,23 @@
 ﻿#pragma once
 
 #define DECLSPEC_EXPORT __declspec(dllexport)
+#define EXPORT_STD_FUNC #pragma comment(linker, "/EXPORT:"__FUNCTION__"="__FUNCDNAME__)
+
+// VS Project macros
+
+#if defined(_M_IX86)
+#define VS_PLATFORMTARGET "x86"
+#elif defined(_M_X64)
+#define VS_PLATFORMTARGET "x64"
+#endif
+
+#if defined(_DEBUG)
+#define VS_CONFIGURATION "Debug"
+#else
+#define VS_CONFIGURATION "Release"
+#endif
+
+#define LIB_PATH_WITH_CONFIG(LibName) VS_PLATFORMTARGET"\\"VS_CONFIGURATION"\\"LibName
 
 #if _WIN64
 #define IS_WIN64 TRUE

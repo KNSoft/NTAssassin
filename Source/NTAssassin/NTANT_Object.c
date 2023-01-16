@@ -1,6 +1,4 @@
-﻿#pragma once
-
-#include "include\NTAssassin\NTADef.h"
+﻿#include "include\NTAssassin\NTANT_Object.h"
 
 typedef DEFINE_ANYSIZE_STRUCT(SID_2, SID, DWORD, 2);
 typedef DEFINE_ANYSIZE_STRUCT(SID_6, SID, DWORD, 6);

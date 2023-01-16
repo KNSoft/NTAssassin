@@ -1,26 +1,10 @@
 ﻿#pragma once
 
-// NTA_DLL
+// NTA_DLL: build lib or dll
 // 0-lib 1-dll
 #if !defined(NTA_DLL)
-#define NTA_DLL 0
+#define NTA_DLL 1
 #endif
-
-// VS Project macros
-
-#if defined(_M_IX86)
-#define VS_PLATFORMTARGET "x86"
-#elif defined(_M_X64)
-#define VS_PLATFORMTARGET "x64"
-#endif
-
-#if defined(_DEBUG)
-#define VS_CONFIGURATION "Debug"
-#else
-#define VS_CONFIGURATION "Release"
-#endif
-
-#define LIB_PATH_WITH_CONFIG(LibName) VS_PLATFORMTARGET"\\"VS_CONFIGURATION"\\"LibName
 
 #if NTA_DLL
 #ifdef NTA_EXPORTS
@@ -30,18 +14,13 @@
 #pragma comment(lib, LIB_PATH_WITH_CONFIG("SlimCRT_Kernel32_Lib.lib"))
 #else
 #define NTA_API DECLSPEC_IMPORT
-
 #endif
 #else
 #define NTA_API
 #endif
 
-// NTA_CUSTOMENTRY / NTA_NOENTRY
-#ifdef NTA_CUSTOMENTRY
-#pragma comment(linker, "/ENTRY:" NTA_CUSTOMENTRY)
-#endif
-
-#if defined(NTA_CUSTOMENTRY) || defined(NTA_NOENTRY)
+// NTA_LINKDEFAULTLIB: link default libs
+#if defined(NTA_LINKDEFAULTLIB)
 #if _DEBUG
 #if _DLL
 #pragma comment(lib, "msvcrtd.lib")

@@ -4,6 +4,8 @@
 
 #include "NTADef.h"
 
+#include "NTANT_Object.h"
+
 /// <summary>
 /// Gets member value of current TEB
 /// </summary>
@@ -128,7 +130,7 @@ _Success_(NT_SUCCESS(return)) NTA_API NTSTATUS NTAPI NT_CopySid(_In_ ULONG Size,
 /// </summary>
 /// <seealso cref="NtQueryInformationToken"/>
 /// <returns>Pointer to a new allocated buffer contains information, should be freed by <c>Mem_Free</c></returns>
-PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLASS TokenInformationClass);
+NTA_API PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLASS TokenInformationClass);
 
 /// <summary>
 /// Adjusts privilege of a token
@@ -139,6 +141,8 @@ PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLAS
 /// <returns>TRUE if succeeded, or FALSE if failed, error code storaged in last STATUS</returns>
 NTA_API BOOL NTAPI NT_AdjustPrivilege(_In_ HANDLE TokenHandle, _In_ SE_PRIVILEGE Privilege, _In_ DWORD Attributes);
 
+NTA_API BOOL NTAPI NT_AdjustPrivileges(_In_ HANDLE TokenHandle, _In_reads_(PrivilegeCount) PSE_PRIVILEGE Privileges, _In_ DWORD PrivilegeCount, _In_ DWORD Attributes);
+
 /// <summary>
 /// Sets impersonate token to current thread
 /// </summary>
@@ -147,10 +151,10 @@ NTA_API BOOL NTAPI NT_AdjustPrivilege(_In_ HANDLE TokenHandle, _In_ SE_PRIVILEGE
 NTA_API BOOL NTAPI NT_Impersonate(HANDLE TokenHandle);
 
 /// <summary>
-/// Duplicates token of CSRSS
+/// Duplicates process token from system PPL process
 /// </summary>
 /// <returns>Handle to the impersonate token created, or NULL if failed, error code storaged in last STATUS</returns>
-NTA_API HANDLE NTAPI NT_DuplicateCsrssToken(_In_ TOKEN_TYPE Type, _In_reads_(PrivilegeCount) PSE_PRIVILEGE PrivilegeToEnable, _In_ DWORD PrivilegeCount);
+NTA_API HANDLE NTAPI NT_DuplicateSystemToken(_In_ DWORD PID, _In_ TOKEN_TYPE Type, _In_reads_(PrivilegeCount) PSE_PRIVILEGE PrivilegeToEnable, _In_ DWORD PrivilegeCount);
 
 /// <summary>
 /// Gets current active session
@@ -168,15 +172,14 @@ _Success_(return != FALSE) NTA_API BOOL NTAPI NT_GetActiveSession(_Out_ PDWORD S
 /// <param name="Attributes">Privilege attributes (SE_PRIVILEGE_XXX)</param>
 /// <param name="ReturnLength">Size in bytes of allocated buffer</param>
 /// <returns>Pointer to the allocated TOKEN_PRIVILEGES structure, or NULL if failed, both of last error and last status will set</returns>
-_Success_(return != FALSE) NTA_API PTOKEN_PRIVILEGES NTAPI NT_InitTokenPrivileges(_In_reads_(PrivilegeCount) PSE_PRIVILEGE Privileges, _In_ DWORD PrivilegeCount, _In_ DWORD Attributes, _Out_opt_ PDWORD ReturnLength);
+_Success_(return != FALSE) NTA_API PTOKEN_PRIVILEGES NTAPI NT_InitTokenPrivileges(_In_reads_(PrivilegeCount) PSE_PRIVILEGE Privileges, _In_ ULONG PrivilegeCount, _In_ DWORD Attributes, _Out_opt_ PULONG ReturnLength);
 
 /// <summary>
 /// Gets token of specified session
 /// </summary>
 /// <param name="SessionId">Id to the session</param>
-/// <param name="UseLinkedToken">Specify to use linked token (if exists)</param>
 /// <returns>Handle to the token, or NULL if failed, error code storaged in last ERROR</returns>
-NTA_API HANDLE NTAPI NT_GetSessionToken(DWORD SessionId, BOOL UseLinkedToken);
+NTA_API HANDLE NTAPI NT_GetSessionToken(DWORD SessionId);
 
 /// <summary>
 /// Gets logon session information

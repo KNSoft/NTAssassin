@@ -279,7 +279,6 @@
 #include "NT_MSTSTS.h"
 #include "NT_NTDDK.h"
 #include "NTAPI.h"
-#include "NTObject.h"
 
 #define PRTL_CONSTANT_UNICODE_STRING(s) ((&(UNICODE_STRING)RTL_CONSTANT_STRING(L##s)))
 #define PRTL_CONSTANT_ANSI_STRING(s) ((&(ANSI_STRING)RTL_CONSTANT_STRING(s)))

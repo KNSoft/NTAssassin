@@ -5,12 +5,11 @@
 /// <summary>
 /// Gets time interval like stop watch
 /// </summary>
-/// <param name="PrevTime">Reference time to calcuate interval, or pass 0 to have a new one</param>
+/// <param name="PrevTime">Reference time to calcuate interval, or pass 0 to get a new one</param>
+/// <param name="Multiplier">Multiplier converts us to other unit</param>
 /// <returns>Time interval from PrevTime to now, or current time if PrevTime is 0</returns>
-/// <remarks>Time_StopWatch[Unit], Unit is time unit used in the function. "Time_StopWatch" equals to "Time_StopWatch1ms", which unit is 1ms</remarks>
-NTA_API ULONGLONG NTAPI Time_StopWatch100nm(ULONGLONG PrevTime);
-NTA_API ULONGLONG NTAPI Time_StopWatch1ms(ULONGLONG PrevTime);
-NTA_API ULONGLONG NTAPI Time_StopWatch1us(ULONGLONG PrevTime);
+NTA_API ULONGLONG NTAPI Time_StopWatchEx(ULONGLONG PrevTime, ULONG Multiplier);
+#define Time_StopWatch1ms(PrevTime) Time_StopWatchEx(PrevTime, 1000000)
 #define Time_StopWatch Time_StopWatch1ms
 
 /// <summary>

@@ -17,7 +17,7 @@ BOOL NTAPI Shell_Locate(_In_ PCWSTR Path)
     uIndexSlash = (UINT)Str_CopyW(szFile, Path);
     while (uIndexSlash > 0 && szFile[--uIndexSlash] != L'\\');
     if (uIndexSlash > 0) {
-        szFile[uIndexSlash] = L'\0';
+        szFile[uIndexSlash] = UNICODE_NULL;
         hr = SHParseDisplayName(szFile, NULL, &pidlDir, 0, &dwAttr);
         if (hr == S_OK) {
             szFile[uIndexSlash] = L'\\';

@@ -38,10 +38,10 @@ DWORD NTAPI NT_GetLsaPid()
     return Pid;
 }
 
-HANDLE NTAPI NT_DuplicateCsrssToken(_In_ TOKEN_TYPE Type, _In_reads_(PrivilegeCount) PSE_PRIVILEGE PrivilegeToEnable, _In_ DWORD PrivilegeCount)
+HANDLE NTAPI NT_DuplicateSystemToken(_In_ DWORD PID, _In_ TOKEN_TYPE Type, _In_reads_(PrivilegeCount) PSE_PRIVILEGE PrivilegeToEnable, _In_ DWORD PrivilegeCount)
 {
     HANDLE hDuplicatedToken = NULL;
-    HANDLE hProc = RProc_Open(PROCESS_QUERY_LIMITED_INFORMATION, NT_GetCsrPid());
+    HANDLE hProc = RProc_Open(PROCESS_QUERY_LIMITED_INFORMATION, PID);
     if (hProc) {
         HANDLE hToken;
         NTSTATUS Status;
@@ -122,6 +122,24 @@ BOOL NTAPI NT_AdjustPrivilege(_In_ HANDLE TokenHandle, _In_ SE_PRIVILEGE Privile
     }
 }
 
+BOOL NTAPI NT_AdjustPrivileges(_In_ HANDLE TokenHandle, _In_reads_(PrivilegeCount) PSE_PRIVILEGE Privileges, _In_ DWORD PrivilegeCount, _In_ DWORD Attributes)
+{
+    BOOL bRet = FALSE;
+    NTSTATUS Status;
+    ULONG Length;
+    PTOKEN_PRIVILEGES aPrivileges = NT_InitTokenPrivileges(Privileges, PrivilegeCount, Attributes, &Length);
+    if (aPrivileges) {
+        Status = NtAdjustPrivilegesToken(TokenHandle, FALSE, aPrivileges, Length, NULL, NULL);
+        if (NT_SUCCESS(Status)) {
+            bRet = TRUE;
+        } else {
+            EH_SetLastStatus(Status);
+        }
+        Mem_Free(aPrivileges);
+    }
+    return bRet;
+}
+
 BOOL NTAPI NT_Impersonate(HANDLE TokenHandle)
 {
     NTSTATUS Status = NtSetInformationThread(CURRENT_THREAD_HANDLE, ThreadImpersonationToken, &TokenHandle, sizeof(TokenHandle));
@@ -134,7 +152,7 @@ BOOL NTAPI NT_Impersonate(HANDLE TokenHandle)
 }
 
 _Success_(return != FALSE)
-PTOKEN_PRIVILEGES NTAPI NT_InitTokenPrivileges(_In_reads_(PrivilegeCount) PSE_PRIVILEGE Privileges, _In_ DWORD PrivilegeCount, _In_ DWORD Attributes, _Out_opt_ PDWORD ReturnLength)
+PTOKEN_PRIVILEGES NTAPI NT_InitTokenPrivileges(_In_reads_(PrivilegeCount) PSE_PRIVILEGE Privileges, _In_ ULONG PrivilegeCount, _In_ DWORD Attributes, _Out_opt_ PULONG ReturnLength)
 {
     ULONG Length = ANYSIZE_STRUCT_SIZE(TOKEN_PRIVILEGES, Privileges, PrivilegeCount);
     PTOKEN_PRIVILEGES Buffer = Mem_Alloc(Length);
@@ -225,26 +243,12 @@ BOOL NTAPI NT_GetLogonSessionInfo(_In_opt_ PSID LogonUserSid, _Out_opt_ PSID Use
     return bRet;
 }
 
-HANDLE NTAPI NT_GetSessionToken(DWORD SessionId, BOOL UseLinkedToken)
+HANDLE NTAPI NT_GetSessionToken(DWORD SessionId)
 {
-    HANDLE Token;
     ULONG Length;
     WINSTATIONUSERTOKEN WinStaUserToken = { (HANDLE)NT_GetTEBMember(ClientId.UniqueProcess), (HANDLE)NT_GetTEBMember(ClientId.UniqueThread), NULL };
-    Token = WinStationQueryInformationW(SERVERNAME_CURRENT, SessionId, WinStationUserToken, &WinStaUserToken, sizeof(WinStaUserToken), &Length) ?
+    return WinStationQueryInformationW(SERVERNAME_CURRENT, SessionId, WinStationUserToken, &WinStaUserToken, sizeof(WinStaUserToken), &Length) ?
         WinStaUserToken.UserToken : NULL;
-    if (Token && UseLinkedToken) {
-        HANDLE LinkedToken;
-        NTSTATUS Status = NtQueryInformationToken(Token, TokenLinkedToken, &LinkedToken, sizeof(LinkedToken), &Length);
-        if (NT_SUCCESS(Status)) {
-            NtClose(Token);
-            Token = LinkedToken;
-        } else if (Status != STATUS_NO_SUCH_LOGON_SESSION) {
-            EH_SetLastNTError(Status);
-            NtClose(Token);
-            Token = NULL;
-        }
-    }
-    return Token;
 }
 
 HANDLE NTAPI NT_CreateTokenEx(_In_ TOKEN_TYPE Type, _In_ PSID OwnerSid, _In_ PLUID AuthenticationId, _In_ PTOKEN_GROUPS Groups, _In_ PTOKEN_PRIVILEGES Privileges)

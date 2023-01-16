@@ -1,24 +1,10 @@
 ﻿#include "include\NTAssassin\NTATime.h"
 
-ULONGLONG NTAPI Time_StopWatch100nm(ULONGLONG PrevTime)
-{
-    LARGE_INTEGER li;
-    NtQuerySystemTime(&li);
-    return li.QuadPart - PrevTime;
-}
-
-ULONGLONG NTAPI Time_StopWatch1ms(ULONGLONG PrevTime)
+ULONGLONG NTAPI Time_StopWatchEx(ULONGLONG PrevTime, ULONG Multiplier)
 {
     LARGE_INTEGER liCounter, liFreq;
     NtQueryPerformanceCounter(&liCounter, &liFreq);
-    return liCounter.QuadPart * 1000 / liFreq.QuadPart - PrevTime;
-}
-
-ULONGLONG NTAPI Time_StopWatch1us(ULONGLONG PrevTime)
-{
-    LARGE_INTEGER liCounter, liFreq;
-    NtQueryPerformanceCounter(&liCounter, &liFreq);
-    return liCounter.QuadPart * 1000000 / liFreq.QuadPart - PrevTime;
+    return liCounter.QuadPart * Multiplier / liFreq.QuadPart - PrevTime;
 }
 
 VOID NTAPI Time_UnixTimeToFileTime(time_t UnixTime, PFILETIME FileTime)

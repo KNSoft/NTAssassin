@@ -294,6 +294,17 @@ RtlWow64EnableFsRedirectionEx(
     OUT PVOID* OldFsRedirectionLevel
 );
 
+NTSYSAPI
+NTSTATUS
+NTAPI
+RtlGetUserPreferredUILanguages(
+    _In_ ULONG Flags,
+    _In_opt_ PCWSTR LocaleName,
+    _Out_ PULONG NumLanguages,
+    _Out_writes_opt_z_(*LanguagesCchSize) PWSTR LanguagesBuffer,
+    _Inout_ PULONG LanguagesCchSize
+);
+
 // Nt*/Zw*
 
 NTSYSAPI
