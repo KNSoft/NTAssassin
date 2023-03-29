@@ -1,0 +1,3 @@
+LIBRARY KERNEL32
+EXPORTS
+    CreateProcessInternalW

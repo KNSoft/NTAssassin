@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="$(VCToolsInstallDir)crt\src\vcruntime\fltused.cpp">
+      <Filter>MSVCRT</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="MSVCRT">
+      <UniqueIdentifier>{da90e511-7714-4011-9b57-a446c790fe32}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

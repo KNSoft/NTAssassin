@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <MASM Include="$(VCToolsInstallDir)crt\src\i386\llmul.asm">
+      <Filter>MSVCRT</Filter>
+    </MASM>
+    <MASM Include="$(VCToolsInstallDir)crt\src\i386\llshl.asm">
+      <Filter>MSVCRT</Filter>
+    </MASM>
+    <MASM Include="$(VCToolsInstallDir)crt\src\i386\llshr.asm">
+      <Filter>MSVCRT</Filter>
+    </MASM>
+    <MASM Include="$(VCToolsInstallDir)crt\src\i386\ullshr.asm">
+      <Filter>MSVCRT</Filter>
+    </MASM>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="MSVCRT">
+      <UniqueIdentifier>{9df053b2-e410-4a24-b9b0-b52d4445d237}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

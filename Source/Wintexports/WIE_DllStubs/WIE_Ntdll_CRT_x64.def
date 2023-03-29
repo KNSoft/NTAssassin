@@ -1,0 +1,8 @@
+LIBRARY ntdll
+EXPORTS
+    __C_specific_handler
+    __misaligned_access
+    _local_unwind
+    _setjmp
+    _setjmpex
+    longjmp

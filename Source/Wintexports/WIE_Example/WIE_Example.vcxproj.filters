@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="UserMode">
+      <UniqueIdentifier>{cd256f9c-732a-4d96-9f68-cd152cf38bd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="KernelMode">
+      <UniqueIdentifier>{92e74e45-269c-4db5-87f7-6ca88d3d4c52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shared">
+      <UniqueIdentifier>{96ac08f8-dbd5-4eb9-b8e2-fbfa6563eb7e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Wintexports.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Include\WIE_Extended.h" />
+    <ClInclude Include="..\Include\Wintexports.h" />
+    <ClInclude Include="..\Include\WIE_Arch_Supp.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_ntdef.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_RtlTypes_Supp.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_ExTypes_Supp.h">
+      <Filter>KernelMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_fltKernel.h">
+      <Filter>KernelMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_KeTypes_Supp.h">
+      <Filter>KernelMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_ntddk.h">
+      <Filter>KernelMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_ntifs.h">
+      <Filter>KernelMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_wdm.h">
+      <Filter>KernelMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_CommCtrl.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_Hash_Supp.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_Internal_Supp.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_Kernel32_API.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_Ntdll_API.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_User32_API.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_Windows.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_Winnt_Supp.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_WinSta.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\WIE_WinUser.h">
+      <Filter>UserMode</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

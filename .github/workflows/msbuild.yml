@@ -1,0 +1,30 @@
+name: MSBuild
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  SOLUTION_FILE_PATH: .\Source\NTAssassin.sln
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        platform: [x64, x86]
+        config: [Debug, Release]
+      fail-fast: false
+    runs-on: windows-latest
+    steps:
+    - name: Source checkout
+      uses: actions/checkout@main
+    - name: Prepare MSBuild
+      uses: microsoft/setup-msbuild@main
+    - name: Build
+      working-directory: ${{env.GITHUB_WORKSPACE}}
+      run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}

@@ -1,15 +1,14 @@
 <Project>
-    <!-- Import before Microsoft.Cpp.props -->
-    <PropertyGroup>
-        <ForceImportBeforeCppProps>$(MsbuildThisFileDirectory)\KNSoft.Before.Cpp.props</ForceImportBeforeCppProps>
-    </PropertyGroup>
     <!-- Customize builds -->
+    <PropertyGroup>
+        <ForceImportAfterCppDefaultProps>$(MsbuildThisFileDirectory)\KNSoft.After.Cpp.Default.props</ForceImportAfterCppDefaultProps>
+    </PropertyGroup>
     <ItemDefinitionGroup>
         <ClCompile>
+            <WarningLevel>Level3</WarningLevel>
             <LanguageStandard>stdcpp20</LanguageStandard>
             <LanguageStandard_C>stdc17</LanguageStandard_C>
             <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-            <ExceptionHandling>false</ExceptionHandling>
         </ClCompile>
     </ItemDefinitionGroup>
     <!-- Import outer Directory.Build.props if exists -->
