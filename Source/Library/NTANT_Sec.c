@@ -28,15 +28,12 @@ NTSTATUS NTAPI NT_CopySid(_In_ ULONG Size, _Out_ PSID SidDst, _In_ PSID SidSrc)
     }
 }
 
-static UNICODE_STRING LsaPidRegPath = RTL_CONSTANT_STRING(L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Control\\Lsa");
-static UNICODE_STRING LsaPidRegValue = RTL_CONSTANT_STRING(L"LsaPid");
-
 DWORD NTAPI NT_GetLsaPid()
 {
     DWORD Pid = 0;
-    HANDLE hKey = NT_RegOpenKey(&LsaPidRegPath, KEY_QUERY_VALUE);
+    HANDLE hKey = NT_RegOpenKey(&(UNICODE_STRING)RTL_CONSTANT_STRING(L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Control\\Lsa"), KEY_QUERY_VALUE);
     if (hKey) {
-        NT_RegGetDword(hKey, &LsaPidRegValue, &Pid);
+        NT_RegGetDword(hKey, &(UNICODE_STRING)RTL_CONSTANT_STRING(L"LsaPid"), &Pid);
         NtClose(hKey);
     }
     return Pid;
@@ -45,6 +42,9 @@ DWORD NTAPI NT_GetLsaPid()
 HANDLE NTAPI NT_DuplicateSystemToken(_In_ DWORD PID, _In_ TOKEN_TYPE Type, _In_reads_(PrivilegeCount) PULONG PrivilegeToEnable, _In_ DWORD PrivilegeCount)
 {
     HANDLE hDuplicatedToken = NULL;
+    SECURITY_QUALITY_OF_SERVICE sqos;
+    OBJECT_ATTRIBUTES oa;
+
     HANDLE hProc = RProc_Open(PROCESS_QUERY_LIMITED_INFORMATION, PID);
     if (hProc) {
         HANDLE hToken;
@@ -53,8 +53,8 @@ HANDLE NTAPI NT_DuplicateSystemToken(_In_ DWORD PID, _In_ TOKEN_TYPE Type, _In_r
         if (NT_SUCCESS(Status)) {
             POBJECT_ATTRIBUTES poa;
             if (Type == TokenImpersonation) {
-                SECURITY_QUALITY_OF_SERVICE sqos = { sizeof(sqos), DEFAULT_IMPERSONATION_LEVEL, SECURITY_DYNAMIC_TRACKING, FALSE };
-                OBJECT_ATTRIBUTES oa = { sizeof(oa), NULL, NULL, 0, NULL, &sqos };
+                sqos = (SECURITY_QUALITY_OF_SERVICE){ sizeof(sqos), DEFAULT_IMPERSONATION_LEVEL, SECURITY_STATIC_TRACKING, FALSE };
+                oa = (OBJECT_ATTRIBUTES){ sizeof(oa), NULL, NULL, 0, NULL, &sqos };
                 poa = &oa;
             } else {
                 poa = NULL;

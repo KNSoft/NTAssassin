@@ -9,7 +9,7 @@
 /// <param name="Multiplier">Multiplier converts us to other unit</param>
 /// <returns>Time interval from PrevTime to now, or current time if PrevTime is 0</returns>
 NTA_API ULONGLONG NTAPI Time_StopWatchEx(ULONGLONG PrevTime, ULONG Multiplier);
-#define Time_StopWatch1ms(PrevTime) Time_StopWatchEx(PrevTime, 1000000)
+#define Time_StopWatch1ms(PrevTime) Time_StopWatchEx(PrevTime, 1000)
 #define Time_StopWatch Time_StopWatch1ms
 
 /// <summary>

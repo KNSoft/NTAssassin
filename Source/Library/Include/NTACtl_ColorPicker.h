@@ -6,7 +6,7 @@
 /// Subclasses a button control to be a RGB color picker
 /// </summary>
 /// <param name="ButtonCtl">Handle to the button control</param>
-/// <param name="Color"> Initial color, or CTL_COLORPICKER_NOCOLOR</param>
+/// <param name="Color"> Initial color, or CLR_INVALID</param>
 /// <returns>TRUE if succeeded, or FALSE if failed, no error code reports due to SetWindowSubclass does</returns>
 NTA_API BOOL NTAPI Ctl_SetColorPickerSubclass(HWND ButtonCtl, COLORREF Color);
 
@@ -14,13 +14,13 @@ NTA_API BOOL NTAPI Ctl_SetColorPickerSubclass(HWND ButtonCtl, COLORREF Color);
 /// Gets RGB value of color picker subclassed by "Ctl_SetColorPickerSubclass"
 /// </summary>
 /// <param name="ButtonCtl">Handle to the button control</param>
-/// <returns>RGB value or CTL_COLORPICKER_NOCOLOR</returns>
+/// <returns>RGB value or CLR_INVALID</returns>
 NTA_API COLORREF NTAPI Ctl_GetColorPickerValue(HWND ButtonCtl);
 
 /// <summary>
 /// Sets RGB value of color picker subclassed by "Ctl_SetColorPickerSubclass"
 /// </summary>
 /// <param name="ButtonCtl">Handle to the button control</param>
-/// <param name="Color">RGB value to set or CTL_COLORPICKER_NOCOLOR</param>
+/// <param name="Color">RGB value to set or CLR_INVALID</param>
 /// <returns>TRUE if succeeded, or FALSE if failed, error code storaged in last ERROR</returns>
 NTA_API BOOL NTAPI Ctl_SetColorPickerValue(HWND ButtonCtl, COLORREF Color);

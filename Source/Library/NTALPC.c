@@ -17,6 +17,8 @@ BOOL NTAPI LPC_ServerRegisterIfSpec(_In_ RPC_IF_HANDLE IfSpec, _In_opt_ RPC_IF_C
         goto _Error;
     }
 
+    return TRUE;
+
 _Error:
     WIE_SetLastError(Status);
     return FALSE;

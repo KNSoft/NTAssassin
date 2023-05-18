@@ -74,5 +74,8 @@
     <ClInclude Include="..\Include\WIE_WinUser.h">
       <Filter>UserMode</Filter>
     </ClInclude>
+    <ClInclude Include="..\Include\WIE_CPU.h">
+      <Filter>Shared</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

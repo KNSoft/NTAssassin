@@ -1,11 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="NTABase">
-      <UniqueIdentifier>{30a7e2f4-4210-4b4d-9ea8-366632e0423e}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="Precomp4C.Output.c" />
     <ClCompile Include="NTACon.c" />
     <ClCompile Include="NTACtl.c" />
