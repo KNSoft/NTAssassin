@@ -82,11 +82,11 @@ HMODULE NTAPI Proc_LoadDll(_In_z_ PCWSTR LibName, BOOL DontResolveRef)
 PVOID NTAPI Proc_GetProcAddr(_In_ HMODULE Module, _In_z_ PCSTR ProcName)
 {
     PANSI_STRING    pstProcName;
+    ANSI_STRING     stProcName;
     ULONG           ulProcOrd;
     PVOID           pProc;
     NTSTATUS        lStatus;
     if ((UINT_PTR)ProcName > MAXWORD) {
-        ANSI_STRING stProcName;
         stProcName.Length = (USHORT)Str_LenA(ProcName);
         stProcName.MaximumLength = stProcName.Length + sizeof(CHAR);
         stProcName.Buffer = (PCHAR)ProcName;

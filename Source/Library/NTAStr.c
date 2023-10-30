@@ -160,11 +160,11 @@ SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZ
             break;
         }
         // Surrogate Pair
-        if (ch >= 0xD800 && ch <= 0xDBFF && Src[cChSrc + 1] != '\0' && Src[cChSrc + 1] >= 0xDC00 && Src[cChSrc + 1] <= 0xDFFF) {
-            ch = ((ch - 0xD800) << 10 | (Src[cChSrc + 1] - 0xDC00)) + 0x010000;
+        if (ch >= HIGH_SURROGATE_START && ch <= HIGH_SURROGATE_END && Src[cChSrc + 1] != '\0' && Src[cChSrc + 1] >= LOW_SURROGATE_START && Src[cChSrc + 1] <= LOW_SURROGATE_END) {
+            ch = ((ch - HIGH_SURROGATE_START) << 10 | (Src[cChSrc + 1] - LOW_SURROGATE_START)) + 0x010000;
             cChSrc++;
             goto Label_Encode;
-        } else if (ch < 0xDC00 || ch > 0xDFFF)
+        } else if (ch < LOW_SURROGATE_START || ch > LOW_SURROGATE_END)
             goto Label_Encode;
         // Invalid character
         ch = 0xFFFD;

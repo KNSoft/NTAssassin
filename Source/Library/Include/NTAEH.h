@@ -62,6 +62,3 @@ NTA_API VOID NTAPI EH_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status);
 
 // Error code converts
 NTA_API DWORD NTAPI EH_HrToWin32(HRESULT hr);
-#define EH_Win32ToHr HRESULT_FROM_WIN32
-#define EH_StatusToWin32 RtlNtStatusToDosErrorNoTeb
-#define EH_StatusToHr HRESULT_FROM_NT
