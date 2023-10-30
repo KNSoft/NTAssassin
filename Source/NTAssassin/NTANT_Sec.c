@@ -1,7 +1,7 @@
 ﻿#include "Include\NTANT.h"
 
 #include <ntsecapi.h>
-#include "WIE_WinSta.h"
+#include <Wintexports/WIE_WinSta_API.h>
 
 #include "Include\NTAEH.h"
 #include "Include\NTARProc.h"

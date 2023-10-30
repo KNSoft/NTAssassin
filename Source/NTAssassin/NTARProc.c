@@ -8,11 +8,6 @@
 #include "Include\NTASys.h"
 
 #pragma comment(lib, "UserEnv.lib")
-#pragma comment(lib, "WIE_Kernel32.lib")
-
-#if !defined(_WINTEXPORTS_)
-static PFNCreateProcessInternalW pfnCreateProcessInternalW = NULL;
-#endif
 
 _Check_return_
 HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR ApplicationName, _Inout_opt_ LPWSTR CommandLine, _In_ BOOL InheritHandles, _In_opt_ PCWSTR CurrentDirectory, _In_opt_ LPSTARTUPINFOW StartupInfo)
@@ -21,16 +16,6 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
     PROCESS_INFORMATION pi;
     DWORD dwCreationFlags = NORMAL_PRIORITY_CLASS | CREATE_NEW_CONSOLE | CREATE_DEFAULT_ERROR_MODE;
     PVOID pEnv = NULL;
-
-    #if !defined(_WINTEXPORTS_)
-    if (!pfnCreateProcessInternalW) {
-        pfnCreateProcessInternalW = (PFNCreateProcessInternalW)Sys_LoadAPI(SysDllNameKernel32, "CreateProcessInternalW");
-        if (!pfnCreateProcessInternalW) {
-            EH_SetLastNTError(WIE_GetLastStatus());
-            return NULL;
-        }
-    }
-    #endif
 
     if (TokenHandle) {
         if (CreateEnvironmentBlock(&pEnv, TokenHandle, FALSE)) {
@@ -45,13 +30,18 @@ HANDLE NTAPI RProc_Create(_In_opt_ HANDLE TokenHandle, _In_opt_ PCWSTR Applicati
         psi = &si;
     }
 
-    if (
-    #if defined(_WINTEXPORTS_)
-    CreateProcessInternalW
-    #else
-    pfnCreateProcessInternalW
-    #endif
-    (TokenHandle, ApplicationName, CommandLine, NULL, NULL, InheritHandles, dwCreationFlags, pEnv, CurrentDirectory, psi, &pi, NULL)) {
+    if (CreateProcessInternalW(TokenHandle,
+                               ApplicationName,
+                               CommandLine,
+                               NULL,
+                               NULL,
+                               InheritHandles,
+                               dwCreationFlags,
+                               pEnv,
+                               CurrentDirectory,
+                               psi,
+                               &pi,
+                               NULL)) {
         NtClose(pi.hThread);
         hProc = pi.hProcess;
     }

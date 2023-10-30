@@ -27,4 +27,4 @@ jobs:
       uses: microsoft/setup-msbuild@main
     - name: Build
       working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: msbuild /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} ${{env.SOLUTION_FILE_PATH}}
+      run: msbuild ${{env.SOLUTION_FILE_PATH}} /restore /m /p:Configuration=${{matrix.config}} /p:Platform=${{matrix.platform}} /p:RestorePackagesConfig=true

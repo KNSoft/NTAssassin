@@ -77,4 +77,7 @@
     <ClInclude Include="Include\NTAUI.h" />
     <ClInclude Include="Include\NTAWS.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
 </Project>

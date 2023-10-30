@@ -1,17 +1,18 @@
 ﻿#pragma once
 
 /* Depend on Winexports */
-
-#define WIN32_LEAN_AND_MEAN
 #define OEMRESOURCE
 #define STRICT_TYPED_ITEMIDS
 
-#ifndef _WINTEXPORTS_
-#include "Wintexports.h"
-#endif
+#include <Wintexports/Wintexports.h>
+#include <Wintexports/WIE_CommCtrl.h>
 
-#include <suppress.h>
-#include "WIE_CommCtrl.h"
+#pragma comment(lib, "WIE_WinAPI.lib")
+
+#if defined(_VC_NODEFAULTLIB)
+#define _NO_CRT_STDIO_INLINE
+#pragma comment(lib, "WIE_CRT.lib")
+#endif
 
 #include "NTAssassin_Type.h"
 
@@ -25,7 +26,6 @@
 #define NTA_API DECLSPEC_IMPORT
 #else
 #define NTA_API DECLSPEC_EXPORT
-#pragma comment(lib, VS_CONFIGURATION"\\WIE_CRT.lib")
 #endif
 #else
 #define NTA_API

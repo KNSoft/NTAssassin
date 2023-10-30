@@ -1,7 +1,7 @@
 <Project>
     <!-- Customize builds -->
     <PropertyGroup>
-        <ForceImportAfterCppDefaultProps>$(MsbuildThisFileDirectory)\KNSoft.After.Cpp.Default.props</ForceImportAfterCppDefaultProps>
+        <ForceImportAfterCppDefaultProps>$(MsbuildThisFileDirectory)\Directory.Build.AfterCppDefault.props</ForceImportAfterCppDefaultProps>
     </PropertyGroup>
     <ItemDefinitionGroup>
         <ClCompile>
