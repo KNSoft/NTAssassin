@@ -13,7 +13,8 @@
 
 static LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-    if (uMsg == WM_PAINT && IsWindowEnabled(hWnd)) {
+    if (uMsg == WM_PAINT && IsWindowEnabled(hWnd))
+    {
         UI_WINDBPAINT   ps;
         TCHAR           szColor[HEX_RGB_CCH];
         COLORREF        cr;
@@ -24,7 +25,8 @@ static LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg,
         SelectBrush(ps.DC, GetStockBrush(BLACK_BRUSH));
         GDI_FrameRect(ps.DC, &ps.Rect, -1, PATCOPY);
         SetTextColor(ps.DC, UI_InverseRGB(cr));
-        if (cr == CLR_INVALID) {
+        if (cr == CLR_INVALID)
+        {
             szColor[0] = '?';
             szColor[1] = '\0';
         } else if (!Str_RGBToHex(cr, szColor))
@@ -33,16 +35,19 @@ static LRESULT CALLBACK Ctl_SetColorPickerSubclass_WndProc(HWND hWnd, UINT uMsg,
         DrawText(ps.DC, szColor, -1, &ps.Rect, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
         UI_EndPaint(hWnd, &ps);
         return 0;
-    } else if (uMsg == WM_LBUTTONUP || uMsg == WM_RBUTTONUP) {
+    } else if (uMsg == WM_LBUTTONUP || uMsg == WM_RBUTTONUP)
+    {
         COLORREF    cr;
         cr = Ctl_GetColorPickerValue(hWnd);
-        if (Dlg_ChooseColor(hWnd, &cr)) {
+        if (Dlg_ChooseColor(hWnd, &cr))
+        {
             cr &= 0xFFFFFF;
             Ctl_SetColorPickerValue(hWnd, cr);
             SendMessage(GetParent(hWnd), WM_COMMAND, MAKEWPARAM(GetWindowLongPtr(hWnd, GWL_ID), BN_CLICKED), (LPARAM)hWnd);
         }
         return 0;
-    } else if (uMsg == WM_ENABLE && wParam == TRUE) {
+    } else if (uMsg == WM_ENABLE && wParam == TRUE)
+    {
         UI_Redraw(hWnd);
         return 0;
     } else

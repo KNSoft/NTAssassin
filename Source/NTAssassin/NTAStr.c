@@ -19,8 +19,10 @@ NTA_API SIZE_T NTAPI Str_LenA(PCSTR String)
 SIZE_T NTAPI Str_CopyExW(_Out_writes_z_(DestCchSize) PWSTR Dest, SIZE_T DestCchSize, _In_ PCWSTR Src)
 {
     SIZE_T i = 0;
-    while (i < DestCchSize) {
-        if ((Dest[i] = Src[i]) == UNICODE_NULL) {
+    while (i < DestCchSize)
+    {
+        if ((Dest[i] = Src[i]) == UNICODE_NULL)
+        {
             return i;
         }
         i++;
@@ -31,8 +33,10 @@ SIZE_T NTAPI Str_CopyExW(_Out_writes_z_(DestCchSize) PWSTR Dest, SIZE_T DestCchS
 SIZE_T NTAPI Str_CopyExA(_Out_writes_z_(DestCchSize) PSTR Dest, SIZE_T DestCchSize, _In_ PCSTR Src)
 {
     SIZE_T i = 0;
-    while (i < DestCchSize) {
-        if ((Dest[i] = Src[i]) == ANSI_NULL) {
+    while (i < DestCchSize)
+    {
+        if ((Dest[i] = Src[i]) == ANSI_NULL)
+        {
             return i;
         }
         i++;
@@ -56,7 +60,8 @@ INT NTAPI Str_ICmpW(_In_ PCWSTR String1, _In_ PCWSTR String2)
 {
     SIZE_T	i = 0;
     INT		iRes;
-    do {
+    do
+    {
         iRes = Str_LowerChar(String1[i]) - Str_LowerChar(String2[i]);
         i++;
     } while (iRes == 0 && String1[i] != UNICODE_NULL);
@@ -67,7 +72,8 @@ INT NTAPI Str_ICmpA(_In_ PCSTR String1, _In_ PCSTR String2)
 {
     SIZE_T	i = 0;
     INT		iRes;
-    do {
+    do
+    {
         iRes = Str_LowerChar(String1[i]) - Str_LowerChar(String2[i]);
         i++;
     } while (iRes == 0 && String1[i] != ANSI_NULL);
@@ -152,15 +158,18 @@ SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZ
     PSTR        psz = Dest;
     ULONG       ch;
     SIZE_T      uChLength;
-    while (TRUE) {
+    while (TRUE)
+    {
         ch = Src[cChSrc];
-        if (ch == UNICODE_NULL) {
-        Label_Terminate:
+        if (ch == UNICODE_NULL)
+        {
+Label_Terminate:
             psz[0] = ANSI_NULL;
             break;
         }
         // Surrogate Pair
-        if (ch >= HIGH_SURROGATE_START && ch <= HIGH_SURROGATE_END && Src[cChSrc + 1] != '\0' && Src[cChSrc + 1] >= LOW_SURROGATE_START && Src[cChSrc + 1] <= LOW_SURROGATE_END) {
+        if (ch >= HIGH_SURROGATE_START && ch <= HIGH_SURROGATE_END && Src[cChSrc + 1] != '\0' && Src[cChSrc + 1] >= LOW_SURROGATE_START && Src[cChSrc + 1] <= LOW_SURROGATE_END)
+        {
             ch = ((ch - HIGH_SURROGATE_START) << 10 | (Src[cChSrc + 1] - LOW_SURROGATE_START)) + 0x010000;
             cChSrc++;
             goto Label_Encode;
@@ -169,26 +178,30 @@ SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZ
         // Invalid character
         ch = 0xFFFD;
         // Encode, ch always <= 0x10FFFF (MAX_UCSCHAR)
-    Label_Encode:
-        if (ch <= 0x7F) {
+Label_Encode:
+        if (ch <= 0x7F)
+        {
             uChLength = 1;
             if (psz - Dest + uChLength >= DestCchSize)
                 goto Label_Terminate;
             psz[0] = ch & 0b01111111;
-        } else if (ch <= 0x7FF) {
+        } else if (ch <= 0x7FF)
+        {
             uChLength = 2;
             if (psz - Dest + uChLength >= DestCchSize)
                 goto Label_Terminate;
             psz[0] = 0b11000000 | (ch >> 6 & 0b00011111);
             psz[1] = 0b10000000 | (ch >> 0 & 0b00111111);
-        } else if (ch <= 0xFFFF) {
+        } else if (ch <= 0xFFFF)
+        {
             uChLength = 3;
             if (psz - Dest + uChLength >= DestCchSize)
                 goto Label_Terminate;
             psz[0] = 0b11100000 | (ch >> 12 & 0b00001111);
             psz[1] = 0b10000000 | (ch >> 6 & 0b00111111);
             psz[2] = 0b10000000 | (ch >> 0 & 0b00111111);
-        } else {
+        } else
+        {
             uChLength = 4;
             if (psz - Dest + uChLength >= DestCchSize)
                 goto Label_Terminate;
@@ -205,8 +218,10 @@ SIZE_T NTAPI Str_UnicodeToUTF8Ex(_Out_writes_z_(DestCchSize) PSTR Dest, _In_ SIZ
 
 VOID NTAPI Str_UpperW(_Inout_ PWSTR String)
 {
-    while (*String != UNICODE_NULL) {
-        if (Str_IsLowerChar(*String)) {
+    while (*String != UNICODE_NULL)
+    {
+        if (Str_IsLowerChar(*String))
+        {
             *String = Str_InverseCaseChar(*String);
         }
         String++;
@@ -215,8 +230,10 @@ VOID NTAPI Str_UpperW(_Inout_ PWSTR String)
 
 VOID NTAPI Str_UpperA(_Inout_ PSTR String)
 {
-    while (*String != ANSI_NULL) {
-        if (Str_IsLowerChar(*String)) {
+    while (*String != ANSI_NULL)
+    {
+        if (Str_IsLowerChar(*String))
+        {
             *String = Str_InverseCaseChar(*String);
         }
         String++;
@@ -225,8 +242,10 @@ VOID NTAPI Str_UpperA(_Inout_ PSTR String)
 
 VOID NTAPI Str_LowerW(_Inout_ PWSTR String)
 {
-    while (*String != UNICODE_NULL) {
-        if (Str_IsUpperChar(*String)) {
+    while (*String != UNICODE_NULL)
+    {
+        if (Str_IsUpperChar(*String))
+        {
             *String = Str_InverseCaseChar(*String);
         }
         String++;
@@ -235,8 +254,10 @@ VOID NTAPI Str_LowerW(_Inout_ PWSTR String)
 
 VOID NTAPI Str_LowerA(_Inout_ PSTR String)
 {
-    while (*String != ANSI_NULL) {
-        if (Str_IsUpperChar(*String)) {
+    while (*String != ANSI_NULL)
+    {
+        if (Str_IsUpperChar(*String))
+        {
             *String = Str_InverseCaseChar(*String);
         }
         String++;
@@ -272,13 +293,16 @@ BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_wri
     BOOL    bMinus;
     if (*psz == UNICODE_NULL)
         return FALSE;
-    if (*psz == L'-') {
-        if (!Unsigned) {
+    if (*psz == L'-')
+    {
+        if (!Unsigned)
+        {
             psz++;
             bMinus = TRUE;
         } else
             return FALSE;
-    } else if (*psz == L'+') {
+    } else if (*psz == L'+')
+    {
         psz++;
         bMinus = FALSE;
     } else
@@ -286,28 +310,35 @@ BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_wri
 
     // Base
     UINT    uBase;
-    if (Base == 0) {
+    if (Base == 0)
+    {
         if (*psz == UNICODE_NULL)
             return FALSE;
-        if (*psz == L'0') {
+        if (*psz == L'0')
+        {
             psz++;
-            if (*psz == UNICODE_NULL) {
+            if (*psz == UNICODE_NULL)
+            {
                 uTotal = 0;
                 goto Label_Output;
-            } else if (*psz == L'b') {
+            } else if (*psz == L'b')
+            {
                 psz++;
                 uBase = 2;
-            } else if (*psz == L'o') {
+            } else if (*psz == L'o')
+            {
                 psz++;
                 uBase = 8;
-            } else if (*psz == L'x') {
+            } else if (*psz == L'x')
+            {
                 psz++;
                 uBase = 16;
             } else
                 uBase = 10;
         } else
             uBase = 10;
-    } else if (Base == 2 || Base == 8 || Base == 16) {
+    } else if (Base == 2 || Base == 8 || Base == 16)
+    {
         uBase = Base;
     } else
         return FALSE;
@@ -330,11 +361,15 @@ BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_wri
     USHORT  uc;
     UINT64  uTemp;
     uTotal = 0;
-    if (uBase == 2) {
-        while ((wc = *psz++) != UNICODE_NULL) {
-            if (wc == L'0') {
+    if (uBase == 2)
+    {
+        while ((wc = *psz++) != UNICODE_NULL)
+        {
+            if (wc == L'0')
+            {
                 uTemp = uTotal << 1;
-            } else if (wc == L'1') {
+            } else if (wc == L'1')
+            {
                 uTemp = (uTotal << 1) | 1;
             } else
                 return FALSE;
@@ -342,9 +377,12 @@ BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_wri
                 return FALSE;
             uTotal = uTemp;
         }
-    } else if (uBase == 8) {
-        while ((wc = *psz++) != UNICODE_NULL) {
-            if (wc >= L'0' && wc <= L'7') {
+    } else if (uBase == 8)
+    {
+        while ((wc = *psz++) != UNICODE_NULL)
+        {
+            if (wc >= L'0' && wc <= L'7')
+            {
                 uc = wc - L'0';
             } else
                 return FALSE;
@@ -353,9 +391,12 @@ BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_wri
                 return FALSE;
             uTotal = uTemp;
         }
-    } else if (uBase == 10) {
-        while ((wc = *psz++) != UNICODE_NULL) {
-            if (wc >= L'0' && wc <= L'9') {
+    } else if (uBase == 10)
+    {
+        while ((wc = *psz++) != UNICODE_NULL)
+        {
+            if (wc >= L'0' && wc <= L'9')
+            {
                 uc = wc - L'0';
             } else
                 return FALSE;
@@ -364,13 +405,18 @@ BOOL NTAPI Str_ToIntExW(_In_ PCWSTR StrValue, BOOL Unsigned, UINT Base, _Out_wri
                 return FALSE;
             uTotal = uTemp;
         }
-    } else if (uBase == 16) {
-        while ((wc = *psz++) != UNICODE_NULL) {
-            if (wc >= L'0' && wc <= L'9') {
+    } else if (uBase == 16)
+    {
+        while ((wc = *psz++) != UNICODE_NULL)
+        {
+            if (wc >= L'0' && wc <= L'9')
+            {
                 uc = wc - L'0';
-            } else if (wc >= L'A' && wc <= L'F') {
+            } else if (wc >= L'A' && wc <= L'F')
+            {
                 uc = wc - L'A' + 10;
-            } else if (wc >= L'a' && wc <= L'f') {
+            } else if (wc >= L'a' && wc <= L'f')
+            {
                 uc = wc - L'a' + 10;
             } else
                 return FALSE;
@@ -408,13 +454,16 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
     BOOL    bMinus;
     if (*psz == ANSI_NULL)
         return FALSE;
-    if (*psz == '-') {
-        if (!Unsigned) {
+    if (*psz == '-')
+    {
+        if (!Unsigned)
+        {
             psz++;
             bMinus = TRUE;
         } else
             return FALSE;
-    } else if (*psz == '+') {
+    } else if (*psz == '+')
+    {
         psz++;
         bMinus = FALSE;
     } else
@@ -422,27 +471,33 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
 
     // Base
     UINT    uBase;
-    if (Base == 0) {
+    if (Base == 0)
+    {
         if (*psz == ANSI_NULL)
             return FALSE;
-        if (*psz == '0') {
+        if (*psz == '0')
+        {
             psz++;
             if (*psz == ANSI_NULL)
                 return FALSE;
-            if (*psz == 'b') {
+            if (*psz == 'b')
+            {
                 psz++;
                 uBase = 2;
-            } else if (*psz == 'o') {
+            } else if (*psz == 'o')
+            {
                 psz++;
                 uBase = 8;
-            } else if (*psz == 'x') {
+            } else if (*psz == 'x')
+            {
                 psz++;
                 uBase = 16;
             } else
                 uBase = 10;
         } else
             uBase = 10;
-    } else if (Base == 2 || Base == 8 || Base == 16) {
+    } else if (Base == 2 || Base == 8 || Base == 16)
+    {
         uBase = Base;
     } else
         return FALSE;
@@ -464,11 +519,15 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
     CHAR    ch;
     USHORT  uc;
     UINT64  uTotal = 0, uTemp;
-    if (uBase == 2) {
-        while ((ch = *psz++) != ANSI_NULL) {
-            if (ch == '0') {
+    if (uBase == 2)
+    {
+        while ((ch = *psz++) != ANSI_NULL)
+        {
+            if (ch == '0')
+            {
                 uTemp = uTotal << 1;
-            } else if (ch == '1') {
+            } else if (ch == '1')
+            {
                 uTemp = (uTotal << 1) | 1;
             } else
                 return FALSE;
@@ -476,9 +535,12 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
                 return FALSE;
             uTotal = uTemp;
         }
-    } else if (uBase == 8) {
-        while ((ch = *psz++) != ANSI_NULL) {
-            if (ch >= '0' && ch <= '7') {
+    } else if (uBase == 8)
+    {
+        while ((ch = *psz++) != ANSI_NULL)
+        {
+            if (ch >= '0' && ch <= '7')
+            {
                 uc = ch - '0';
             } else
                 return FALSE;
@@ -487,9 +549,12 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
                 return FALSE;
             uTotal = uTemp;
         }
-    } else if (uBase == 10) {
-        while ((ch = *psz++) != ANSI_NULL) {
-            if (ch >= '0' && ch <= '9') {
+    } else if (uBase == 10)
+    {
+        while ((ch = *psz++) != ANSI_NULL)
+        {
+            if (ch >= '0' && ch <= '9')
+            {
                 uc = ch - '0';
             } else
                 return FALSE;
@@ -498,13 +563,18 @@ BOOL NTAPI Str_ToIntExA(_In_ PCSTR StrValue, BOOL Unsigned, UINT Base, _Out_writ
                 return FALSE;
             uTotal = uTemp;
         }
-    } else if (uBase == 16) {
-        while ((ch = *psz++) != ANSI_NULL) {
-            if (ch >= '0' && ch <= '9') {
+    } else if (uBase == 16)
+    {
+        while ((ch = *psz++) != ANSI_NULL)
+        {
+            if (ch >= '0' && ch <= '9')
+            {
                 uc = ch - '0';
-            } else if (ch >= 'A' && ch <= 'F') {
+            } else if (ch >= 'A' && ch <= 'F')
+            {
                 uc = ch - 'A' + 10;
-            } else if (ch >= 'a' && ch <= 'f') {
+            } else if (ch >= 'a' && ch <= 'f')
+            {
                 uc = ch - 'a' + 10;
             } else
                 return FALSE;
@@ -559,7 +629,8 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
 
     // Find max divisor
     UINT64 uDivisorTemp = Base;
-    do {
+    do
+    {
         uDivisor = uDivisorTemp;
         uDivisorTemp = uPowerFlag ? uDivisorTemp << uPowerFlag : uDivisorTemp * 10;
     } while (uTotal >= uDivisorTemp && uDivisorTemp > uDivisor);
@@ -568,21 +639,27 @@ BOOL NTAPI Str_FromIntExW(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
     BOOL bRet = TRUE;
     if (bNegative)
         *psz++ = L'-';
-    while (TRUE) {
+    while (TRUE)
+    {
         UINT64 i = uTotal / uDivisor;
         uTotal = uTotal % uDivisor;
-        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < ((ULONG_PTR)DestCchSize - 1) * sizeof(WCHAR)) {
+        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < ((ULONG_PTR)DestCchSize - 1) * sizeof(WCHAR))
+        {
             if (i != 0 || (bNegative ? psz != StrValue + 1 : psz != StrValue))
                 *psz++ = (WCHAR)(i <= 9 ? i + L'0' : i - 10 + L'A');
-        } else {
+        } else
+        {
             bRet = FALSE;
             break;
         }
-        if (uDivisor == Base) {
+        if (uDivisor == Base)
+        {
             i = uTotal;
-            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < ((ULONG_PTR)DestCchSize - 1) * sizeof(WCHAR)) {
+            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < ((ULONG_PTR)DestCchSize - 1) * sizeof(WCHAR))
+            {
                 *psz++ = (WCHAR)(i <= 9 ? i + L'0' : i - 10 + L'A');
-            } else {
+            } else
+            {
                 bRet = FALSE;
             }
             break;
@@ -621,7 +698,8 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
 
     // Find max divisor
     UINT64 uDivisorTemp = Base;
-    do {
+    do
+    {
         uDivisor = uDivisorTemp;
         uDivisorTemp = uPowerFlag ? uDivisorTemp << uPowerFlag : uDivisorTemp * 10;
     } while (uTotal >= uDivisorTemp && uDivisorTemp > uDivisor);
@@ -630,21 +708,27 @@ BOOL NTAPI Str_FromIntExA(INT64 Value, BOOL Unsigned, UINT Base, _Out_writes_z_(
     BOOL bRet = TRUE;
     if (bNegative)
         *psz++ = '-';
-    while (TRUE) {
+    while (TRUE)
+    {
         UINT64 i = uTotal / uDivisor;
         uTotal = uTotal % uDivisor;
-        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < (ULONG_PTR)DestCchSize - 1) {
+        if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < (ULONG_PTR)DestCchSize - 1)
+        {
             if (i != 0 || (bNegative ? psz != StrValue + 1 : psz != StrValue))
                 *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
-        } else {
+        } else
+        {
             bRet = FALSE;
             break;
         }
-        if (uDivisor == Base) {
+        if (uDivisor == Base)
+        {
             i = uTotal;
-            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < (ULONG_PTR)DestCchSize - 1) {
+            if ((ULONG_PTR)psz - (ULONG_PTR)StrValue < (ULONG_PTR)DestCchSize - 1)
+            {
                 *psz++ = (CHAR)(i <= 9 ? i + '0' : i - 10 + 'A');
-            } else {
+            } else
+            {
                 bRet = FALSE;
             }
             break;
@@ -667,7 +751,8 @@ BOOL NTAPI Str_RGBToHexExW(COLORREF Color, _Out_writes_z_(DestCchSize) PWSTR Des
         return FALSE;
     psz = Dest;
     *psz++ = L'#';
-    for (uCh = 0; uCh < 6; uCh++) {
+    for (uCh = 0; uCh < 6; uCh++)
+    {
         ch = (WCHAR)(dwColor & 0xF);
         ch += ch <= 9 ? L'0' : (L'A' - 0xA);
         psz[uCh] = ch;
@@ -688,7 +773,8 @@ BOOL NTAPI Str_RGBToHexExA(COLORREF Color, _Out_writes_z_(DestCchSize) PSTR Dest
         return FALSE;
     psz = Dest;
     *psz++ = '#';
-    for (uCh = 0; uCh < 6; uCh++) {
+    for (uCh = 0; uCh < 6; uCh++)
+    {
         ch = (CHAR)(dwColor & 0xF);
         ch += ch <= 9 ? '0' : ('A' - 0xA);
         psz[uCh] = ch;
@@ -706,12 +792,14 @@ DOUBLE NTAPI Str_SimplifySize(UINT64 Size, _Out_opt_ PCHAR Unit)
 {
     UINT64 uTotal = Size, uDivisor, uDivisorTemp = 1;
     UINT uTimes = 0;
-    do {
+    do
+    {
         uDivisor = uDivisorTemp;
         uDivisorTemp = uDivisorTemp << 10;
         uTimes++;
     } while (uTotal >= uDivisorTemp && uDivisorTemp > uDivisor);
-    if (Unit) {
+    if (Unit)
+    {
         *Unit = arrSizeUnitPrefix[uTimes - 1];
     }
     return uTotal / (DOUBLE)uDivisor;
@@ -724,7 +812,8 @@ DWORD NTAPI Str_Hash_X65599W(_In_ PCWSTR String)
 {
     DWORD dwHash = 0;
     PCWSTR psz;
-    for (psz = String; *psz != UNICODE_NULL; psz++) {
+    for (psz = String; *psz != UNICODE_NULL; psz++)
+    {
         dwHash = 65599 * dwHash + *psz;
     }
     return dwHash;
@@ -734,7 +823,8 @@ DWORD NTAPI Str_Hash_X65599A(_In_ PCSTR String)
 {
     DWORD dwHash = 0;
     PCSTR psz;
-    for (psz = String; *psz != ANSI_NULL; psz++) {
+    for (psz = String; *psz != ANSI_NULL; psz++)
+    {
         dwHash = 65599 * dwHash + *psz;
     }
     return dwHash;
@@ -744,7 +834,8 @@ DWORD NTAPI Str_Hash_FNV1aW(_In_ PCWSTR String)
 {
     DWORD dwHash = 2166136261U;
     PCWSTR psz;
-    for (psz = String; *psz != UNICODE_NULL; psz++) {
+    for (psz = String; *psz != UNICODE_NULL; psz++)
+    {
         dwHash ^= *psz;
         dwHash *= 16777619U;
     }
@@ -755,7 +846,8 @@ DWORD NTAPI Str_Hash_FNV1aA(_In_ PCSTR String)
 {
     DWORD dwHash = 2166136261U;
     PCSTR psz;
-    for (psz = String; *psz != ANSI_NULL; psz++) {
+    for (psz = String; *psz != ANSI_NULL; psz++)
+    {
         dwHash ^= *psz;
         dwHash *= 16777619U;
     }

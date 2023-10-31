@@ -6,13 +6,15 @@
 
 typedef struct _DATA_LIST_NODE DATA_LIST_NODE, *PDATA_LIST_NODE;
 
-struct _DATA_LIST_NODE {
+struct _DATA_LIST_NODE
+{
     PDATA_LIST_NODE Flink;  // Forward link, point to the next node
     PDATA_LIST_NODE Blink;  // Backward link, point to the previous node
     PVOID           Value;  // Node value
 };
 
-typedef struct _DATA_LIST {
+typedef struct _DATA_LIST
+{
     PDATA_LIST_NODE     First;      // Pointer to the first node
     PDATA_LIST_NODE     Last;       // Pointer to the last node
     UINT                Length;     // Number of nodes the list has

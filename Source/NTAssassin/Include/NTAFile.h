@@ -4,7 +4,8 @@
 
 #include "NTAssassin_Base.h"
 
-typedef struct _FILE_MAP {
+typedef struct _FILE_MAP
+{
     HANDLE  FileHandle;
     HANDLE  SectionHandle;
     PVOID   Map;

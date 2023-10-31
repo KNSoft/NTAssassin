@@ -15,7 +15,8 @@ PCWSTR NTAPI EH_GetErrorInfo(DWORD Error)
 {
     DWORD dwError = Error;
     if (HRESULT_SEVERITY(dwError) == SEVERITY_ERROR &&
-        HRESULT_FACILITY(dwError) == FACILITY_WIN32) {
+        HRESULT_FACILITY(dwError) == FACILITY_WIN32)
+    {
         dwError = HRESULT_CODE(dwError);
     }
     return Sys_GetMessage(Sys_LoadDll(SysDllNameKernel32), dwError);
@@ -68,19 +69,27 @@ VOID NTAPI EH_StatusMsgBox(HWND Owner, PCWSTR Title, NTSTATUS Status)
 DWORD NTAPI EH_HrToWin32(HRESULT hr)
 {
     DWORD dwError = HRESULT_CODE(hr);
-    if (hr != MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, dwError)) {
-        if (!IS_ERROR(hr)) {
+    if (hr != MAKE_HRESULT(SEVERITY_ERROR, FACILITY_WIN32, dwError))
+    {
+        if (!IS_ERROR(hr))
+        {
             dwError = ERROR_SUCCESS;
-        } else if ((DWORD)hr & FACILITY_NT_BIT) {
+        } else if ((DWORD)hr & FACILITY_NT_BIT)
+        {
             dwError = RtlNtStatusToDosErrorNoTeb(hr & (~FACILITY_NT_BIT));
-        } else {
-            if (hr == E_NOINTERFACE) {
+        } else
+        {
+            if (hr == E_NOINTERFACE)
+            {
                 dwError = ERROR_INVALID_FUNCTION;
-            } else if (hr == E_NOTIMPL) {
+            } else if (hr == E_NOTIMPL)
+            {
                 dwError = ERROR_CALL_NOT_IMPLEMENTED;
-            } else if (hr == E_UNEXPECTED) {
+            } else if (hr == E_UNEXPECTED)
+            {
                 dwError = ERROR_INVALID_DATA;
-            } else {
+            } else
+            {
                 dwError = hr;
             }
         }

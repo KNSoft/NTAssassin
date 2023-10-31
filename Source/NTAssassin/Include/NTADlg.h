@@ -9,15 +9,17 @@
 #define DLG_CONTROL_H   28
 #define DLG_BUTTON_W    124
 
-typedef struct _DLG_TEMPLATE {
+typedef struct _DLG_TEMPLATE
+{
     DLGTEMPLATE Template;
     WORD        wMenu;
     WORD        wClass;
     WORD        wTitle;
 } DLG_TEMPLATE, *PDLG_TEMPLATE;
 
-typedef struct _DLG_SCREENSNAPSHOT {
-    // Input
+typedef struct _DLG_SCREENSNAPSHOT
+{
+// Input
     WNDPROC         pfnWndProc;
     HCURSOR         hCursor;
     HINSTANCE       hInstance;
@@ -30,7 +32,8 @@ typedef struct _DLG_SCREENSNAPSHOT {
 } DLG_SCREENSNAPSHOT, *PDLG_SCREENSNAPSHOT;
 
 typedef struct _DLG_TREEVIEWPROPSHEETPAGE DLG_TREEVIEWPROPSHEETPAGE, *PDLG_TREEVIEWPROPSHEETPAGE;
-struct _DLG_TREEVIEWPROPSHEETPAGE {
+struct _DLG_TREEVIEWPROPSHEETPAGE
+{
     PWSTR       DisplayName;
     HINSTANCE   Instance;
     INT         DlgResID;
@@ -140,7 +143,8 @@ NTA_API BOOL NTAPI Dlg_RectEditor(HWND Owner, _In_opt_ PCWSTR * Strings, _Inout_
 #define DVE_VALUE_HEXDWORD      0x100
 #define DVE_VALUE_HEXQWORD      0x200
 
-typedef struct _DLG_VALUEEDITOR_CONST {
+typedef struct _DLG_VALUEEDITOR_CONST
+{
     QWORD   Value;
     PCWSTR  Name;
     PCWSTR  Info;

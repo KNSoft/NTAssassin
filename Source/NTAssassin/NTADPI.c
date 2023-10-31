@@ -10,7 +10,8 @@
 
 #pragma comment (lib, "Comctl32.lib")
 
-typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
+typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF
+{
     DWORD   dwNewDPIX;
     DWORD   dwNewDPIY;
     DWORD   dwOldDPIX;
@@ -18,8 +19,9 @@ typedef struct _DPI_SETAUTOADJUSTSUBCLASS_REF {
     HFONT   hFont;
 } DPI_SETAUTOADJUSTSUBCLASS_REF, *PDPI_SETAUTOADJUSTSUBCLASS_REF;
 
-typedef struct _DPI_APPLYTOCHILD_REF {
-    // Update DPI
+typedef struct _DPI_APPLYTOCHILD_REF
+{
+// Update DPI
     BOOL    bUpdateDPI;
     DWORD   dwNewDPIX;
     DWORD   dwNewDPIY;
@@ -45,13 +47,17 @@ static PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
 BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY)
 {
     PCKUSER_SHARED_DATA pKUSD = SharedUserData;
-    if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3)) {
-        if (!pfnGetDpiForMonitor) {
+    if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3))
+    {
+        if (!pfnGetDpiForMonitor)
+        {
             pfnGetDpiForMonitor = (PFNGetDpiForMonitor)Sys_LoadAPI(SysDllNameShcore, "GetDpiForMonitor");
         }
-        if (pfnGetDpiForMonitor) {
+        if (pfnGetDpiForMonitor)
+        {
             HMONITOR hMon = MonitorFromWindow(Window, MONITOR_DEFAULTTONULL);
-            if (hMon && pfnGetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, DPIX, DPIY) == S_OK) {
+            if (hMon && pfnGetDpiForMonitor(hMon, MDT_EFFECTIVE_DPI, DPIX, DPIY) == S_OK)
+            {
                 return TRUE;
             }
         }
@@ -86,13 +92,16 @@ static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam)
 {
     PDPI_APPLYTOCHILD_REF pstRef = (PDPI_APPLYTOCHILD_REF)lParam;
     BOOL bNeedsRedraw = FALSE;
-    if (pstRef->bUpdateFont) {
+    if (pstRef->bUpdateFont)
+    {
         SendMessage(hWnd, WM_SETFONT, (WPARAM)pstRef->hFont, FALSE);
-        if (pstRef->bRedrawFontNow) {
+        if (pstRef->bRedrawFontNow)
+        {
             bNeedsRedraw = TRUE;
         }
     }
-    if (pstRef->bUpdateDPI) {
+    if (pstRef->bUpdateDPI)
+    {
         RECT rcWnd;
         GetWindowRect(hWnd, &rcWnd);
         rcWnd.left -= pstRef->ptParent.x;
@@ -108,11 +117,13 @@ static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam)
             rcWnd.right - rcWnd.left,
             rcWnd.bottom - rcWnd.top,
             SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOREDRAW);
-        if (bNeedsRedraw) {
+        if (bNeedsRedraw)
+        {
             bNeedsRedraw = TRUE;
         }
     }
-    if (bNeedsRedraw) {
+    if (bNeedsRedraw)
+    {
         UI_Redraw(hWnd);
     }
 
@@ -121,7 +132,8 @@ static BOOL CALLBACK DPI_Subclass_DlgProc_ApplyToChild(HWND hWnd, LPARAM lParam)
 
 static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-    if (uMsg == WM_DPICHANGED) {
+    if (uMsg == WM_DPICHANGED)
+    {
         PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;
         pstRef->dwOldDPIY = pstRef->dwNewDPIY;
@@ -130,9 +142,11 @@ static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, 
 
         // Adjust rectangle, Win11 has fixed the DWM shadow problem
         PRECT prc = (PRECT)lParam;
-        if (SharedUserData->NtMajorVersion >= 10 || SharedUserData->NtBuildNumber >= 22000) {
+        if (SharedUserData->NtMajorVersion >= 10 || SharedUserData->NtBuildNumber >= 22000)
+        {
             SetWindowPos(hDlg, NULL, prc->left, prc->top, prc->right - prc->left, prc->bottom - prc->top, SWP_NOZORDER | SWP_NOACTIVATE);
-        } else {
+        } else
+        {
             UI_SetWindowRect(hDlg, prc);
         }
 
@@ -148,13 +162,16 @@ static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, 
 
         // Adjust font for child
         ChildRef.bUpdateFont = FALSE;
-        if (pstRef->hFont) {
+        if (pstRef->hFont)
+        {
             ENUMLOGFONTEXDVW FontInfo;
-            if (GDI_GetFont(pstRef->hFont, &FontInfo)) {
+            if (GDI_GetFont(pstRef->hFont, &FontInfo))
+            {
                 FontInfo.elfEnumLogfontEx.elfLogFont.lfWidth = 0;
                 DPI_ScaleInt(&FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
                 HFONT hFont = CreateFontIndirectExW(&FontInfo);
-                if (hFont) {
+                if (hFont)
+                {
                     DeleteObject(pstRef->hFont);
                     pstRef->hFont = hFont;
                     ChildRef.bUpdateFont = TRUE;
@@ -168,9 +185,11 @@ static LRESULT CALLBACK DPI_SetAutoAdjustSubclass_DlgProc(HWND hDlg, UINT uMsg, 
         UI_EnumChildWindows(hDlg, DPI_Subclass_DlgProc_ApplyToChild, (LPARAM)&ChildRef);
         UI_Redraw(hDlg);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
-    } else if (uMsg == WM_DESTROY) {
+    } else if (uMsg == WM_DESTROY)
+    {
         PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef = (PDPI_SETAUTOADJUSTSUBCLASS_REF)dwRefData;
-        if (pstRef->hFont) {
+        if (pstRef->hFont)
+        {
             DeleteObject(pstRef->hFont);
         }
         Mem_Free(pstRef);
@@ -185,37 +204,46 @@ BOOL NTAPI DPI_SetAutoAdjustSubclass(_In_ HWND Dialog, _In_opt_ PENUMLOGFONTEXDV
     UINT DPIX, DPIY;
     LONG lDelta;
     pstRef = Mem_Alloc(sizeof(DPI_SETAUTOADJUSTSUBCLASS_REF));
-    if (!pstRef) {
+    if (!pstRef)
+    {
         return FALSE;
     }
     pstRef->dwNewDPIX = pstRef->dwNewDPIY = pstRef->dwOldDPIX = pstRef->dwOldDPIY = USER_DEFAULT_SCREEN_DPI;
     if (UI_GetWindowRect(Dialog, &rcDlg) &&
-        SetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (DWORD_PTR)pstRef)) {
+        SetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (DWORD_PTR)pstRef))
+    {
         DPI_FromWindow(Dialog, &DPIX, &DPIY);
         pstRef->hFont = FontInfo ? CreateFontIndirectExW(FontInfo) : GDI_CreateDefaultFont();
-        if (DPIX != USER_DEFAULT_SCREEN_DPI) {
+        if (DPIX != USER_DEFAULT_SCREEN_DPI)
+        {
             lDelta = Math_RoundInt((rcDlg.right - rcDlg.left) * (((FLOAT)DPIX / USER_DEFAULT_SCREEN_DPI) - 1) / 2);
-            if (lDelta <= rcDlg.left) {
+            if (lDelta <= rcDlg.left)
+            {
                 rcDlg.left -= lDelta;
                 rcDlg.right += lDelta;
-            } else {
+            } else
+            {
                 rcDlg.right += 2 * lDelta - rcDlg.left;
                 rcDlg.left = 0;
             }
         }
-        if (DPIY != USER_DEFAULT_SCREEN_DPI) {
+        if (DPIY != USER_DEFAULT_SCREEN_DPI)
+        {
             lDelta = Math_RoundInt((rcDlg.bottom - rcDlg.top) * (((FLOAT)DPIY / USER_DEFAULT_SCREEN_DPI) - 1) / 2);
-            if (lDelta <= rcDlg.top) {
+            if (lDelta <= rcDlg.top)
+            {
                 rcDlg.top -= lDelta;
                 rcDlg.bottom += lDelta;
-            } else {
+            } else
+            {
                 rcDlg.bottom += 2 * lDelta - rcDlg.top;
                 rcDlg.top = 0;
             }
         }
         SendMessage(Dialog, WM_DPICHANGED, MAKEDWORD(DPIX, DPIY), (LPARAM)&rcDlg);
         return TRUE;
-    } else {
+    } else
+    {
         Mem_Free(pstRef);
         return FALSE;
     }
@@ -225,18 +253,23 @@ _Success_(return != FALSE)
 BOOL NTAPI DPI_GetAutoAdjustSubclass(_In_ HWND Dialog, _Out_opt_ PDWORD NewDPIX, _Out_opt_ PDWORD NewDPIY, _Out_opt_ HFONT * Font)
 {
     PDPI_SETAUTOADJUSTSUBCLASS_REF pstRef;
-    if (GetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (PDWORD_PTR)&pstRef)) {
-        if (NewDPIX) {
+    if (GetWindowSubclass(Dialog, DPI_SetAutoAdjustSubclass_DlgProc, 0, (PDWORD_PTR)&pstRef))
+    {
+        if (NewDPIX)
+        {
             *NewDPIX = pstRef->dwNewDPIX;
         }
-        if (NewDPIY) {
+        if (NewDPIY)
+        {
             *NewDPIY = pstRef->dwNewDPIY;
         }
-        if (Font) {
+        if (Font)
+        {
             *Font = pstRef->hFont;
         }
         return TRUE;
-    } else {
+    } else
+    {
         return FALSE;
     }
 }

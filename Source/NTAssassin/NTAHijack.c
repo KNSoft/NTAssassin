@@ -41,14 +41,17 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR
     pTemp = Add2Ptr(pTemp, sizeof(WORD));
 
     // szProcName
-    if (!wProcOrdinal) {
+    if (!wProcOrdinal)
+    {
         pTemp = (PVOID)ROUND_TO_SIZE((ULONG_PTR)pTemp, STRING_ALIGNMENT);
-        if (ProcName) {
-            // Fixme: Patches C6387, in fact, ProcName won't be NULL here
-            #pragma warning(disable: 6387)
+        if (ProcName)
+        {
+// Fixme: Patches C6387, in fact, ProcName won't be NULL here
+#pragma warning(disable: 6387)
             iCcb = Str_CopyExA((PSTR)pTemp, MAX_CIDENTIFIERNAME_CCH, ProcName);
-            #pragma warning(default: 6387)
-        } else {
+#pragma warning(default: 6387)
+        } else
+        {
             ((PSTR)pTemp)[0] = '\0';
             iCcb = 0;
         }
@@ -56,7 +59,8 @@ PVOID NTAPI Hijack_LoadProcAddr_InitParam(_Out_writes_bytes_(HIJACK_LOADPROCADDR
     }
 
     // pProc
-    if (ProcName) {
+    if (ProcName)
+    {
         *(PVOID64*)pTemp = NULL;
         *ProcAddrPointer = (PVOID64*)pTemp;
         pTemp = Add2Ptr(pTemp, sizeof(PVOID64));
@@ -79,45 +83,57 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
 
     // Maps shellcode and parameter
     RProc_InitMap(&ProcMap, ShellCode, ShellCodeSize, NULL, PAGE_EXECUTE_READ);
-    if (!RProc_MemMap(ProcessHandle, &ProcMap)) {
+    if (!RProc_MemMap(ProcessHandle, &ProcMap))
+    {
         goto Label_0;
     }
-    if (Param) {
+    if (Param)
+    {
         RProc_InitMap(&ParamMap, Param, ParamSize, NULL, PAGE_READWRITE);
-        if (!RProc_MemMap(ProcessHandle, &ParamMap)) {
+        if (!RProc_MemMap(ProcessHandle, &ParamMap))
+        {
             goto Label_1;
         }
         pParam = ParamMap.Remote;
-    } else {
+    } else
+    {
         pParam = NULL;
     }
 
     // Create remote thread and wait
-    if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pParam, FALSE, &hThread)) {
+    if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pParam, FALSE, &hThread))
+    {
         goto Label_2;
     }
 
-    if (Timeout) {
+    if (Timeout)
+    {
         NTSTATUS lStatus = Proc_WaitForObject(hThread, Timeout);
-        if (lStatus != STATUS_SUCCESS) {
-            // Keep remote memory due to the thread still running
+        if (lStatus != STATUS_SUCCESS)
+        {
+// Keep remote memory due to the thread still running
             WIE_SetLastStatus(lStatus);
             bKeepMem = TRUE;
             goto Label_3;
         }
 
         // Receive return values and parameters
-        if (ExitCode) {
-            if (!Proc_GetThreadExitCode(hThread, ExitCode)) {
+        if (ExitCode)
+        {
+            if (!Proc_GetThreadExitCode(hThread, ExitCode))
+            {
                 goto Label_3;
             }
         }
 
-        if (!pParam || RProc_ReadMemory(ProcessHandle, pParam, Param, ParamSize)) {
+        if (!pParam || RProc_ReadMemory(ProcessHandle, pParam, Param, ParamSize))
+        {
             bRet = TRUE;
         }
-    } else {
-        if (ExitCode) {
+    } else
+    {
+        if (ExitCode)
+        {
             *ExitCode = STILL_ACTIVE;
         }
         bRet = TRUE;
@@ -127,11 +143,13 @@ BOOL NTAPI Hijack_ExecShellcode(_In_ HANDLE ProcessHandle, _In_reads_bytes_(Shel
 Label_3:
     NtClose(hThread);
 Label_2:
-    if (!bKeepMem && pParam) {
+    if (!bKeepMem && pParam)
+    {
         RProc_MemUnmap(ProcessHandle, &ParamMap);
     }
 Label_1:
-    if (!bKeepMem) {
+    if (!bKeepMem)
+    {
         RProc_MemUnmap(ProcessHandle, &ProcMap);
     }
 Label_0:
@@ -146,14 +164,15 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
     PVOID64 *pProc;
     DWORD   ExitCode;
     BOOL    b32Proc;
-    #ifdef _WIN64
-    if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
+#ifdef _WIN64
+    if (!RProc_IsWow64(ProcessHandle, &b32Proc))
+    {
         return FALSE;
     }
-    #else
+#else
     b32Proc = TRUE;
-    #endif
-        // Initialize parameter
+#endif
+    // Initialize parameter
     pParam = Hijack_LoadProcAddr_InitParam(Buffer, LibName, ProcName, &pProc);
     // Create remote thread and execute
     if (Hijack_ExecShellcode(
@@ -163,13 +182,17 @@ BOOL NTAPI Hijack_LoadProcAddr(_In_ HANDLE ProcessHandle, _In_z_ PCWSTR LibName,
         pParam,
         *(PDWORD)pParam,
         &ExitCode,
-        Timeout)) {
-        if (NT_SUCCESS(ExitCode)) {
-            if (ProcAddr) {
+        Timeout))
+    {
+        if (NT_SUCCESS(ExitCode))
+        {
+            if (ProcAddr)
+            {
                 *ProcAddr = *pProc;
             }
             return TRUE;
-        } else {
+        } else
+        {
             WIE_SetLastStatus(ExitCode);
         }
     }
@@ -191,26 +214,29 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     BOOL                    b32Proc;
     BOOL                    bKeepMem = FALSE;
 
-    #ifdef _WIN64
-    if (!RProc_IsWow64(ProcessHandle, &b32Proc)) {
+#ifdef _WIN64
+    if (!RProc_IsWow64(ProcessHandle, &b32Proc))
+    {
         return FALSE;
     }
-    #else
+#else
     b32Proc = TRUE;
-    #endif
+#endif
 
-        // Calculate size of remote buffer and allocate memory
+    // Calculate size of remote buffer and allocate memory
     uParamCount = CallProcHeader->ParamCount;
     usTotalSize = sizeof(HIJACK_CALLPROCHEADER) + sizeof(HIJACK_CALLPROCPARAM) * uParamCount;
     pParam = Params;
-    for (i = 0; i < uParamCount; i++) {
+    for (i = 0; i < uParamCount; i++)
+    {
         _Analysis_assume_(pParam != NULL);
         usTotalSize += ROUND_TO_SIZE(pParam[i].Size, STRING_ALIGNMENT);
     }
     pRemoteBuffer = NULL;
     usPageSize = usTotalSize;
     lStatus = NtAllocateVirtualMemory(ProcessHandle, &pRemoteBuffer, 0, &usPageSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-    if (!NT_SUCCESS(lStatus)) {
+    if (!NT_SUCCESS(lStatus))
+    {
         WIE_SetLastStatus(lStatus);
         goto Label_0;
     }
@@ -220,27 +246,33 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     // MEMORY_RANGE_ENTRY[HIJACK_CALLPROCHEADER.ParamCount]
     // Random Parameters..., align to STRING_ALIGNMENT
     lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteBuffer, CallProcHeader, sizeof(HIJACK_CALLPROCHEADER), NULL);
-    if (!NT_SUCCESS(lStatus)) {
+    if (!NT_SUCCESS(lStatus))
+    {
         WIE_SetLastStatus(lStatus);
         goto Label_1;
     }
     pRemoteParam = Add2Ptr(pRemoteBuffer, sizeof(HIJACK_CALLPROCHEADER));
     pTemp = pRemoteRandomParam = Add2Ptr(pRemoteParam, sizeof(HIJACK_CALLPROCPARAM) * uParamCount);
-    for (i = uParamCount; i > 0; i--) {
+    for (i = uParamCount; i > 0; i--)
+    {
         stMemParam.Size = pParam[i - 1].Size;
-        if (stMemParam.Size) {
+        if (stMemParam.Size)
+        {
             lStatus = NtWriteVirtualMemory(ProcessHandle, pTemp, (PVOID)pParam[i - 1].Address, (SIZE_T)stMemParam.Size, NULL);
-            if (!NT_SUCCESS(lStatus)) {
+            if (!NT_SUCCESS(lStatus))
+            {
                 WIE_SetLastStatus(lStatus);
                 goto Label_1;
             }
             stMemParam.Address = pTemp;
             pTemp = Add2Ptr(pTemp, ROUND_TO_SIZE(stMemParam.Size, STRING_ALIGNMENT));
-        } else {
+        } else
+        {
             stMemParam.Address = pParam[i - 1].Address;
         }
         lStatus = NtWriteVirtualMemory(ProcessHandle, pRemoteParam, &stMemParam, sizeof(stMemParam), NULL);
-        if (!NT_SUCCESS(lStatus)) {
+        if (!NT_SUCCESS(lStatus))
+        {
             WIE_SetLastStatus(lStatus);
             goto Label_1;
         }
@@ -254,14 +286,17 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
         b32Proc ? sizeof(SYM_Hijack_CallProc_InjectThread_x86) : sizeof(SYM_Hijack_CallProc_InjectThread_x64),
         NULL,
         PAGE_EXECUTE_READ);
-    if (!RProc_MemMap(ProcessHandle, &ProcMap)) {
+    if (!RProc_MemMap(ProcessHandle, &ProcMap))
+    {
         goto Label_1;
     }
-    if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pRemoteBuffer, FALSE, &hThread)) {
+    if (!RProc_CreateThread(ProcessHandle, ProcMap.Remote, pRemoteBuffer, FALSE, &hThread))
+    {
         goto Label_2;
     }
     lStatus = Proc_WaitForObject(hThread, Timeout);
-    if (lStatus != STATUS_SUCCESS) {
+    if (lStatus != STATUS_SUCCESS)
+    {
         bKeepMem = TRUE;
         WIE_SetLastStatus(lStatus);
         goto Label_3;
@@ -269,7 +304,8 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
 
     // Get return values and parameters
     lStatus = NtReadVirtualMemory(ProcessHandle, pRemoteBuffer, &stCallProcRet, sizeof(stCallProcRet), NULL);
-    if (!NT_SUCCESS(lStatus)) {
+    if (!NT_SUCCESS(lStatus))
+    {
         WIE_SetLastStatus(lStatus);
         goto Label_3;
     }
@@ -277,11 +313,15 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
     CallProcHeader->LastError = stCallProcRet.LastError;
     CallProcHeader->LastStatus = stCallProcRet.LastStatus;
     CallProcHeader->ExceptionCode = stCallProcRet.ExceptionCode;
-    for (i = uParamCount; i > 0; i--) {
-        if (pParam[i - 1].Size) {
-            if (pParam[i - 1].Out) {
+    for (i = uParamCount; i > 0; i--)
+    {
+        if (pParam[i - 1].Size)
+        {
+            if (pParam[i - 1].Out)
+            {
                 lStatus = NtReadVirtualMemory(ProcessHandle, pRemoteRandomParam, (PVOID)pParam[i - 1].Address, (SIZE_T)pParam[i - 1].Size, NULL);
-                if (!NT_SUCCESS(lStatus)) {
+                if (!NT_SUCCESS(lStatus))
+                {
                     WIE_SetLastStatus(lStatus);
                     goto Label_3;
                 }
@@ -294,11 +334,13 @@ BOOL NTAPI Hijack_CallProc(_In_ HANDLE ProcessHandle, _Inout_ PHIJACK_CALLPROCHE
 Label_3:
     NtClose(hThread);
 Label_2:
-    if (!bKeepMem) {
+    if (!bKeepMem)
+    {
         RProc_MemUnmap(ProcessHandle, &ProcMap);
     }
 Label_1:
-    if (!bKeepMem) {
+    if (!bKeepMem)
+    {
         NtFreeVirtualMemory(ProcessHandle, &pRemoteBuffer, &usPageSize, MEM_RELEASE);
     }
 Label_0:

@@ -31,10 +31,12 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR Lan
     int     iCchName;
 
     // Use user default language instead when lpszName is NULL
-    if (LangName) {
+    if (LangName)
+    {
         pszLangName = LangName;
         iCchName = LOCALE_NAME_MAX_LENGTH;
-    } else {
+    } else
+    {
         iCchName = GetUserDefaultLocaleName(wcName, ARRAYSIZE(wcName));
         if (iCchName == 0 || wcName[0] == '\0')
             return Langs[0];
@@ -42,13 +44,16 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR Lan
     }
 
     // Match locale
-    do {
-        // Split name
+    do
+    {
+    // Split name
         QWORD   qwNames[3] = { 0 };
         INT     i = 0, iNameIndex = 0;
         QWORD   qwName = 0;
-        do {
-            while (pszLangName[i] != '\0' && pszLangName[i] != '-') {
+        do
+        {
+            while (pszLangName[i] != '\0' && pszLangName[i] != '-')
+            {
                 qwName <<= 8;
                 qwName |= pszLangName[i];
                 if (++i >= iCchName)
@@ -58,7 +63,8 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR Lan
             qwName = 0;
         } while (iNameIndex++ < ARRAYSIZE(qwNames) && pszLangName[i] != '\0' && i++ < iCchName);
         // Find in list
-        for (i = 0; i < (INT)LangCount; i++) {
+        for (i = 0; i < (INT)LangCount; i++)
+        {
             if (Langs[i]->Name[0] == qwNames[0] &&
                 Langs[i]->Name[1] == qwNames[1] &&
                 Langs[i]->Name[2] == qwNames[2])
@@ -73,18 +79,22 @@ PI18N_LANGUAGE I18N_FindLangEx(PI18N_LANGUAGE *Langs, UINT LangCount, PCWSTR Lan
 
 PCWSTR NTAPI I18N_GetString(UINT_PTR StrIndex)
 {
-    if (IS_INTRESOURCE(StrIndex)) {
+    if (IS_INTRESOURCE(StrIndex))
+    {
         PCWSTR  psz = NULL;
         USHORT  usIndex = LOWORD(StrIndex);
-        if (usIndex < usI18NStringCount) {
+        if (usIndex < usI18NStringCount)
+        {
             psz = pI18NStringTable[usIndex].Value;
             return psz ? psz : pI18NDefaultStringTable[usIndex].Value;
         }
-    } else {
+    } else
+    {
         DWORD       dwHash = Str_Hash_X65599W((PCWSTR)StrIndex);
         PI18N_ITEM  lpItem = pI18NStringTable, lpEndItem = pI18NStringTable + usI18NStringCount;
         BOOL        bUseDefault = FALSE;
-        while (TRUE) {
+        while (TRUE)
+        {
             while (lpItem < lpEndItem)
                 if (lpItem->KeyHash == dwHash)
                     return lpItem->Value;
@@ -112,7 +122,8 @@ VOID NTAPI I18N_InitCtlTextsEx(HWND Dialog, PI18N_CTLTEXT CtlTexts, UINT CtlText
 {
     HWND hCtl;
     UINT i;
-    for (i = 0; i < CtlTextCount; i++) {
+    for (i = 0; i < CtlTextCount; i++)
+    {
         hCtl = GetDlgItem(Dialog, CtlTexts->CtlID);
         UI_EnableWindowStyle(hCtl, GWL_EXSTYLE, WS_EX_RTLREADING, bI18NRTLReading);
         SendMessageW(hCtl, WM_SETTEXT, 0, (LPARAM)I18N_GetString(CtlTexts->StrIndex));

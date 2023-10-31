@@ -4,7 +4,8 @@
 
 #include "NTAssassin_Base.h"
 
-typedef struct _RPROC_MAP {
+typedef struct _RPROC_MAP
+{
     PVOID   Local;
     SIZE_T  LocalSize;
     PVOID   Remote;

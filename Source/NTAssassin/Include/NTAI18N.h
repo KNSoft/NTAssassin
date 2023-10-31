@@ -5,14 +5,16 @@
 
 #include "NTAssassin_Base.h"
 
-typedef struct _I18N_ITEM {
+typedef struct _I18N_ITEM
+{
     DWORD   KeyHash;
     LPCWSTR Value;
 } I18N_ITEM, *PI18N_ITEM;
 
 typedef struct _I18N_LANGUAGE I18N_LANGUAGE, *PI18N_LANGUAGE;
 
-struct _I18N_LANGUAGE {
+struct _I18N_LANGUAGE
+{
     QWORD           Name[3];        // Each parts of name
     LCID            dwLangId;       // LCID
     PI18N_LANGUAGE  Parent;         // Pointer to parent
@@ -21,7 +23,8 @@ struct _I18N_LANGUAGE {
     PI18N_ITEM      StringTable;    // Pointer to the string table
 };
 
-typedef struct _I18N_CTLTEXT {
+typedef struct _I18N_CTLTEXT
+{
     INT         CtlID;
     UINT_PTR    StrIndex;
 } I18N_CTLTEXT, * PI18N_CTLTEXT;

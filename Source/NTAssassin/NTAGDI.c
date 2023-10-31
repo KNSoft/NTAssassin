@@ -54,7 +54,8 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(Buffer
         cClrBits = 24;
     else
         cClrBits = 32;
-    if (cClrBits < 24) {
+    if (cClrBits < 24)
+    {
         dwClrItem = 1 << cClrBits;
         dwClrSize = dwClrItem * sizeof(RGBQUAD);
     } else
@@ -64,7 +65,8 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(Buffer
     uImageSize = ROUND_TO_SIZE(bmp.bmWidth * cClrBits, 32) / 8 * bmp.bmHeight;
     uFileSize = uHeadersSize + uImageSize;
     // Write bitmap
-    if (Buffer && BufferSize >= uFileSize) {
+    if (Buffer && BufferSize >= uFileSize)
+    {
         pbmfh = (PBITMAPFILEHEADER)Buffer;
         pbmfh->bfType = 'MB';
         pbmfh->bfOffBits = uHeadersSize;
@@ -81,7 +83,8 @@ UINT NTAPI GDI_WriteBitmap(HDC DC, HBITMAP Bitmap, _Out_writes_bytes_opt_(Buffer
         pbmi->bmiHeader.biCompression = BI_RGB;
         pbmi->bmiHeader.biXPelsPerMeter = pbmi->bmiHeader.biYPelsPerMeter = pbmi->bmiHeader.biClrImportant = 0;
         pBits = Add2Ptr(pbmi, pbmi->bmiHeader.biSize + (DWORD_PTR)dwClrSize);
-        if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBits, pbmi, DIB_RGB_COLORS)) {
+        if (!GetDIBits(DC, Bitmap, 0, bmp.bmHeight, pBits, pbmi, DIB_RGB_COLORS))
+        {
             return 0;
         }
     }
@@ -127,9 +130,11 @@ VOID NTAPI GDI_InitFontInfoEx(
     pFontInfo->lfClipPrecision = ClipPrecision;
     pFontInfo->lfQuality = Quality;
     pFontInfo->lfPitchAndFamily = PitchAndFamily;
-    if (Name == NULL) {
+    if (Name == NULL)
+    {
         pFontInfo->lfFaceName[0] = '\0';
-    } else {
+    } else
+    {
         Str_CopyW(pFontInfo->lfFaceName, Name);
     }
 }
@@ -141,10 +146,12 @@ BOOL NTAPI GDI_GetDefaultFont(_Out_ PENUMLOGFONTEXDVW FontInfo, _In_opt_ LONG He
     NONCLIENTMETRICSW ncm;
     ncm.cbSize = sizeof(ncm);
     bRet = SystemParametersInfoW(SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0);
-    if (bRet) {
+    if (bRet)
+    {
         GDI_InitInternalFontInfo(FontInfo);
         RtlCopyMemory(&FontInfo->elfEnumLogfontEx.elfLogFont, &ncm.lfMessageFont, sizeof(FontInfo->elfEnumLogfontEx.elfLogFont));
-        if (Height) {
+        if (Height)
+        {
             FontInfo->elfEnumLogfontEx.elfLogFont.lfHeight = Height;
             FontInfo->elfEnumLogfontEx.elfLogFont.lfWidth = 0;
         }
@@ -156,7 +163,8 @@ HFONT NTAPI GDI_CreateDefaultFont()
 {
     HFONT hFont = NULL;
     ENUMLOGFONTEXDVW FontInfo;
-    if (GDI_GetDefaultFont(&FontInfo, 0)) {
+    if (GDI_GetDefaultFont(&FontInfo, 0))
+    {
         hFont = CreateFontIndirectExW(&FontInfo);
     }
     return hFont;
@@ -182,13 +190,16 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY)
     // Get icon info and bitmaps
     if (!GetIconInfo(Icon, &stIconInfo))
         return FALSE;
-    if (GetObject(stIconInfo.hbmMask, sizeof(stBmp), &stBmp)) {
-        // Height of icon is half of bmHeight member if has mask bitmap only
+    if (GetObject(stIconInfo.hbmMask, sizeof(stBmp), &stBmp))
+    {
+// Height of icon is half of bmHeight member if has mask bitmap only
         iIconHeight = stIconInfo.hbmColor ? stBmp.bmHeight : (stBmp.bmHeight / 2);
-        if (CX && CY) {
+        if (CX && CY)
+        {
             iCX = CX;
             iCY = CY;
-        } else {
+        } else
+        {
             iCX = stBmp.bmWidth;
             iCY = iIconHeight;
         }
@@ -204,15 +215,17 @@ BOOL NTAPI GDI_DrawIcon(HDC DC, _In_ HICON Icon, INT X, INT Y, INT CX, INT CY)
         // Draw mask bitmap
         if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, 0, stBmp.bmWidth, iIconHeight, SRCAND))
             // Draw color bitmap or bottom half of mask bitmap
-            if (stIconInfo.hbmColor) {
+            if (stIconInfo.hbmColor)
+            {
                 SelectBitmap(hDC, stIconInfo.hbmColor);
                 if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, 0, stBmp.bmWidth, iIconHeight, SRCAND))
                     bRet = TRUE;
-            } else {
+            } else
+            {
                 if (StretchBlt(DC, X, Y, iCX, iCY, hDC, 0, iIconHeight, stBmp.bmWidth, iIconHeight, SRCINVERT))
                     bRet = TRUE;
             }
-        DeleteDC(hDC);
+            DeleteDC(hDC);
     }
     // Cleanup
     DeleteObject(stIconInfo.hbmMask);
@@ -228,29 +241,35 @@ BOOL NTAPI GDI_CreateSnapshot(HWND Window, _Out_ PGDI_SNAPSHOT Snapshot)
     SIZE    size;
     HDC     hDC, hMemDC;
     HBITMAP hBmp;
-    if (Window) {
+    if (Window)
+    {
         RECT rc;
         GetClientRect(Window, &rc);
         pt.x = pt.y = 0;
         size.cx = rc.right;
         size.cy = rc.bottom;
-    } else {
+    } else
+    {
         UI_GetScreenPos(&pt, &size);
     }
     hDC = GetDC(Window);
-    if (!hDC) {
+    if (!hDC)
+    {
         goto _Error_0;
     }
     hMemDC = CreateCompatibleDC(hDC);
-    if (!hMemDC) {
+    if (!hMemDC)
+    {
         goto _Error_1;
     }
     hBmp = CreateCompatibleBitmap(hDC, size.cx, size.cy);
-    if (!hBmp) {
+    if (!hBmp)
+    {
         goto _Error_2;
     }
     SelectObject(hMemDC, hBmp);
-    if (BitBlt(hMemDC, 0, 0, size.cx, size.cy, hDC, pt.x, pt.y, SRCCOPY)) {
+    if (BitBlt(hMemDC, 0, 0, size.cx, size.cy, hDC, pt.x, pt.y, SRCCOPY))
+    {
         Snapshot->DC = hMemDC;
         Snapshot->Bitmap = hBmp;
         Snapshot->Position = pt;

@@ -48,7 +48,8 @@ HICON NTAPI KNS_GetIcon()
     return hIconDefault;
 }
 
-typedef struct _KNS_SETBANNERSUBCLASS_REF {
+typedef struct _KNS_SETBANNERSUBCLASS_REF
+{
     HWND        hStatic;
     LONG        lWidth;
     LONG        lHeight;
@@ -64,7 +65,8 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
 {
     PKNS_SETBANNERSUBCLASS_REF  pstRef = (PKNS_SETBANNERSUBCLASS_REF)dwRefData;
     RECT                        rcText;
-    if (uMsg == WM_PAINT) {
+    if (uMsg == WM_PAINT)
+    {
         UI_WINDBPAINT   stPaint;
         HDC             hDC;
         hDC = UI_BeginPaint(hWnd, &stPaint);
@@ -85,34 +87,42 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
                 pstRef->lHeight * KNS_BANNER_ICON_SCALE,
                 pstRef->lHeight * KNS_BANNER_ICON_SCALE
             );
-        if (pstRef->lpszName) {
+        if (pstRef->lpszName)
+        {
             SelectObject(hDC, pstRef->hFontBig);
             DrawTextW(hDC, pstRef->lpszName, -1, &rcText, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
         }
         UI_EndPaint(hWnd, &stPaint);
-    } else if (uMsg == WM_WINDOWPOSCHANGED) {
+    } else if (uMsg == WM_WINDOWPOSCHANGED)
+    {
         PWINDOWPOS lpstWndPos = (PWINDOWPOS)lParam;
-        if (pstRef->lWidth != lpstWndPos->cx || pstRef->lHeight != lpstWndPos->cy) {
+        if (pstRef->lWidth != lpstWndPos->cx || pstRef->lHeight != lpstWndPos->cy)
+        {
             pstRef->lWidth = lpstWndPos->cx;
             pstRef->lHeight = lpstWndPos->cy;
 
             // Scale fonts
             HFONT hFont;
             ENUMLOGFONTEXDVW FontInfo;
-            if (GDI_GetDefaultFont(&FontInfo, 0)) {
+            if (GDI_GetDefaultFont(&FontInfo, 0))
+            {
                 FontInfo.elfEnumLogfontEx.elfLogFont.lfWidth = 0;
                 FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = pstRef->lHeight * KNS_BANNER_FONTBIG_SCALE;
                 hFont = CreateFontIndirectExW(&FontInfo);
-                if (hFont) {
-                    if (pstRef->hFontBig) {
+                if (hFont)
+                {
+                    if (pstRef->hFontBig)
+                    {
                         DeleteObject(pstRef->hFontBig);
                     }
                     pstRef->hFontBig = hFont;
                 }
                 FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = pstRef->lHeight * KNS_BANNER_FONTSMALL_SCALE;
                 hFont = CreateFontIndirectExW(&FontInfo);
-                if (hFont) {
-                    if (pstRef->hFontSmall) {
+                if (hFont)
+                {
+                    if (pstRef->hFontSmall)
+                    {
                         DeleteObject(pstRef->hFontSmall);
                     }
                     pstRef->hFontSmall = hFont;
@@ -124,16 +134,20 @@ static LRESULT CALLBACK KNS_SetBannerSubclass_Proc(HWND hWnd, UINT uMsg, WPARAM 
             stIconInfo.fIcon = TRUE;
             stIconInfo.xHotspot = 0;
             HICON hIcon = LoadImageW(CURRENT_IMAGE_BASE, MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, pstRef->lHeight * KNS_BANNER_ICON_SCALE, pstRef->lHeight * KNS_BANNER_ICON_SCALE, 0);
-            if (hIcon) {
-                if (GetIconInfo(hIcon, &stIconInfo) && stIconInfo.xHotspot) {
-                    if (pstRef->hIcon) {
+            if (hIcon)
+            {
+                if (GetIconInfo(hIcon, &stIconInfo) && stIconInfo.xHotspot)
+                {
+                    if (pstRef->hIcon)
+                    {
                         DestroyIcon(pstRef->hIcon);
                     }
                     pstRef->lIconHotspot = stIconInfo.xHotspot;
                     pstRef->hIcon = hIcon;
                     DeleteObject(stIconInfo.hbmMask);
                     DeleteObject(stIconInfo.hbmColor);
-                } else {
+                } else
+                {
                     DestroyIcon(hIcon);
                     hIcon = NULL;
                 }
@@ -169,8 +183,10 @@ VOID KNS_SetBannerSubclass(HWND hBanner)
 
 static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    if (uMsg == WM_INITDIALOG) {
-        if (hIconDefault) {
+    if (uMsg == WM_INITDIALOG)
+    {
+        if (hIconDefault)
+        {
             SendMessageW(hDlg, WM_SETICON, ICON_BIG, (LPARAM)hIconDefault);
             SendMessageW(hDlg, WM_SETICON, ICON_SMALL, (LPARAM)hIconDefault);
         }
@@ -183,7 +199,8 @@ static INT_PTR CALLBACK KNS_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM 
 VOID NTAPI KNS_SetDialogSubclass(HWND Dialog, DLG_RESIZEDPROC ResizedProc)
 {
     DPI_SetAutoAdjustSubclass(Dialog, NULL);
-    if (ResizedProc) {
+    if (ResizedProc)
+    {
         Dlg_SetResizingSubclass(Dialog, TRUE, ResizedProc);
     }
 }
@@ -201,31 +218,38 @@ UINT_PTR NTAPI KNS_Startup(PKNS_INFO KNSInfo)
     if (lpKNSInfo->UI.IconResID != -1)
         hIconDefault = LoadImageW(CURRENT_IMAGE_BASE, MAKEINTRESOURCEW(lpKNSInfo->UI.IconResID), IMAGE_ICON, 0, 0, 0);
     ENUMLOGFONTEXDVW FontInfo;
-    if (GDI_GetDefaultFont(&FontInfo, 0)) {
+    if (GDI_GetDefaultFont(&FontInfo, 0))
+    {
         FontInfo.elfEnumLogfontEx.elfLogFont.lfWidth = 0;
         FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = ICON_SIDE;
         hFontBig = CreateFontIndirectExW(&FontInfo);
         FontInfo.elfEnumLogfontEx.elfLogFont.lfHeight = ICON_SIDE / 2;
         hFontSmall = CreateFontIndirectExW(&FontInfo);
-    } else {
+    } else
+    {
         hFontBig = hFontSmall = NULL;
     }
     hMainDlg = CreateDialogParamW(CURRENT_IMAGE_BASE, MAKEINTRESOURCEW(KNSInfo->UI.DlgResID), NULL, KNS_DlgProc, 0);
     HACCEL hAccel;
-    if (KNSInfo->UI.DlgAccResID != -1) {
+    if (KNSInfo->UI.DlgAccResID != -1)
+    {
         hAccel = LoadAcceleratorsW(CURRENT_IMAGE_BASE, MAKEINTRESOURCEW(KNSInfo->UI.DlgAccResID));
-    } else {
+    } else
+    {
         hAccel = NULL;
     }
     UINT_PTR ulRet;
     ulRet = Dlg_MessageLoop(NULL, hMainDlg, hAccel, &ulRet) ? ulRet : (UINT_PTR)WIE_GetLastError();
-    if (hFontBig) {
+    if (hFontBig)
+    {
         DeleteObject(hFontBig);
     }
-    if (hFontSmall) {
+    if (hFontSmall)
+    {
         DeleteObject(hFontSmall);
     }
-    if (hAccel) {
+    if (hAccel)
+    {
         DestroyAcceleratorTable(hAccel);
     }
     return ulRet;
@@ -272,14 +296,16 @@ static RECT rcDlgAbout, rcHomePage;
 
 static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    if (uMsg == WM_INITDIALOG) {
+    if (uMsg == WM_INITDIALOG)
+    {
         GetClientRect(hDlg, &rcDlgAbout);
         rcHomePage.left = PADDING_X;
         rcHomePage.bottom = rcDlgAbout.bottom - PADDING_Y;
         rcHomePage.top = rcHomePage.bottom - ICON_SIDE / 2;
         rcHomePage.right = rcDlgAbout.right - PADDING_X;
         return TRUE;
-    } else if (uMsg == WM_PAINT) {
+    } else if (uMsg == WM_PAINT)
+    {
         UI_WINDBPAINT pt;
         UI_BeginPaint(hDlg, &pt);
         // Background
@@ -290,13 +316,15 @@ static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wPara
         // Icon
         DrawIconEx(pt.DC, PADDING_X, PADDING_Y, hIconDefault, ICON_SIDE, ICON_SIDE, 0, NULL, DI_NORMAL);
         // Name
-        if (lpKNSInfo->Name) {
+        if (lpKNSInfo->Name)
+        {
             RECT rcName = { PADDING_X * 2 + ICON_SIDE, PADDING_Y ,rcDlgAbout.right - PADDING_X, PADDING_Y + ICON_SIDE };
             SelectObject(pt.DC, hFontBig);
             DrawTextW(pt.DC, lpKNSInfo->Name, -1, &rcName, DT_LEFT | DT_VCENTER | DT_SINGLELINE);
         }
         // Version
-        if (szVersion[0]) {
+        if (szVersion[0])
+        {
             RECT rcVer = { PADDING_X , PADDING_Y + ICON_SIDE ,rcDlgAbout.right - PADDING_X, PADDING_Y * 2 + PADDING_Y / 2 + ICON_SIDE };
             SelectObject(pt.DC, hFontSmall);
             DrawTextW(pt.DC, szVersion, -1, &rcVer, DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
@@ -305,18 +333,22 @@ static INT_PTR CALLBACK KNS_DlgAbout_DlgProcW(HWND hDlg, UINT uMsg, WPARAM wPara
         DrawTextW(pt.DC, lpKNSInfo->OnlineService.HomePage, -1, &rcHomePage, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
         GDI_FrameRect(pt.DC, &rcHomePage, 1, PATCOPY);
         UI_EndPaint(hDlg, &pt);
-    } else if (uMsg == WM_MOUSEMOVE) {
+    } else if (uMsg == WM_MOUSEMOVE)
+    {
         POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         SetCursor(UI_PtInRect(&rcHomePage, pt) ? hCurPointer : hCurArrow);
-    } else if (uMsg == WM_LBUTTONUP) {
+    } else if (uMsg == WM_LBUTTONUP)
+    {
         POINT pt = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
         if (UI_PtInRect(&rcHomePage, pt))
             KNS_OpenHomePage();
-        else {
+        else
+        {
             EndDialog(hDlg, FALSE);
             SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
         }
-    } else if (uMsg == WM_CLOSE || uMsg == WM_KEYUP || uMsg == WM_RBUTTONUP) {
+    } else if (uMsg == WM_CLOSE || uMsg == WM_KEYUP || uMsg == WM_RBUTTONUP)
+    {
         EndDialog(hDlg, FALSE);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     }

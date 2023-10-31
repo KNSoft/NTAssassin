@@ -11,7 +11,8 @@ typedef DWORD ARGB;
 
 #pragma region C-style wrappers of Gdiplus.h
 
-typedef enum _GDIP_TIFFENCODER_PARAMVALUE {
+typedef enum _GDIP_TIFFENCODER_PARAMVALUE
+{
     TIFF_ParamValue_CompressionUnused,
     TIFF_ParamValue_CompressionLZW = 2,
     TIFF_ParamValue_CompressionCCITT3 = 3,
@@ -21,7 +22,8 @@ typedef enum _GDIP_TIFFENCODER_PARAMVALUE {
     TIFF_ParamValue_CompressionMax
 } GDIP_TIFFENCODER_PARAMVALUE, *PGDIP_TIFFENCODER_PARAMVALUE;
 
-typedef enum _GDIP_SMOOTHINGMODE {
+typedef enum _GDIP_SMOOTHINGMODE
+{
     GDIP_SmoothingModeDefault = 0x00,
     GDIP_SmoothingModeHighSpeed = 0x01,
     GDIP_SmoothingModeHighQuality = 0x02,

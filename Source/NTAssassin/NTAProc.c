@@ -10,9 +10,11 @@ PLDR_DATA_TABLE_ENTRY NTAPI Proc_EnumDlls(_In_ PROC_DLLENUMPROC DllEnumProc, LPA
     RtlEnterCriticalSection(NtCurrentPeb()->LoaderLock);
     pHead = CONTAINING_RECORD(NtCurrentPeb()->Ldr->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
     pNode = pHead;
-    while (DllEnumProc(pNode, Param)) {
+    while (DllEnumProc(pNode, Param))
+    {
         pNode = CONTAINING_RECORD(pNode->InLoadOrderModuleList.Flink, LDR_DATA_TABLE_ENTRY, InLoadOrderModuleList);
-        if (pNode == pHead) {
+        if (pNode == pHead)
+        {
             pNode = NULL;
             break;
         }
@@ -86,20 +88,24 @@ PVOID NTAPI Proc_GetProcAddr(_In_ HMODULE Module, _In_z_ PCSTR ProcName)
     ULONG           ulProcOrd;
     PVOID           pProc;
     NTSTATUS        lStatus;
-    if ((UINT_PTR)ProcName > MAXWORD) {
+    if ((UINT_PTR)ProcName > MAXWORD)
+    {
         stProcName.Length = (USHORT)Str_LenA(ProcName);
         stProcName.MaximumLength = stProcName.Length + sizeof(CHAR);
         stProcName.Buffer = (PCHAR)ProcName;
         pstProcName = &stProcName;
         ulProcOrd = 0;
-    } else {
+    } else
+    {
         pstProcName = NULL;
         ulProcOrd = (ULONG)(ULONG_PTR)ProcName;
     }
     lStatus = LdrGetProcedureAddress(Module, pstProcName, ulProcOrd, &pProc);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         return pProc;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return NULL;
     }
@@ -130,10 +136,12 @@ BOOL NTAPI Proc_GetThreadExitCode(HANDLE ThreadHandle, _Out_ PDWORD ExitCode)
     THREAD_BASIC_INFORMATION    stThreadInfo;
     NTSTATUS                    lStatus;
     lStatus = NtQueryInformationThread(ThreadHandle, ThreadBasicInformation, &stThreadInfo, sizeof(stThreadInfo), NULL);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         *ExitCode = stThreadInfo.ExitStatus;
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return FALSE;
     }

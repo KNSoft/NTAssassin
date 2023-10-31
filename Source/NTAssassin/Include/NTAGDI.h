@@ -2,7 +2,8 @@
 
 #include "NTAssassin_Base.h"
 
-typedef struct _GDI_SNAPSHOT {
+typedef struct _GDI_SNAPSHOT
+{
     HDC     DC;
     HBITMAP Bitmap;
     POINT   Position;

@@ -94,11 +94,15 @@ static BOOL NTAPI GDIP_EnumImageEncoders(GDIP_IMGCODECENUMPROC ImgEncEnumProc, L
 {
     BOOL bRet = FALSE;
     UINT uNum, uSize;
-    if (GdipGetImageEncodersSize(&uNum, &uSize) == Ok && uNum && uSize) {
+    if (GdipGetImageEncodersSize(&uNum, &uSize) == Ok && uNum && uSize)
+    {
         Gdiplus::ImageCodecInfo* pImgEncInfo = (Gdiplus::ImageCodecInfo*)(Mem_Alloc(uSize));
-        if (pImgEncInfo) {
-            if (GdipGetImageEncoders(uNum, uSize, pImgEncInfo) == Ok) {
-                for (UINT i = 0; i < uNum; i++) {
+        if (pImgEncInfo)
+        {
+            if (GdipGetImageEncoders(uNum, uSize, pImgEncInfo) == Ok)
+            {
+                for (UINT i = 0; i < uNum; i++)
+                {
                     if (!ImgEncEnumProc(pImgEncInfo[i], Param))
                         break;
                 }
@@ -114,11 +118,15 @@ static BOOL NTAPI GDIP_EnumImageDecoders(GDIP_IMGCODECENUMPROC ImgDecEnumProc, L
 {
     BOOL bRet = FALSE;
     UINT uNum, uSize;
-    if (GdipGetImageDecodersSize(&uNum, &uSize) == Ok && uNum && uSize) {
+    if (GdipGetImageDecodersSize(&uNum, &uSize) == Ok && uNum && uSize)
+    {
         Gdiplus::ImageCodecInfo* pImgEncInfo = (Gdiplus::ImageCodecInfo*)(Mem_Alloc(uSize));
-        if (pImgEncInfo) {
-            if (GdipGetImageDecoders(uNum, uSize, pImgEncInfo) == Ok) {
-                for (UINT i = 0; i < uNum; i++) {
+        if (pImgEncInfo)
+        {
+            if (GdipGetImageDecoders(uNum, uSize, pImgEncInfo) == Ok)
+            {
+                for (UINT i = 0; i < uNum; i++)
+                {
                     if (!ImgDecEnumProc(pImgEncInfo[i], Param))
                         break;
                 }
@@ -147,7 +155,8 @@ BOOL NTAPI GDIP_DisposeImage(PGDIP_IMAGE Image)
     return GdipDisposeImage((GpImage*)Image) == Ok;
 }
 
-typedef struct _GDIP_IMGCODECENUMPARAM {
+typedef struct _GDIP_IMGCODECENUMPARAM
+{
     REFCLSID    FormatCLSID;
     LPCLSID     OutCLSID;
     BOOL        Found;
@@ -157,7 +166,8 @@ static BOOL GDIP_FindCodecEnumProc(Gdiplus::ImageCodecInfo ImageCodecInfo, LPARA
 {
     PGDIP_IMGCODECENUMPARAM pParam = reinterpret_cast<PGDIP_IMGCODECENUMPARAM>(Param);
     BOOL bRet = TRUE;
-    if (Sys_EqualGUID(ImageCodecInfo.FormatID, pParam->FormatCLSID)) {
+    if (Sys_EqualGUID(ImageCodecInfo.FormatID, pParam->FormatCLSID))
+    {
         *(pParam->OutCLSID) = ImageCodecInfo.Clsid;
         pParam->Found = TRUE;
         bRet = FALSE;
@@ -169,7 +179,8 @@ PGDIP_IMAGE NTAPI GDIP_LoadImageFromBuffer(_In_reads_bytes_(Size) PVOID Buffer, 
 {
     GpImage* pImage = NULL;
     IStream* Stream = SHCreateMemStream((const BYTE*)Buffer, Size);
-    if (Stream) {
+    if (Stream)
+    {
         GdipLoadImageFromStream(Stream, &pImage);
         Stream->Release();
     }
@@ -181,7 +192,8 @@ BOOL NTAPI GDIP_SaveImageToFileEx(PGDIP_IMAGE Image, PCWSTR FileName, REFCLSID F
     BOOL bRet = FALSE;
     CLSID Encoder;
     GDIP_IMGCODECENUMPARAM Param = { FormatID, &Encoder, FALSE };
-    if (GDIP_EnumImageEncoders(GDIP_FindCodecEnumProc, reinterpret_cast<LPARAM>(&Param)) && Param.Found) {
+    if (GDIP_EnumImageEncoders(GDIP_FindCodecEnumProc, reinterpret_cast<LPARAM>(&Param)) && Param.Found)
+    {
         bRet = GdipSaveImageToFile((Gdiplus::GpImage*)Image, FileName, const_cast<GDIPCONST LPCLSID>(&Encoder), EncParams) == Ok;
     }
     return bRet;
@@ -205,26 +217,32 @@ BOOL NTAPI GDIP_SaveImageToPNGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName)
 BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, INT Quality)
 {
     UINT ubQuality = 0;
-    if (Quality >= 0 && Quality <= 100) {
+    if (Quality >= 0 && Quality <= 100)
+    {
         ubQuality++;
     }
     Gdiplus::EncoderParameters *EncParams;
-    if (ubQuality) {
+    if (ubQuality)
+    {
         EncParams = (Gdiplus::EncoderParameters*)Mem_Alloc(sizeof(Gdiplus::EncoderParameters));
-        if (EncParams) {
+        if (EncParams)
+        {
             EncParams->Count = 1;
             EncParams->Parameter[0].Guid = Gdiplus::EncoderQuality;
             EncParams->Parameter[0].Type = EncoderParameterValueTypeLong;
             EncParams->Parameter[0].NumberOfValues = 1;
             EncParams->Parameter[0].Value = &Quality;
-        } else {
+        } else
+        {
             return FALSE;
         }
-    } else {
+    } else
+    {
         EncParams = NULL;
     }
     BOOL bRet = GDIP_SaveImageToFileEx(Image, FileName, Gdiplus::ImageFormatJPEG, EncParams);
-    if (EncParams) {
+    if (EncParams)
+    {
         Mem_Free(EncParams);
     }
     return bRet;
@@ -233,29 +251,39 @@ BOOL NTAPI GDIP_SaveImageToJPEGFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, I
 BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, GDIP_TIFFENCODER_PARAMVALUE Compression, INT ColorDepth)
 {
     UINT ubCompression = 0, ubColorDepth = 0, uIndex = 0, uCount;
-    if (Compression > TIFF_ParamValue_CompressionUnused && Compression < TIFF_ParamValue_CompressionMax) {
+    if (Compression > TIFF_ParamValue_CompressionUnused && Compression < TIFF_ParamValue_CompressionMax)
+    {
         ubCompression++;
     }
-    if (ColorDepth == 1 || ColorDepth == 4 || ColorDepth == 8 || ColorDepth == 24 || ColorDepth == 32) {
+    if (ColorDepth == 1 || ColorDepth == 4 || ColorDepth == 8 || ColorDepth == 24 || ColorDepth == 32)
+    {
         ubColorDepth++;
     }
     uCount = ubCompression + ubColorDepth;
     Gdiplus::EncoderParameters *EncParams;
-    if (uCount) {
+    if (uCount)
+    {
         EncParams = (Gdiplus::EncoderParameters*)Mem_Alloc(sizeof(Gdiplus::EncoderParameters) + (uCount - 1) * sizeof(Gdiplus::EncoderParameter));
-        if (EncParams) {
+        if (EncParams)
+        {
             EncParams->Count = uCount;
-            if (ubCompression) {
+            if (ubCompression)
+            {
                 ULONG ulCompression;
-                if (Compression == TIFF_ParamValue_CompressionLZW) {
+                if (Compression == TIFF_ParamValue_CompressionLZW)
+                {
                     ulCompression = EncoderValueCompressionLZW;
-                } else if (Compression == TIFF_ParamValue_CompressionCCITT3) {
+                } else if (Compression == TIFF_ParamValue_CompressionCCITT3)
+                {
                     ulCompression = EncoderValueCompressionCCITT3;
-                } else if (Compression == TIFF_ParamValue_CompressionCCITT4) {
+                } else if (Compression == TIFF_ParamValue_CompressionCCITT4)
+                {
                     ulCompression = EncoderValueCompressionCCITT4;
-                } else if (Compression == TIFF_ParamValue_CompressionRle) {
+                } else if (Compression == TIFF_ParamValue_CompressionRle)
+                {
                     ulCompression = EncoderValueCompressionRle;
-                } else if (Compression == TIFF_ParamValue_CompressionNone) {
+                } else if (Compression == TIFF_ParamValue_CompressionNone)
+                {
                     ulCompression = EncoderValueCompressionNone;
                 }
                 EncParams->Parameter[uIndex].Guid = Gdiplus::EncoderCompression;
@@ -264,45 +292,55 @@ BOOL NTAPI GDIP_SaveImageToTIFFFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName, G
                 EncParams->Parameter[uIndex].Value = &ulCompression;
                 uIndex++;
             }
-            if (ubColorDepth) {
+            if (ubColorDepth)
+            {
                 EncParams->Parameter[uIndex].Guid = Gdiplus::EncoderColorDepth;
                 EncParams->Parameter[uIndex].Type = EncoderParameterValueTypeLong;
                 EncParams->Parameter[uIndex].NumberOfValues = 1;
                 EncParams->Parameter[uIndex].Value = &ColorDepth;
             }
-        } else {
+        } else
+        {
             return FALSE;
         }
-    } else {
+    } else
+    {
         EncParams = NULL;
     }
     BOOL bRet = GDIP_SaveImageToFileEx(Image, FileName, Gdiplus::ImageFormatTIFF, EncParams);
-    if (EncParams) {
+    if (EncParams)
+    {
         Mem_Free(EncParams);
     }
     return bRet;
 }
 
 PCWSTR GDIP_SaveImageFilter = L"PNG (*.png)\0*.png\0"
-    L"JPEG (*.jpg;*.jpeg)\0*.jpg;*.jpeg\0"
-    L"BMP (*.bmp)\0*.bmp\0"
-    L"GIF (*.gif)\0*.gif\0"
-    L"TIFF (*.tif;*.tiff)\0*.tif;*.tiff\0";
+L"JPEG (*.jpg;*.jpeg)\0*.jpg;*.jpeg\0"
+L"BMP (*.bmp)\0*.bmp\0"
+L"GIF (*.gif)\0*.gif\0"
+L"TIFF (*.tif;*.tiff)\0*.tif;*.tiff\0";
 
 BOOL NTAPI GDIP_SaveImageToFile(PGDIP_IMAGE Image, _In_z_ PCWSTR FileName)
 {
     BOOL bRet = FALSE;
     PCWSTR pszExt = (PCWSTR)Str_ExtensionOfPathW(FileName, 0);
-    if (pszExt) {
-        if (Str_IEqualW(pszExt, L"png")) {
+    if (pszExt)
+    {
+        if (Str_IEqualW(pszExt, L"png"))
+        {
             bRet = GDIP_SaveImageToPNGFile(Image, FileName);
-        } else if (Str_IEqualW(pszExt, L"jpg") || Str_IEqualW(pszExt, L"jpeg")) {
+        } else if (Str_IEqualW(pszExt, L"jpg") || Str_IEqualW(pszExt, L"jpeg"))
+        {
             bRet = GDIP_SaveImageToJPEGFile(Image, FileName, 95);
-        } else if (Str_IEqualW(pszExt, L"gif")) {
+        } else if (Str_IEqualW(pszExt, L"gif"))
+        {
             bRet = GDIP_SaveImageToGIFFile(Image, FileName);
-        } else if (Str_IEqualW(pszExt, L"bmp")) {
+        } else if (Str_IEqualW(pszExt, L"bmp"))
+        {
             bRet = GDIP_SaveImageToBMPFile(Image, FileName);
-        } else if (Str_IEqualW(pszExt, L"tif") || Str_IEqualW(pszExt, L"tiff")) {
+        } else if (Str_IEqualW(pszExt, L"tif") || Str_IEqualW(pszExt, L"tiff"))
+        {
             bRet = GDIP_SaveImageToTIFFFile(Image, FileName, TIFF_ParamValue_CompressionLZW, 32);
         }
     }

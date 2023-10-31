@@ -17,7 +17,8 @@
 #define IDC_RESETBTN    1003
 #define IDC_OKBTN       1004
 
-typedef struct _DLG_VALUEEDITOR {
+typedef struct _DLG_VALUEEDITOR
+{
     HWND                    Owner;
     DWORD                   Flags;
     PCWSTR*                 Texts;          // ["Title", "Reset", "OK", "Member", "Value", "Info", "Unknow"]
@@ -30,11 +31,14 @@ typedef struct _DLG_VALUEEDITOR {
 static INT Dlg_ValueEditor_FormatValueEx(PDLG_VALUEEDITOR pstDVE, PWSTR pszBuff, INT iCchBuff, QWORD qwValue)
 {
     INT iTemp;
-    if (pstDVE->Flags & DVE_VALUE_HEXQWORD) {
+    if (pstDVE->Flags & DVE_VALUE_HEXQWORD)
+    {
         iTemp = Str_PrintfExW(pszBuff, iCchBuff, L"0x%016llX", qwValue);
-    } else if (pstDVE->Flags & DVE_VALUE_HEXDWORD) {
+    } else if (pstDVE->Flags & DVE_VALUE_HEXDWORD)
+    {
         iTemp = Str_PrintfExW(pszBuff, iCchBuff, L"0x%08X", (DWORD)qwValue);
-    } else {
+    } else
+    {
         iTemp = 0;
     }
     return iTemp;
@@ -60,15 +64,18 @@ static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE)
     UINT    u;
     INT     i;
     stLVI.iItem = MAXINT;
-    for (u = 0; u < pstDVE->NumOfConsts; u++) {
+    for (u = 0; u < pstDVE->NumOfConsts; u++)
+    {
         stLVI.iSubItem = 0;
         stLVI.mask = LVIF_TEXT | LVIF_PARAM;
         stLVI.lParam = (LPARAM)&pstDVE->Consts[u];
         stLVI.pszText = (PWSTR)pstDVE->Consts[u].Name;
         stLVI.iItem = (INT)SendMessageW(hListView, LVM_INSERTITEMW, 0, (LPARAM)&stLVI);
-        if (stLVI.iItem != -1) {
+        if (stLVI.iItem != -1)
+        {
             stLVI.mask = LVIF_TEXT;
-            if ((qwTemp & pstDVE->Consts[u].Value) == pstDVE->Consts[u].Value) {
+            if ((qwTemp & pstDVE->Consts[u].Value) == pstDVE->Consts[u].Value)
+            {
                 ListView_SetCheckState(hListView, stLVI.iItem, TRUE);
                 qwTemp &= ~pstDVE->Consts[u].Value;
             }
@@ -82,12 +89,14 @@ static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE)
         }
         stLVI.iItem++;
     }
-    if (qwTemp) {
+    if (qwTemp)
+    {
         stLVI.mask = LVIF_TEXT | LVIF_PARAM;
         stLVI.iSubItem = 0;
         stLVI.lParam = 0;
         stLVI.pszText = (LPWSTR)(pstDVE->Texts[6] ? pstDVE->Texts[6] : L"(Unknow)");
-        if (SendMessageW(hListView, LVM_INSERTITEMW, 0, (LPARAM)&stLVI) != -1) {
+        if (SendMessageW(hListView, LVM_INSERTITEMW, 0, (LPARAM)&stLVI) != -1)
+        {
             ListView_SetCheckState(hListView, stLVI.iItem, TRUE);
             stLVI.mask = LVIF_TEXT;
             stLVI.iSubItem++;
@@ -100,7 +109,8 @@ static VOID Dlg_ValueEditor_AddItems(HWND hListView, PDLG_VALUEEDITOR pstDVE)
 
 static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    if (uMsg == WM_INITDIALOG) {
+    if (uMsg == WM_INITDIALOG)
+    {
         PDLG_VALUEEDITOR    lpstDVE;
         RECT                rcClient;
         HWND                hEdit, hListView, hBtnReset, hBtnOK;
@@ -195,19 +205,23 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
         SetFocus(hListView);
 
         // DPI Aware
-        if (IsProcessDPIAware()) {
+        if (IsProcessDPIAware())
+        {
             DPI_SetAutoAdjustSubclass(hDlg, NULL);
         }
 
         return FALSE;
-    } else if (uMsg == WM_NOTIFY) {
+    } else if (uMsg == WM_NOTIFY)
+    {
         LPNMHDR lpnm = (LPNMHDR)lParam;
-        if (lpnm->idFrom == IDC_LISTVIEW) {
+        if (lpnm->idFrom == IDC_LISTVIEW)
+        {
             LPNMLISTVIEW lpnmlv = (LPNMLISTVIEW)lParam;
             if (lpnmlv->hdr.idFrom == IDC_LISTVIEW &&
                 lpnmlv->hdr.code == LVN_ITEMCHANGING &&
                 lpnmlv->iItem != -1 &&
-                lpnmlv->uChanged == LVIF_STATE) {
+                lpnmlv->uChanged == LVIF_STATE)
+            {
                 BOOL    bAllow;
                 LVITEMW stLVI;
                 stLVI.mask = LVIF_PARAM;
@@ -217,27 +231,33 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
                 bAllow = SendMessageW(lpnmlv->hdr.hwndFrom, LVM_GETITEMW, 0, (LPARAM)&stLVI) ?
                     (stLVI.lParam ? TRUE : FALSE) :
                     FALSE;
-                if (!bAllow) {
+                if (!bAllow)
+                {
                     SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
                     return TRUE;
                 }
             } else if (lpnmlv->hdr.idFrom == IDC_LISTVIEW &&
                 lpnmlv->hdr.code == LVN_ITEMCHANGED &&
                 lpnmlv->iItem != -1 &&
-                lpnmlv->uChanged == LVIF_STATE) {
+                lpnmlv->uChanged == LVIF_STATE)
+            {
                 LVITEMW stLVI;
                 stLVI.mask = LVIF_PARAM;
                 stLVI.iItem = lpnmlv->iItem;
                 stLVI.iSubItem = 0;
-                if (SendMessageW(lpnmlv->hdr.hwndFrom, LVM_GETITEMW, 0, (LPARAM)&stLVI) && stLVI.lParam) {
+                if (SendMessageW(lpnmlv->hdr.hwndFrom, LVM_GETITEMW, 0, (LPARAM)&stLVI) && stLVI.lParam)
+                {
                     PDLG_VALUEEDITOR_CONST  pstConst = (PDLG_VALUEEDITOR_CONST)stLVI.lParam;
                     PDLG_VALUEEDITOR        pstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
                     BOOL                    bNewChecked = (lpnmlv->uNewState & LVIS_STATEIMAGEMASK) >> 12 == 2;
                     BOOL                    bOldChecked = (lpnmlv->uOldState & LVIS_STATEIMAGEMASK) >> 12 == 2;
-                    if (bNewChecked != bOldChecked) {
-                        if (bNewChecked) {
+                    if (bNewChecked != bOldChecked)
+                    {
+                        if (bNewChecked)
+                        {
                             SetFlag(pstDVE->PreviousValue, pstConst->Value);
-                        } else {
+                        } else
+                        {
                             ClearFlag(pstDVE->PreviousValue, pstConst->Value);
                         }
                         Dlg_ValueEditor_SetValue(pstDVE, hDlg, pstDVE->PreviousValue);
@@ -245,20 +265,24 @@ static INT_PTR CALLBACK Dlg_ValueEditor_DlgProc(HWND hDlg, UINT uMsg, WPARAM wPa
                 }
             }
         }
-    } else if (uMsg == WM_COMMAND) {
-        if (wParam == MAKEWPARAM(IDC_RESETBTN, 0)) {
+    } else if (uMsg == WM_COMMAND)
+    {
+        if (wParam == MAKEWPARAM(IDC_RESETBTN, 0))
+        {
             HWND                hListView = GetDlgItem(hDlg, IDC_LISTVIEW);
             PDLG_VALUEEDITOR    lpstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
             SendMessage(hListView, LVM_DELETEALLITEMS, 0, 0);
             Dlg_ValueEditor_AddItems(hListView, lpstDVE);
             lpstDVE->PreviousValue = lpstDVE->Value;
-        } else if (wParam == MAKEWPARAM(IDC_OKBTN, 0)) {
+        } else if (wParam == MAKEWPARAM(IDC_OKBTN, 0))
+        {
             PDLG_VALUEEDITOR pstDVE = (PDLG_VALUEEDITOR)GetWindowLongPtr(hDlg, DWLP_USER);
             pstDVE->Value = pstDVE->PreviousValue;
             EndDialog(hDlg, TRUE);
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
-    } else if (uMsg == WM_CLOSE) {
+    } else if (uMsg == WM_CLOSE)
+    {
         EndDialog(hDlg, FALSE);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
     }
@@ -283,7 +307,8 @@ BOOL NTAPI Dlg_ValueEditorEx(HWND Owner, _In_ DWORD Flags, _In_opt_ PCWSTR* Stri
         Dlg_ValueEditor_DlgProc,
         (LPARAM)&stDVE
     ) == TRUE;
-    if (bRet) {
+    if (bRet)
+    {
         *Value = stDVE.Value;
     }
 

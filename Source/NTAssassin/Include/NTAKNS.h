@@ -22,7 +22,8 @@
 
 #define ICON_SIDE   48
 
-typedef struct _KNS_VERSION_INFO {
+typedef struct _KNS_VERSION_INFO
+{
     USHORT  Major;
     USHORT  Minor;
     USHORT  Revision;
@@ -30,11 +31,13 @@ typedef struct _KNS_VERSION_INFO {
     USHORT  Type;   // KNS_VERSION_*
 } KNS_VERSION_INFO, * PKNS_VERSION_INFO;
 
-typedef struct _KNS_INFO {
+typedef struct _KNS_INFO
+{
     PWSTR               Name;           // Name of software
     BOOL                KNSOfficial;    // Is official software of KNSoft
     KNS_VERSION_INFO    Version;
-    struct {
+    struct
+    {
         COLORREF    MainColor;      // Main color to draw splash, banner, etc.
         UINT        IconResID;      // Main icon resource to draw splash, banner, etc.
         UINT        DlgResID;       // Main dialog resource template
@@ -45,12 +48,14 @@ typedef struct _KNS_INFO {
         UINT        SplashDuration; // Splash timeout, or no splash if it's null
         BOOL        SplashAsync;    // Display splash asynchronously or not
     } UI;
-    struct {
+    struct
+    {
         PI18N_LANGUAGE  *Langs;
         UINT            LangCount;
         USHORT          ItemCount;
     } I18N;
-    struct {
+    struct
+    {
         PWSTR   HomePage;        // URL to Homepage
         PWSTR   HelpDoc;         // URL or path to help content
         PWSTR   KNSUpdateSrv;    // URL to KNSoft Update Service

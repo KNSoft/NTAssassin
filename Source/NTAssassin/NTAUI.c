@@ -61,12 +61,14 @@ BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, _Out_ PRECT Rect)
     RECT    rcWnd;
     BOOL    bRet;
     bRet = UI_GetWindowRect(Window, &rcWnd);
-    if (bRet) {
+    if (bRet)
+    {
         pt.x = rcWnd.left;
         pt.y = rcWnd.top;
         hParent = RefWindow ? RefWindow : GetParent(Window);
         bRet = ScreenToClient(hParent ? hParent : GetDesktopWindow(), &pt);
-        if (bRet) {
+        if (bRet)
+        {
             Rect->right = rcWnd.right + pt.x - rcWnd.left;
             Rect->bottom = rcWnd.bottom + pt.y - rcWnd.top;
             Rect->left = pt.x;
@@ -79,7 +81,8 @@ BOOL NTAPI UI_GetRelativeRect(HWND Window, HWND RefWindow, _Out_ PRECT Rect)
 VOID NTAPI UI_EnumChildWindows(HWND ParentWindow, _In_ WNDENUMPROC WindowEnumProc, LPARAM Param)
 {
     HWND hWndChild = GetWindow(ParentWindow, GW_CHILD);
-    while (hWndChild && WindowEnumProc(hWndChild, Param)) {
+    while (hWndChild && WindowEnumProc(hWndChild, Param))
+    {
         hWndChild = GetWindow(hWndChild, GW_HWNDNEXT);
     }
 }
@@ -108,14 +111,18 @@ BOOL NTAPI UI_EnableWindowStyle(HWND Window, INT StyleIndex, LONG_PTR StyleFlag,
     LONG_PTR    lStyle;
     BOOL        bRet;
     bRet = FALSE;
-    if (StyleIndex == GWL_STYLE || StyleIndex == GWL_EXSTYLE) {
+    if (StyleIndex == GWL_STYLE || StyleIndex == GWL_EXSTYLE)
+    {
         WIE_SetLastError(ERROR_SUCCESS);
         lStyle = GetWindowLongPtr(Window, StyleIndex);
-        if (lStyle || WIE_GetLastError() == ERROR_SUCCESS) {
+        if (lStyle || WIE_GetLastError() == ERROR_SUCCESS)
+        {
             WIE_SetLastError(ERROR_SUCCESS);
-            if (EnableState) {
+            if (EnableState)
+            {
                 SetFlag(lStyle, StyleFlag);
-            } else {
+            } else
+            {
                 ClearFlag(lStyle, StyleFlag);
             }
             return SetWindowLongPtr(Window, StyleIndex, lStyle) || WIE_GetLastError() == ERROR_SUCCESS;
@@ -155,7 +162,8 @@ LRESULT NTAPI UI_SetWndTextNoNotify(HWND Window, _In_opt_ PCWSTR Text)
 _Success_(return > 0) UINT NTAPI UI_GetWindowTextExW(HWND Window, _Out_writes_z_(TextCch) PWSTR Text, UINT TextCch)
 {
     UINT cCh = (UINT)SendMessageW(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
-    if (cCh >= TextCch) {
+    if (cCh >= TextCch)
+    {
         cCh = 0;
     }
     Text[cCh] = UNICODE_NULL;
@@ -166,7 +174,8 @@ _Success_(return > 0)
 UINT NTAPI UI_GetWindowTextExA(HWND Window, _Out_writes_z_(TextCch) PSTR Text, UINT TextCch)
 {
     UINT cCh = (UINT)SendMessageA(Window, WM_GETTEXT, TextCch, (LPARAM)Text);
-    if (cCh >= TextCch) {
+    if (cCh >= TextCch)
+    {
         cCh = 0;
     }
     Text[cCh] = ANSI_NULL;
@@ -181,13 +190,17 @@ BOOL NTAPI UI_GetWindowLong(HWND Window, BOOL ClassLong, INT Index, _Out_ PLONG_
     // GetWindowLongPtr may crash in some cases
     WIE_SetLastError(ERROR_SUCCESS);
     BOOL bUnicode = IsWindowUnicode(Window);
-    if (bUnicode && !ClassLong) {
+    if (bUnicode && !ClassLong)
+    {
         lResult = GetWindowLongPtrW(Window, Index);
-    } else if (bUnicode && ClassLong) {
+    } else if (bUnicode && ClassLong)
+    {
         lResult = GetClassLongPtrW(Window, Index);
-    } else if (!bUnicode && !ClassLong) {
+    } else if (!bUnicode && !ClassLong)
+    {
         lResult = GetWindowLongPtrA(Window, Index);
-    } else {
+    } else
+    {
         lResult = GetClassLongPtrA(Window, Index);
     }
     bRet = lResult ? TRUE : WIE_GetLastError() == ERROR_SUCCESS;
@@ -200,14 +213,18 @@ BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode)
 {
     BOOL    bRet;
     MSG     stMsg;
-    while (TRUE) {
+    while (TRUE)
+    {
         bRet = GetMessage(&stMsg, Window, 0, 0);
-        if (bRet != 0 && bRet != -1) {
+        if (bRet != 0 && bRet != -1)
+        {
             TranslateMessage(&stMsg);
             DispatchMessage(&stMsg);
-        } else {
+        } else
+        {
             bRet = bRet == 0;
-            if (bRet && ExitCode) {
+            if (bRet && ExitCode)
+            {
                 *ExitCode = stMsg.wParam;
             }
             return bRet;
@@ -217,11 +234,13 @@ BOOL NTAPI UI_MessageLoop(HWND Window, _Out_opt_ PUINT_PTR ExitCode)
 
 VOID NTAPI UI_GetScreenPos(_Out_opt_ PPOINT Point, _Out_opt_ PSIZE Size)
 {
-    if (Point) {
+    if (Point)
+    {
         Point->x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         Point->y = GetSystemMetrics(SM_YVIRTUALSCREEN);
     }
-    if (Size) {
+    if (Size)
+    {
         Size->cx = GetSystemMetrics(SM_CXVIRTUALSCREEN);
         Size->cy = GetSystemMetrics(SM_CYVIRTUALSCREEN);
     }

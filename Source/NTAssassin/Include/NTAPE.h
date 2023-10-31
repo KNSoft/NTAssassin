@@ -2,11 +2,13 @@
 
 #include "NTAssassin_Base.h"
 
-typedef struct _PE_STRUCT {
+typedef struct _PE_STRUCT
+{
     PBYTE                           Image;
     ULONG                           ImageSize;
     PIMAGE_FILE_HEADER              FileHeader;
-    union {
+    union
+    {
         PIMAGE_OPTIONAL_HEADER      OptionalHeader;
         PIMAGE_OPTIONAL_HEADER64    OptionalHeader64;
         PIMAGE_OPTIONAL_HEADER32    OptionalHeader32;

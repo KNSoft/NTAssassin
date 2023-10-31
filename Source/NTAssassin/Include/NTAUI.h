@@ -4,12 +4,13 @@
 
 #define UI_NONOTIFYPROP TEXT("NTAssassin.UI.NoNotify")
 
-typedef struct _UI_WINDBPAINT {
+typedef struct _UI_WINDBPAINT
+{
     PAINTSTRUCT Paint;  // Native PAINTSTRUCT structure from "BeginPaint"
     HDC         DC;     // Compatible memory DC
     HBITMAP     Bitmap; // Compatible memory bitmap
     RECT        Rect;   // RECT of window client area
-} UI_WINDBPAINT, * PUI_WINDBPAINT;
+} UI_WINDBPAINT, *PUI_WINDBPAINT;
 
 /// <seealso cref="BeginPaint"/>
 /// <remarks>Double-buffered painting intergrated</remarks>

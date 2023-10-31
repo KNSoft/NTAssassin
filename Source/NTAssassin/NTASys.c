@@ -18,12 +18,15 @@ static PCWSTR  pszSysDllNames[] = {
 
 HMODULE NTAPI Sys_LoadDll(SYS_DLL_NAME SysDll)
 {
-    if (SysDll >= 0 && SysDll < SysDllNameMax) {
-        if (!hSysDlls[SysDll]) {
+    if (SysDll >= 0 && SysDll < SysDllNameMax)
+    {
+        if (!hSysDlls[SysDll])
+        {
             hSysDlls[SysDll] = SysDll == SysDllNameNTDll ? CURRENT_NTDLL_BASE : Proc_LoadDll(pszSysDllNames[SysDll - 1], FALSE);
         }
         return hSysDlls[SysDll];
-    } else {
+    } else
+    {
         return NULL;
     }
 }

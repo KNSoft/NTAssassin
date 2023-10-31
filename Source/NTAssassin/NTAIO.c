@@ -9,9 +9,11 @@ BOOL NTAPI IO_Write(HANDLE FileHandle, ULONGLONG ByteOffset, _In_reads_bytes_(Le
     NTSTATUS        lStatus;
     stLIOffset.QuadPart = ByteOffset;
     lStatus = NtWriteFile(FileHandle, NULL, NULL, NULL, &stIOStatus, Buffer, Length, &stLIOffset, NULL);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return FALSE;
     }

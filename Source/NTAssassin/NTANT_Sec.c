@@ -20,9 +20,11 @@ _Success_(NT_SUCCESS(return))
 NTSTATUS NTAPI NT_CopySid(_In_ ULONG Size, _Out_ PSID SidDst, _In_ PSID SidSrc)
 {
     SIZE_T Length = NT_LengthSid(SidSrc);
-    if (Size < Length) {
+    if (Size < Length)
+    {
         return STATUS_BUFFER_TOO_SMALL;
-    } else {
+    } else
+    {
         RtlCopyMemory(SidDst, SidSrc, Length);
         return STATUS_SUCCESS;
     }
@@ -32,7 +34,8 @@ DWORD NTAPI NT_GetLsaPid()
 {
     DWORD Pid = 0;
     HANDLE hKey = NT_RegOpenKey(&(UNICODE_STRING)RTL_CONSTANT_STRING(L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Control\\Lsa"), KEY_QUERY_VALUE);
-    if (hKey) {
+    if (hKey)
+    {
         NT_RegGetDword(hKey, &(UNICODE_STRING)RTL_CONSTANT_STRING(L"LsaPid"), &Pid);
         NtClose(hKey);
     }
@@ -46,40 +49,50 @@ HANDLE NTAPI NT_DuplicateSystemToken(_In_ DWORD PID, _In_ TOKEN_TYPE Type, _In_r
     OBJECT_ATTRIBUTES oa;
 
     HANDLE hProc = RProc_Open(PROCESS_QUERY_LIMITED_INFORMATION, PID);
-    if (hProc) {
+    if (hProc)
+    {
         HANDLE hToken;
         NTSTATUS Status;
         Status = NtOpenProcessToken(hProc, TOKEN_QUERY | TOKEN_DUPLICATE, &hToken);
-        if (NT_SUCCESS(Status)) {
+        if (NT_SUCCESS(Status))
+        {
             POBJECT_ATTRIBUTES poa;
-            if (Type == TokenImpersonation) {
+            if (Type == TokenImpersonation)
+            {
                 sqos = (SECURITY_QUALITY_OF_SERVICE){ sizeof(sqos), DEFAULT_IMPERSONATION_LEVEL, SECURITY_STATIC_TRACKING, FALSE };
                 oa = (OBJECT_ATTRIBUTES){ sizeof(oa), NULL, NULL, 0, NULL, &sqos };
                 poa = &oa;
-            } else {
+            } else
+            {
                 poa = NULL;
             }
             Status = NtDuplicateToken(hToken, TOKEN_ALL_ACCESS, poa, FALSE, Type, &hDuplicatedToken);
-            if (NT_SUCCESS(Status)) {
-                if (PrivilegeCount) {
+            if (NT_SUCCESS(Status))
+            {
+                if (PrivilegeCount)
+                {
                     ULONG PrivLength;
                     PTOKEN_PRIVILEGES Priv = NT_InitTokenPrivileges(PrivilegeToEnable, PrivilegeCount, SE_PRIVILEGE_ENABLED, &PrivLength);
-                    if (Priv) {
+                    if (Priv)
+                    {
                         ULONG ReturnLength;
                         Status = NtAdjustPrivilegesToken(hDuplicatedToken, FALSE, Priv, PrivLength, NULL, &ReturnLength);
-                        if (Status != STATUS_SUCCESS) {
+                        if (Status != STATUS_SUCCESS)
+                        {
                             NtClose(hDuplicatedToken);
                             hDuplicatedToken = NULL;
                         }
                         Mem_Free(Priv);
-                    } else {
+                    } else
+                    {
                         Status = WIE_GetLastStatus();
                     }
                 }
             }
             NtClose(hToken);
         }
-        if (!hDuplicatedToken) {
+        if (!hDuplicatedToken)
+        {
             WIE_SetLastStatus(Status);
         }
         NtClose(hProc);
@@ -93,23 +106,30 @@ PVOID NTAPI NT_GetTokenInfo(_In_ HANDLE TokenHandle, _In_ TOKEN_INFORMATION_CLAS
     ULONG Length;
     NTSTATUS Status;
     Status = NtQueryInformationToken(TokenHandle, TokenInformationClass, NULL, 0, &Length);
-    if (Status == STATUS_BUFFER_TOO_SMALL) {
-        if (Length) {
+    if (Status == STATUS_BUFFER_TOO_SMALL)
+    {
+        if (Length)
+        {
             Info = Mem_Alloc(Length);
-            if (Info) {
+            if (Info)
+            {
                 Status = NtQueryInformationToken(TokenHandle, TokenInformationClass, Info, Length, &Length);
-                if (!NT_SUCCESS(Status)) {
+                if (!NT_SUCCESS(Status))
+                {
                     Mem_Free(Info);
                     Info = NULL;
                 }
-            } else {
+            } else
+            {
                 return NULL;
             }
-        } else {
+        } else
+        {
             Status = STATUS_NOT_FOUND;
         }
     }
-    if (!Info) {
+    if (!Info)
+    {
         WIE_SetLastStatus(Status);
     }
     return Info;
@@ -120,9 +140,11 @@ BOOL NTAPI NT_AdjustPrivilege(_In_ HANDLE TokenHandle, _In_ ULONG Privilege, _In
     ULONG ReturnLength;
     TOKEN_PRIVILEGES stTokenPrivilege = { 1, { { { Privilege, 0 }, Attributes } } };
     NTSTATUS Status = NtAdjustPrivilegesToken(TokenHandle, FALSE, &stTokenPrivilege, sizeof(stTokenPrivilege), NULL, &ReturnLength);
-    if (Status == STATUS_SUCCESS) {
+    if (Status == STATUS_SUCCESS)
+    {
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(Status);
         return FALSE;
     }
@@ -134,11 +156,14 @@ BOOL NTAPI NT_AdjustPrivileges(_In_ HANDLE TokenHandle, _In_reads_(PrivilegeCoun
     NTSTATUS Status;
     ULONG Length;
     PTOKEN_PRIVILEGES aPrivileges = NT_InitTokenPrivileges(Privileges, PrivilegeCount, Attributes, &Length);
-    if (aPrivileges) {
+    if (aPrivileges)
+    {
         Status = NtAdjustPrivilegesToken(TokenHandle, FALSE, aPrivileges, Length, NULL, &Length);
-        if (NT_SUCCESS(Status)) {
+        if (NT_SUCCESS(Status))
+        {
             bRet = TRUE;
-        } else {
+        } else
+        {
             WIE_SetLastStatus(Status);
         }
         Mem_Free(aPrivileges);
@@ -149,9 +174,11 @@ BOOL NTAPI NT_AdjustPrivileges(_In_ HANDLE TokenHandle, _In_reads_(PrivilegeCoun
 BOOL NTAPI NT_Impersonate(HANDLE TokenHandle)
 {
     NTSTATUS Status = NtSetInformationThread(CURRENT_THREAD_HANDLE, ThreadImpersonationToken, &TokenHandle, sizeof(TokenHandle));
-    if (NT_SUCCESS(Status)) {
+    if (NT_SUCCESS(Status))
+    {
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(Status);
         return FALSE;
     }
@@ -162,14 +189,17 @@ PTOKEN_PRIVILEGES NTAPI NT_InitTokenPrivileges(_In_reads_(PrivilegeCount) PULONG
 {
     ULONG Length = ANYSIZE_STRUCT_SIZE(TOKEN_PRIVILEGES, Privileges, PrivilegeCount);
     PTOKEN_PRIVILEGES Buffer = Mem_Alloc(Length);
-    if (Buffer) {
+    if (Buffer)
+    {
         Buffer->PrivilegeCount = PrivilegeCount;
         ULONG i;
-        for (i = 0; i < PrivilegeCount; i++) {
+        for (i = 0; i < PrivilegeCount; i++)
+        {
             Buffer->Privileges[i].Luid = (LUID){ Privileges[i], 0 };
             Buffer->Privileges[i].Attributes = Attributes;
         }
-        if (ReturnLength) {
+        if (ReturnLength)
+        {
             *ReturnLength = Length;
         }
     }
@@ -182,17 +212,22 @@ BOOL NTAPI NT_GetFirstActiveSession(_Out_ PDWORD SessionId)
     PSESSIONID pBuffer = NULL, pSessionInfo;
     ULONG Count;
     BOOL bRet = FALSE;
-    if (WinStationEnumerateW(SERVERNAME_CURRENT, &pBuffer, &Count) && pBuffer) {
+    if (WinStationEnumerateW(SERVERNAME_CURRENT, &pBuffer, &Count) && pBuffer)
+    {
         pSessionInfo = pBuffer;
-        while (Count--) {
-            if (pSessionInfo->State == State_Active) {
+        while (Count--)
+        {
+            if (pSessionInfo->State == State_Active)
+            {
                 *SessionId = pSessionInfo->_SessionId_LogonId_union.SessionId;
                 bRet = TRUE;
                 break;
             }
-            if (Count) {
+            if (Count)
+            {
                 pSessionInfo++;
-            } else {
+            } else
+            {
                 WIE_SetLastError(ERROR_NO_SUCH_LOGON_SESSION);
                 break;
             }
@@ -209,7 +244,8 @@ BOOL NTAPI NT_GetLogonSessionInfo(_In_opt_ PSID LogonUserSid, _Out_opt_ PSID Use
 
     DWORD dwSessionId;
     if (!LogonUserSid &&
-        !NT_GetFirstActiveSession(&dwSessionId)) {
+        !NT_GetFirstActiveSession(&dwSessionId))
+    {
         return FALSE;
     }
 
@@ -217,38 +253,48 @@ BOOL NTAPI NT_GetLogonSessionInfo(_In_opt_ PSID LogonUserSid, _Out_opt_ PSID Use
     ULONG LogonSessionCount;
     PLUID LogonSessionIDs;
     NTSTATUS Status = LsaEnumerateLogonSessions(&LogonSessionCount, &LogonSessionIDs);
-    if (Status == STATUS_SUCCESS) {
-        for (i = 0; i < LogonSessionCount && !bRet; i++) {
+    if (Status == STATUS_SUCCESS)
+    {
+        for (i = 0; i < LogonSessionCount && !bRet; i++)
+        {
             PSECURITY_LOGON_SESSION_DATA LogonSessionData;
             Status = LsaGetLogonSessionData(&LogonSessionIDs[i], &LogonSessionData);
-            if (Status == STATUS_SUCCESS) {
+            if (Status == STATUS_SUCCESS)
+            {
                 if (LogonUserSid ?
                     (LogonSessionData->Sid && NT_EqualSid(LogonSessionData->Sid, LogonUserSid)) :
-                    LogonSessionData->Session == dwSessionId) {
-                    if (UserSid) {
+                    LogonSessionData->Session == dwSessionId)
+                {
+                    if (UserSid)
+                    {
                         Status = NT_CopySid(UserSidSize, UserSid, LogonSessionData->Sid);
-                        if (!NT_SUCCESS(Status)) {
+                        if (!NT_SUCCESS(Status))
+                        {
                             LsaFreeReturnBuffer(LogonSessionData);
                             break;
                         }
                     }
-                    if (LogonSessionId) {
+                    if (LogonSessionId)
+                    {
                         *LogonSessionId = LogonSessionIDs[i];
                     }
-                    if (SessionId) {
+                    if (SessionId)
+                    {
                         *SessionId = LogonSessionData->Session;
                     }
                     bRet = TRUE;
                 }
                 LsaFreeReturnBuffer(LogonSessionData);
-            } else {
+            } else
+            {
                 break;
             }
         }
         LsaFreeReturnBuffer(LogonSessionIDs);
     }
 
-    if (!bRet) {
+    if (!bRet)
+    {
         EH_SetLastNTError(Status);
     }
     return bRet;
@@ -271,11 +317,13 @@ HANDLE NTAPI NT_CreateTokenEx(_In_ TOKEN_TYPE Type, _In_ PSID OwnerSid, _In_ PLU
     TOKEN_USER User = { { OwnerSid } };
     TOKEN_SOURCE Source = { 0 };
     POBJECT_ATTRIBUTES pObjectAttribute;
-    if (Type == TokenImpersonation) {
+    if (Type == TokenImpersonation)
+    {
         SECURITY_QUALITY_OF_SERVICE Qos = { sizeof(Qos), DEFAULT_IMPERSONATION_LEVEL, SECURITY_DYNAMIC_TRACKING, FALSE };
         OBJECT_ATTRIBUTES ObjectAttribute = { sizeof(ObjectAttribute), NULL, NULL, 0, NULL, &Qos };
         pObjectAttribute = &ObjectAttribute;
-    } else {
+    } else
+    {
         pObjectAttribute = NULL;
     }
     NTSTATUS Status = NtCreateToken(
@@ -292,9 +340,11 @@ HANDLE NTAPI NT_CreateTokenEx(_In_ TOKEN_TYPE Type, _In_ PSID OwnerSid, _In_ PLU
         &PrimaryGroup,
         NULL,
         &Source);
-    if (NT_SUCCESS(Status)) {
+    if (NT_SUCCESS(Status))
+    {
         return Token;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(Status);
         return NULL;
     }
@@ -309,72 +359,93 @@ HANDLE NTAPI NT_CreateToken(_In_ TOKEN_TYPE Type, _In_opt_ HANDLE RefToken, _In_
     PTOKEN_GROUPS LocalGroups;
     PTOKEN_PRIVILEGES LocalPrivileges;
 
-    if (OwnerSid) {
+    if (OwnerSid)
+    {
         LocalSid = OwnerSid;
-    } else if (RefToken) {
+    } else if (RefToken)
+    {
         LocalUser = NT_GetTokenInfo(RefToken, TokenUser);
-        if (LocalUser) {
+        if (LocalUser)
+        {
             LocalSid = LocalUser->User.Sid;
-        } else {
+        } else
+        {
             return NULL;
         }
-    } else {
+    } else
+    {
         WIE_SetLastStatus(STATUS_INVALID_PARAMETER);
         return NULL;
     }
 
-    if (AuthenticationId) {
+    if (AuthenticationId)
+    {
         LocalAuthenticationId = *AuthenticationId;
-    } else if (RefToken) {
+    } else if (RefToken)
+    {
         PTOKEN_STATISTICS Statistics = NT_GetTokenInfo(RefToken, TokenStatistics);
-        if (Statistics) {
+        if (Statistics)
+        {
             LocalAuthenticationId = Statistics->AuthenticationId;
             Mem_Free(Statistics);
-        } else {
+        } else
+        {
             goto Label_0;
         }
-    } else {
+    } else
+    {
         WIE_SetLastStatus(STATUS_INVALID_PARAMETER);
         goto Label_0;
     }
 
-    if (Groups) {
+    if (Groups)
+    {
         LocalGroups = Groups;
-    } else if (RefToken) {
+    } else if (RefToken)
+    {
         LocalGroups = NT_GetTokenInfo(RefToken, TokenGroups);
-        if (!LocalGroups) {
+        if (!LocalGroups)
+        {
             goto Label_0;
         }
-    } else {
+    } else
+    {
         WIE_SetLastStatus(STATUS_INVALID_PARAMETER);
         goto Label_0;
     }
 
-    if (Privileges) {
+    if (Privileges)
+    {
         LocalPrivileges = Privileges;
-    } else if (RefToken) {
+    } else if (RefToken)
+    {
         LocalPrivileges = NT_GetTokenInfo(RefToken, TokenPrivileges);
-        if (!LocalPrivileges) {
+        if (!LocalPrivileges)
+        {
             goto Label_1;
         }
-    } else {
+    } else
+    {
         WIE_SetLastStatus(STATUS_INVALID_PARAMETER);
         goto Label_1;
     }
 
     Token = NT_CreateTokenEx(Type, LocalSid, &LocalAuthenticationId, LocalGroups, LocalPrivileges);
 
-    if (!Privileges) {
+    if (!Privileges)
+    {
         Mem_Free(LocalPrivileges);
     }
 
 Label_1:
-    if (!Groups) {
+    if (!Groups)
+    {
         Mem_Free(LocalGroups);
     }
 
 Label_0:
-    if (!OwnerSid) {
+    if (!OwnerSid)
+    {
         Mem_Free(LocalUser);
     }
 

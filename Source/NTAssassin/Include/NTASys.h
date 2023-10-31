@@ -2,7 +2,8 @@
 
 #include "NTAssassin_Base.h"
 
-typedef enum _SYS_DLL_NAME {
+typedef enum _SYS_DLL_NAME
+{
     SysDllNameNTDll = 0,
     SysDllNameKernel32,
     SysDllNameUser32,

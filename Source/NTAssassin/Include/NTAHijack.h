@@ -8,7 +8,8 @@
 
 #pragma pack(push)
 #pragma pack(4)
-typedef struct _HIJACK_CALLPROCHEADER {
+typedef struct _HIJACK_CALLPROCHEADER
+{
     PVOID64     Procedure;
     CALLCONV    CallConvention;
     QWORD       RetValue;
@@ -18,8 +19,10 @@ typedef struct _HIJACK_CALLPROCHEADER {
     UINT        ParamCount; // PHIJACK_CALLPROCPARAM
 } HIJACK_CALLPROCHEADER, *PHIJACK_CALLPROCHEADER;
 
-typedef struct _HIJACK_CALLPROCPARAM {
-    union {
+typedef struct _HIJACK_CALLPROCPARAM
+{
+    union
+    {
         QWORD   Value;
         PVOID64 Address;
         FLOAT   FloatNum;

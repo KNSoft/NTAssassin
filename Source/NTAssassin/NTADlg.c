@@ -81,14 +81,16 @@ BOOL NTAPI Dlg_ChooseFont(HWND Owner, _Inout_ PLOGFONTW Font, _Inout_opt_ LPCOLO
     BOOL        bRet;
     stChooseFontW.hwndOwner = Owner;
     DWORD dwFlags = CF_INITTOLOGFONTSTRUCT | CF_FORCEFONTEXIST | CF_INACTIVEFONTS;
-    if (Color) {
+    if (Color)
+    {
         dwFlags |= CF_EFFECTS;
         stChooseFontW.rgbColors = *Color;
     }
     stChooseFontW.Flags = dwFlags;
     stChooseFontW.lpLogFont = Font;
     bRet = ChooseFontW(&stChooseFontW);
-    if (bRet && Color) {
+    if (bRet && Color)
+    {
         *Color = stChooseFontW.rgbColors;
     }
     return bRet;
@@ -105,10 +107,12 @@ BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot)
     stWndClsExCaptureW.hCursor = ScreenSnapshot->hCursor;
     stWndClsExCaptureW.hInstance = ScreenSnapshot->hInstance;
     atomClass = RegisterClassExW(&stWndClsExCaptureW);
-    if (atomClass) {
-        // Get virtual screen position
-        if (GDI_CreateSnapshot(NULL, &ScreenSnapshot->Snapshot)) {
-            // Create window and enter message loop
+    if (atomClass)
+    {
+// Get virtual screen position
+        if (GDI_CreateSnapshot(NULL, &ScreenSnapshot->Snapshot))
+        {
+// Create window and enter message loop
             hWnd = CreateWindowExW(
                 ScreenSnapshot->dwExStyle,
                 MAKEINTRESOURCEW(atomClass),
@@ -130,7 +134,8 @@ BOOL NTAPI Dlg_ScreenSnapshot(_In_ PDLG_SCREENSNAPSHOT ScreenSnapshot)
     return bRet;
 }
 
-typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
+typedef struct _DLG_SETRESIZINGSUBCLASS_REF
+{
     LONG            lMinWidth;
     LONG            lMinHeight;
     DWORD           dwNewDPIX;
@@ -142,7 +147,8 @@ typedef struct _DLG_SETRESIZINGSUBCLASS_REF {
 
 static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-    if (uMsg == WM_DPICHANGED) {
+    if (uMsg == WM_DPICHANGED)
+    {
         PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         pstRef->dwOldDPIX = pstRef->dwNewDPIX;
         pstRef->dwOldDPIY = pstRef->dwNewDPIY;
@@ -151,30 +157,38 @@ static LRESULT CALLBACK Dlg_SetResizingSubclass_DlgProc(HWND hDlg, UINT uMsg, WP
         DPI_ScaleInt(&pstRef->lMinWidth, pstRef->dwOldDPIX, pstRef->dwNewDPIX);
         DPI_ScaleInt(&pstRef->lMinHeight, pstRef->dwOldDPIY, pstRef->dwNewDPIY);
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
-    } else if (uMsg == WM_SIZING) {
+    } else if (uMsg == WM_SIZING)
+    {
         PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         PRECT pRect = (RECT*)lParam;
-        if (pstRef->lMinWidth && pRect->right < pRect->left + pstRef->lMinWidth) {
+        if (pstRef->lMinWidth && pRect->right < pRect->left + pstRef->lMinWidth)
+        {
             pRect->right = pRect->left + pstRef->lMinWidth;
         }
-        if (pstRef->lMinHeight && pRect->bottom < pRect->top + pstRef->lMinHeight) {
+        if (pstRef->lMinHeight && pRect->bottom < pRect->top + pstRef->lMinHeight)
+        {
             pRect->bottom = pRect->top + pstRef->lMinHeight;
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
-    } else if (uMsg == WM_SIZE) {
-        if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED) {
+    } else if (uMsg == WM_SIZE)
+    {
+        if (wParam == SIZE_RESTORED || wParam == SIZE_MAXIMIZED)
+        {
             PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
             pstRef->pfnResizedProc(hDlg, LOWORD(lParam), HIWORD(lParam), NULL);
             SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
         }
-    } else if (uMsg == WM_WINDOWPOSCHANGED) {
+    } else if (uMsg == WM_WINDOWPOSCHANGED)
+    {
         PDLG_SETRESIZINGSUBCLASS_REF pstRef = (PDLG_SETRESIZINGSUBCLASS_REF)dwRefData;
         RECT rcClient;
-        if (GetClientRect(hDlg, &rcClient)) {
+        if (GetClientRect(hDlg, &rcClient))
+        {
             pstRef->pfnResizedProc(hDlg, rcClient.right, rcClient.bottom, (PWINDOWPOS)lParam);
         }
         SetWindowLongPtr(hDlg, DWLP_MSGRESULT, 0);
-    } else if (uMsg == WM_DESTROY) {
+    } else if (uMsg == WM_DESTROY)
+    {
         Mem_Free((PVOID)dwRefData);
     }
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
@@ -185,13 +199,16 @@ BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC R
     PDLG_SETRESIZINGSUBCLASS_REF pstRef;
     RECT rcClient, rcWnd;
     pstRef = Mem_Alloc(sizeof(DLG_SETRESIZINGSUBCLASS_REF));
-    if (!pstRef || !GetClientRect(Dialog, &rcClient) || !GetWindowRect(Dialog, &rcWnd)) {
+    if (!pstRef || !GetClientRect(Dialog, &rcClient) || !GetWindowRect(Dialog, &rcWnd))
+    {
         return FALSE;
     }
-    if (MinLimit) {
+    if (MinLimit)
+    {
         pstRef->lMinWidth = rcWnd.right - rcWnd.left;
         pstRef->lMinHeight = rcWnd.bottom - rcWnd.top;
-    } else {
+    } else
+    {
         pstRef->lMinWidth = 0;
         pstRef->lMinHeight = 0;
     }
@@ -202,7 +219,8 @@ BOOL NTAPI Dlg_SetResizingSubclass(HWND Dialog, BOOL MinLimit, DLG_RESIZEDPROC R
     return SetWindowSubclass(Dialog, Dlg_SetResizingSubclass_DlgProc, 0, (DWORD_PTR)pstRef);
 }
 
-typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF {
+typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF
+{
     HWND                        Dialog;
     HWND                        TreeView;
     RECT                        SheetRect;
@@ -212,15 +230,18 @@ typedef struct _DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF {
 
 static LRESULT CALLBACK Dlg_SetTreeViewPropertySheetSubclass_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR dwRefData)
 {
-    if (uMsg == WM_NOTIFY) {
+    if (uMsg == WM_NOTIFY)
+    {
         PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef = (PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF)dwRefData;
         LPNMTREEVIEW pnmtv = (LPNMTREEVIEW)lParam;
         if (pnmtv->hdr.hwndFrom == pstRef->TreeView &&
-            pnmtv->hdr.code == TVN_SELCHANGED) {
+            pnmtv->hdr.code == TVN_SELCHANGED)
+        {
             ShowWindow((HWND)pnmtv->itemOld.lParam, SW_HIDE);
             ShowWindow((HWND)pnmtv->itemNew.lParam, SW_SHOW);
         }
-    } else if (uMsg == WM_DESTROY) {
+    } else if (uMsg == WM_DESTROY)
+    {
         Mem_Free((PVOID)dwRefData);
     }
     return DefSubclassProc(hDlg, uMsg, wParam, lParam);
@@ -230,14 +251,17 @@ VOID Dlg_SetTreeViewPropertySheetSubclass_InitSheet(PDLG_SETTREEVIEWPROPERTYSHEE
 {
     TVINSERTSTRUCT stTVIInsert = { 0, TVI_LAST, { TVIF_TEXT | TVIF_PARAM } };
     UINT i;
-    for (i = 0; i < Count; i++) {
+    for (i = 0; i < Count; i++)
+    {
         Sheets[i].Handle = CreateDialogParam(Sheets[i].Instance, MAKEINTRESOURCE(Sheets[i].DlgResID), pstRef->Dialog, Sheets[i].DlgProc, Sheets[i].Param);
-        if (Sheets[i].Handle) {
+        if (Sheets[i].Handle)
+        {
             stTVIInsert.hParent = TreeItem;
             stTVIInsert.item.pszText = Sheets[i].DisplayName;
             stTVIInsert.item.lParam = (LPARAM)Sheets[i].Handle;
             Sheets[i].TreeItem = (HTREEITEM)SendMessage(pstRef->TreeView, TVM_INSERTITEM, 0, (LPARAM)&stTVIInsert);
-            if (Sheets[i].TreeItem) {
+            if (Sheets[i].TreeItem)
+            {
                 SetWindowPos(
                     Sheets[i].Handle,
                     NULL,
@@ -246,10 +270,12 @@ VOID Dlg_SetTreeViewPropertySheetSubclass_InitSheet(PDLG_SETTREEVIEWPROPERTYSHEE
                     pstRef->SheetRect.right - pstRef->SheetRect.left,
                     pstRef->SheetRect.bottom - pstRef->SheetRect.top,
                     SWP_NOZORDER | SWP_HIDEWINDOW);
-                if (Sheets[i].Count) {
+                if (Sheets[i].Count)
+                {
                     Dlg_SetTreeViewPropertySheetSubclass_InitSheet(pstRef, Sheets[i].TreeItem, Sheets[i].SubItems, Sheets[i].Count);
                 }
-            } else {
+            } else
+            {
                 EndDialog(Sheets[i].Handle, -1);
                 Sheets[i].Handle = NULL;
             }
@@ -261,7 +287,8 @@ BOOL NTAPI Dlg_SetTreeViewPropertySheetSubclass(HWND Dialog, HWND TreeView, PREC
 {
     PDLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF pstRef;
     pstRef = Mem_Alloc(sizeof(DLG_SETTREEVIEWPROPERTYSHEETSUBCLASS_REF));
-    if (!pstRef) {
+    if (!pstRef)
+    {
         return FALSE;
     }
     pstRef->Dialog = Dialog;
@@ -281,20 +308,27 @@ BOOL NTAPI Dlg_MessageLoop(_In_opt_ HWND Window, _In_ HWND Dialog, _In_opt_ HACC
 {
     BOOL    bRet;
     MSG     stMsg;
-    while (TRUE) {
+    while (TRUE)
+    {
         bRet = GetMessage(&stMsg, Window, 0, 0);
-        if (bRet != 0 && bRet != -1) {
-            if ((!Accelerator || !TranslateAcceleratorW(Dialog, Accelerator, &stMsg)) && !IsDialogMessageW(Dialog, &stMsg)) {
+        if (bRet != 0 && bRet != -1)
+        {
+            if ((!Accelerator || !TranslateAcceleratorW(Dialog, Accelerator, &stMsg)) && !IsDialogMessageW(Dialog, &stMsg))
+            {
                 TranslateMessage(&stMsg);
                 DispatchMessage(&stMsg);
             }
-        } else {
-            if (bRet == 0) {
-                if (ExitCode) {
+        } else
+        {
+            if (bRet == 0)
+            {
+                if (ExitCode)
+                {
                     *ExitCode = stMsg.wParam;
                 }
                 return TRUE;
-            } else {
+            } else
+            {
                 return FALSE;
             }
         }

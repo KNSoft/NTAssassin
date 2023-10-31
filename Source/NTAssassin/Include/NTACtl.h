@@ -5,10 +5,12 @@
 #include "NTACtl_ColorPicker.h"
 
 typedef struct _CTL_MENU CTL_MENU, *PCTL_MENU;
-struct _CTL_MENU {
+struct _CTL_MENU
+{
     UINT        Flags;
     UINT_PTR    ID;
-    union {
+    union
+    {
         UINT_PTR    I18NIndex;
         LPARAM      Param;  // MF_OWNERDRAW
         HBITMAP     Bitmap; // MF_BITMAP
@@ -19,8 +21,10 @@ struct _CTL_MENU {
     HMENU       Handle;     // Initializes with NULL
 };
 
-typedef struct _CTL_PROPSHEETPAGE {
-    union {
+typedef struct _CTL_PROPSHEETPAGE
+{
+    union
+    {
         UINT_PTR    I18NIndex;
         PCWSTR      Title;
     };
@@ -30,16 +34,20 @@ typedef struct _CTL_PROPSHEETPAGE {
     HWND        Handle;
 } CTL_PROPSHEETPAGE, *PCTL_PROPSHEETPAGE;
 
-typedef struct _CTL_LISTCTL_COLUME {
-    union {
+typedef struct _CTL_LISTCTL_COLUME
+{
+    union
+    {
         UINT_PTR    I18NIndex;
         PCWSTR      Title;
     };
     INT     Width;
 } CTL_LISTCTL_COLUME, *PCTL_LISTCTL_COLUME;
 
-typedef struct _CTL_COMBOBOXCTL_ITEM {
-    union {
+typedef struct _CTL_COMBOBOXCTL_ITEM
+{
+    union
+    {
         UINT_PTR    I18NIndex;
         PCWSTR      String;
     };

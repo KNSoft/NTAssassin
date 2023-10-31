@@ -11,10 +11,12 @@ HANDLE NTAPI File_Create(_In_z_ PCWSTR FileName, HANDLE RootDirectory, ACCESS_MA
     IO_STATUS_BLOCK     stIOStatus;
     NTSTATUS            lStatus;
     HANDLE              hFile = NULL;
-    if (NT_InitPathObject(&stObject, FileName, RootDirectory, &stString)) {
+    if (NT_InitPathObject(&stObject, FileName, RootDirectory, &stString))
+    {
         lStatus = NtCreateFile(&hFile, DesiredAccess, &stObject, &stIOStatus, NULL, FILE_ATTRIBUTE_NORMAL, ShareAccess, CreateDisposition, CreateOptions, NULL, 0);
         Mem_HeapFree(stString.Buffer);
-        if (!NT_SUCCESS(lStatus)) {
+        if (!NT_SUCCESS(lStatus))
+        {
             WIE_SetLastStatus(lStatus);
         }
     }
@@ -28,10 +30,12 @@ BOOL NTAPI File_GetSize(_In_ HANDLE FileHandle, _Out_ PSIZE_T Size)
     FILE_STANDARD_INFORMATION fsi;
     NTSTATUS        lStatus;
     lStatus = NtQueryInformationFile(FileHandle, &stIOStatus, &fsi, sizeof(fsi), FileStandardInformation);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         *Size = (SIZE_T)fsi.EndOfFile.QuadPart;
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return FALSE;
     }
@@ -43,9 +47,11 @@ ULONG NTAPI File_Read(_In_ HANDLE FileHandle, _Out_writes_bytes_(BytesToRead) PV
     IO_STATUS_BLOCK stIOStatus;
     NTSTATUS        lStatus;
     lStatus = NtReadFile(FileHandle, NULL, NULL, NULL, &stIOStatus, Buffer, BytesToRead, ByteOffset, NULL);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         return (ULONG)stIOStatus.Information;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return FALSE;
     }
@@ -58,14 +64,17 @@ BOOL NTAPI File_IsDirectory(_In_z_ PCWSTR FilePath, _Out_ PBOOL Result)
     OBJECT_ATTRIBUTES               stObjectAttr;
     FILE_NETWORK_OPEN_INFORMATION   stFileInfo;
     NTSTATUS                        lStatus;
-    if (NT_InitPathObject(&stObjectAttr, FilePath, NULL, &stString)) {
+    if (NT_InitPathObject(&stObjectAttr, FilePath, NULL, &stString))
+    {
         lStatus = NtQueryFullAttributesFile(&stObjectAttr, &stFileInfo);
         Mem_HeapFree(stString.Buffer);
-        if (NT_SUCCESS(lStatus)) {
+        if (NT_SUCCESS(lStatus))
+        {
             *Result = stFileInfo.FileAttributes & FILE_ATTRIBUTE_DIRECTORY;
             return TRUE;
         }
-    } else {
+    } else
+    {
         lStatus = STATUS_OBJECT_NAME_INVALID;
     }
     WIE_SetLastStatus(lStatus);
@@ -79,14 +88,17 @@ BOOL NTAPI File_Delete(_In_z_ PCWSTR FilePath)
     IO_STATUS_BLOCK     stIOStatus;
     HANDLE              hFile;
     NTSTATUS            lStatus;
-    if (NT_InitPathObject(&stObjectAttr, FilePath, NULL, &stString)) {
+    if (NT_InitPathObject(&stObjectAttr, FilePath, NULL, &stString))
+    {
         lStatus = NtCreateFile(&hFile, DELETE | SYNCHRONIZE, &stObjectAttr, &stIOStatus, NULL, 0, 0, FILE_OPEN, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_DELETE_ON_CLOSE, NULL, 0);
         Mem_HeapFree(stString.Buffer);
-        if (NT_SUCCESS(lStatus)) {
+        if (NT_SUCCESS(lStatus))
+        {
             NtClose(hFile);
             return TRUE;
         }
-    } else {
+    } else
+    {
         lStatus = STATUS_OBJECT_NAME_INVALID;
     }
     WIE_SetLastStatus(lStatus);
@@ -99,9 +111,11 @@ BOOL NTAPI File_Dispose(HANDLE FileHandle)
     FILE_DISPOSITION_INFORMATION    fdi = { TRUE };
     NTSTATUS                        lStatus;
     lStatus = NtSetInformationFile(FileHandle, &stIOStatus, &fdi, sizeof(fdi), FileDispositionInformation);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return FALSE;
     }
@@ -114,9 +128,11 @@ BOOL NTAPI File_SetSize(HANDLE FileHandle, ULONGLONG NewSize)
     NTSTATUS                        lStatus;
     feofi.EndOfFile.QuadPart = NewSize;
     lStatus = NtSetInformationFile(FileHandle, &stIOStatus, &feofi, sizeof(feofi), FileEndOfFileInformation);
-    if (NT_SUCCESS(lStatus)) {
+    if (NT_SUCCESS(lStatus))
+    {
         return TRUE;
-    } else {
+    } else
+    {
         WIE_SetLastStatus(lStatus);
         return FALSE;
     }
@@ -129,15 +145,19 @@ BOOL NTAPI File_ReadOnlyMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
     HANDLE hFile, hSection;
     SIZE_T sFileSize;
     hFile = File_Create(FileName, RootDirectory, FILE_GENERIC_READ, FILE_SHARE_READ, FILE_OPEN, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT);
-    if (hFile) {
-        if (File_GetSize(hFile, &sFileSize)) {
+    if (hFile)
+    {
+        if (File_GetSize(hFile, &sFileSize))
+        {
             NTSTATUS lStatus;
             lStatus = NtCreateSection(&hSection, SECTION_MAP_READ, NULL, NULL, PAGE_READONLY, SEC_COMMIT, hFile);
-            if (NT_SUCCESS(lStatus)) {
+            if (NT_SUCCESS(lStatus))
+            {
                 PVOID BaseAddress = NULL;
                 SIZE_T sPageSize = sFileSize;
                 lStatus = NtMapViewOfSection(hSection, CURRENT_PROCESS_HANDLE, &BaseAddress, 0, 0, 0, &sPageSize, ViewUnmap, 0, PAGE_READONLY);
-                if (NT_SUCCESS(lStatus)) {
+                if (NT_SUCCESS(lStatus))
+                {
                     FileMap->FileHandle = hFile;
                     FileMap->SectionHandle = hSection;
                     FileMap->FileSize = sFileSize;
@@ -161,8 +181,10 @@ BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
     HANDLE hFile, hSection;
     SIZE_T sFileSize;
     hFile = File_Create(FileName, RootDirectory, FILE_GENERIC_READ | FILE_GENERIC_WRITE, FILE_SHARE_READ, FILE_OVERWRITE_IF, FILE_NON_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | (UseCache ? 0 : FILE_NO_INTERMEDIATE_BUFFERING));
-    if (hFile) {
-        if (File_GetSize(hFile, &sFileSize)) {
+    if (hFile)
+    {
+        if (File_GetSize(hFile, &sFileSize))
+        {
             NTSTATUS lStatus;
             LARGE_INTEGER liMaximumSize;
             lStatus = NtCreateSection(
@@ -173,11 +195,13 @@ BOOL NTAPI File_WritableMap(_In_z_ PCWSTR FileName, HANDLE RootDirectory, _Out_ 
                 PAGE_READONLY,
                 SEC_COMMIT | (UseCache ? 0 : SEC_NOCACHE),
                 hFile);
-            if (NT_SUCCESS(lStatus)) {
+            if (NT_SUCCESS(lStatus))
+            {
                 PVOID BaseAddress = NULL;
                 SIZE_T sPageSize = MaximumSize ? MaximumSize : sFileSize;
                 lStatus = NtMapViewOfSection(hSection, CURRENT_PROCESS_HANDLE, &BaseAddress, 0, 0, 0, &sPageSize, ViewUnmap, 0, PAGE_READWRITE);
-                if (NT_SUCCESS(lStatus)) {
+                if (NT_SUCCESS(lStatus))
+                {
                     FileMap->FileHandle = hFile;
                     FileMap->SectionHandle = hSection;
                     FileMap->FileSize = sFileSize;

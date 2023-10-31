@@ -16,7 +16,7 @@
 
 #include "NTAssassin_Type.h"
 
-/* NTA_DLL: Build lib (0) or dll (1) */ 
+/* NTA_DLL: Build lib (0) or dll (1) */
 #if !defined(NTA_DLL)
 #define NTA_DLL 1
 #endif
