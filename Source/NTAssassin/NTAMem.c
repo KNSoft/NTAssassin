@@ -2,7 +2,9 @@
 
 #include "Include\NTAEH.h"
 
-_Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(Size)
+_Must_inspect_result_
+__drv_allocatesMem(Mem)
+_Post_writable_byte_size_(Size)
 PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect)
 {
     PVOID       pBase = NULL;

@@ -1,20 +1,5 @@
 ﻿#include "Include\NTANT.h"
 
-HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK DesiredAccess)
-{
-    HANDLE hKey;
-    OBJECT_ATTRIBUTES RegObj = RTL_CONSTANT_OBJECT_ATTRIBUTES(KeyPath, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE);
-    NTSTATUS Status = NtOpenKey(&hKey, DesiredAccess, &RegObj);
-    if (NT_SUCCESS(Status))
-    {
-        return hKey;
-    } else
-    {
-        WIE_SetLastStatus(Status);
-        return NULL;
-    }
-}
-
 _Success_(return != FALSE)
 BOOL NTAPI NT_RegGetDword(_In_ HANDLE KeyHandle, _In_ PUNICODE_STRING KeyName, _Out_ PDWORD Value)
 {
@@ -30,7 +15,7 @@ BOOL NTAPI NT_RegGetDword(_In_ HANDLE KeyHandle, _In_ PUNICODE_STRING KeyName, _
             Ret = TRUE;
         } else
         {
-            Status = STATUS_DATATYPE_MISALIGNMENT;
+            Status = STATUS_BUFFER_TOO_SMALL;
         }
     }
     if (!Ret)

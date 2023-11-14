@@ -54,7 +54,10 @@ typedef struct _CTL_COMBOBOXCTL_ITEM
     LPARAM          Param;
 } CTL_COMBOBOXCTL_ITEM, *PCTL_COMBOBOXCTL_ITEM;
 
-typedef BOOL(CALLBACK* CTL_TREEVIEWITEMENUMPROC)(HWND TreeView, HTREEITEM TreeItem, UINT Level, LPARAM Param);
+typedef
+BOOL
+CALLBACK
+CTL_FN_TREEVIEWITEMENUMPROC(HWND TreeView, HTREEITEM TreeItem, UINT Level, LPARAM Param);
 
 /// <summary>
 /// Creates menu
@@ -130,10 +133,17 @@ NTA_API BOOL NTAPI Ctl_InitComboBoxEx(HWND ComboBox, _In_ PCTL_COMBOBOXCTL_ITEM 
 /// <param name="TreeItemEnumProc">Callback procedure to receive information of each item</param>
 /// <param name="Param">User defined value passed to the callback</param>
 /// <returns>Returns handle to the last enumerated item if the callback stops the enumeration, or NULL if enumeration finished successfully</returns>
-NTA_API HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param);
+NTA_API
+HTREEITEM
+NTAPI
+Ctl_EnumTreeViewItems(
+    _In_ HWND TreeView,
+    BOOL BFS,
+    _In_ CTL_FN_TREEVIEWITEMENUMPROC* TreeItemEnumProc,
+    LPARAM Param);
 
 /// <summary>
-/// Sends CB_SETCURSEL message but will notify parent window by sending "WM_COMMAND" with CBN_SELCHANGE
+/// Sends CB_SETCURSEL message and also notify parent window with WM_COMMAND message and CBN_SELCHANGE
 /// </summary>
 /// <seealso cref="CB_SETCURSEL"/>
-NTA_API LRESULT NTAPI Ctl_ComboBoxSetSelect(HWND ComboBox, INT ItemIndex);
+NTA_API LRESULT NTAPI Ctl_ComboBoxSetSelection(_In_ HWND ComboBox, INT ItemIndex);

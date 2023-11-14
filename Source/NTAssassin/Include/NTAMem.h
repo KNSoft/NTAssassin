@@ -21,7 +21,11 @@
 /// </summary>
 /// <seealso cref="VirtualAlloc"/>
 /// <return>Error code storaged in last STATUS</return>
-NTA_API _Check_return_ _Ret_maybenull_ _Post_writable_byte_size_(Size) PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect);
+NTA_API
+_Must_inspect_result_
+__drv_allocatesMem(Mem)
+_Post_writable_byte_size_(Size)
+PVOID NTAPI Mem_PageAlloc(_In_ SIZE_T Size, _In_ ULONG Protect);
 
 /// <summary>
 /// Changes the protection of memory pages

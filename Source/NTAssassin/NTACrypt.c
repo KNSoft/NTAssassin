@@ -2,25 +2,28 @@
 
 #pragma comment (lib, "Crypt32.lib")
 
-BOOL NTAPI Crypt_EnumBlobCertificates(_In_reads_(BlobSize) PBYTE BlobData, _In_ ULONG BlobSize, DWORD ExpectedContentTypeFlags, _In_ CRYPT_CERTENUMPROC CertEnumProc, LPARAM Param)
+BOOL NTAPI Crypt_EnumBlobCertificates(_In_reads_bytes_(BlobSize) PBYTE BlobData, _In_ ULONG BlobSize, DWORD ExpectedContentTypeFlags, _In_ CRYPT_CERTENUMPROC CertEnumProc, LPARAM Param)
 {
-    CRYPT_UINT_BLOB blob = { BlobSize, BlobData };
-    HCERTSTORE hCertStore;
-    if (CryptQueryObject(CERT_QUERY_OBJECT_BLOB, &blob, ExpectedContentTypeFlags, CERT_QUERY_FORMAT_FLAG_BINARY, 0, NULL, NULL, NULL, &hCertStore, NULL, NULL))
-    {
-        PCCERT_CONTEXT pContext = NULL;
-        while ((pContext = CertEnumCertificatesInStore(hCertStore, pContext)) != NULL)
-        {
-            if (!CertEnumProc(pContext, Param))
-            {
-                CertFreeCertificateContext(pContext);
-                break;
-            }
-        };
-        CertCloseStore(hCertStore, 0);
-        return TRUE;
-    } else
+    CRYPT_DATA_BLOB Blob = { BlobSize, BlobData };
+    HCERTSTORE CertStore;
+    PCCERT_CONTEXT CertContext;
+
+    CertStore = CertOpenStore(CERT_STORE_PROV_PKCS7, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, (HCRYPTPROV_LEGACY)NULL, 0, &Blob);
+    if (!CertStore)
     {
         return FALSE;
     }
+
+    CertContext = NULL;
+    while ((CertContext = CertEnumCertificatesInStore(CertStore, CertContext)) != NULL)
+    {
+        if (!CertEnumProc(CertContext, Param))
+        {
+            CertFreeCertificateContext(CertContext);
+            break;
+        }
+    };
+
+    CertCloseStore(CertStore, 0);
+    return TRUE;
 }

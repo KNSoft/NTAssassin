@@ -30,15 +30,25 @@ NTSTATUS NTAPI NT_CopySid(_In_ ULONG Size, _Out_ PSID SidDst, _In_ PSID SidSrc)
     }
 }
 
+static UNICODE_STRING g_LsaKeyPath = RTL_CONSTANT_STRING(L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Control\\Lsa");
+static UNICODE_STRING g_LsaPidKeyName = RTL_CONSTANT_STRING(L"LsaPid");
+
 DWORD NTAPI NT_GetLsaPid()
 {
     DWORD Pid = 0;
-    HANDLE hKey = NT_RegOpenKey(&(UNICODE_STRING)RTL_CONSTANT_STRING(L"\\Registry\\Machine\\SYSTEM\\CurrentControlSet\\Control\\Lsa"), KEY_QUERY_VALUE);
-    if (hKey)
+    HANDLE hKey;
+    NTSTATUS Status;
+    OBJECT_ATTRIBUTES ObjectAttributes = RTL_CONSTANT_OBJECT_ATTRIBUTES(&g_LsaKeyPath, 0);
+
+    Status = NtOpenKey(&hKey, KEY_QUERY_VALUE, &ObjectAttributes);
+    if (!NT_SUCCESS(Status))
     {
-        NT_RegGetDword(hKey, &(UNICODE_STRING)RTL_CONSTANT_STRING(L"LsaPid"), &Pid);
-        NtClose(hKey);
+        WIE_SetLastStatus(Status);
+        return 0;
     }
+
+    NT_RegGetDword(hKey, &g_LsaPidKeyName, &Pid);
+    NtClose(hKey);
     return Pid;
 }
 

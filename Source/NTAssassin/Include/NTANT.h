@@ -26,12 +26,6 @@ NTA_API DWORD NTAPI NT_GetLsaPid();
 NTA_API BOOL NTAPI NT_InitPathObject(POBJECT_ATTRIBUTES Object, _In_z_ PCWSTR Path, HANDLE RootDirectory, PUNICODE_STRING ObjectName);
 
 /// <summary>
-/// Opens existing registry key
-/// </summary>
-/// <seealso cref="NtOpenKey"/>
-NTA_API HANDLE NTAPI NT_RegOpenKey(_In_ PUNICODE_STRING KeyPath, _In_ ACCESS_MASK DesiredAccess);
-
-/// <summary>
 /// Gets a DWORD value from registry key
 /// </summary>
 /// <seealso cref="NtQueryValueKey"/>

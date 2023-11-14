@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NTACon.c" />
     <ClCompile Include="NTACrypt.c" />
     <ClCompile Include="NTACtl.c" />
     <ClCompile Include="NTACtl_ColorPicker.c" />
@@ -57,7 +56,6 @@
     <ClCompile Include="Precomp4C.Output.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\NTACon.h" />
     <ClInclude Include="Include\NTACrypt.h" />
     <ClInclude Include="Include\NTACtl.h" />
     <ClInclude Include="Include\NTACtl_ColorPicker.h" />

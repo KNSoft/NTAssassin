@@ -20,7 +20,6 @@ EXTERN_C_START
 #include "NTAPE.h"
 #include "NTAProc.h"
 #include "NTARProc.h"
-#include "NTACon.h"
 #include "NTAUI.h"
 #include "NTACtl.h"
 #include "NTAGDI.h"

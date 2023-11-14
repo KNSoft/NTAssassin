@@ -185,17 +185,29 @@ BOOL NTAPI Ctl_InitComboBoxEx(HWND ComboBox, _In_ PCTL_COMBOBOXCTL_ITEM Items, _
             }
         } else
         {
-    // CB_ERR or CB_ERRSPACE...
+            // CB_ERR or CB_ERRSPACE...
             break;
         }
     }
     return !(u < ItemCount);
 }
 
-HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEWITEMENUMPROC TreeItemEnumProc, LPARAM Param)
+HTREEITEM
+NTAPI
+Ctl_EnumTreeViewItems(
+    _In_ HWND TreeView,
+    BOOL BFS,
+    _In_ CTL_FN_TREEVIEWITEMENUMPROC* TreeItemEnumProc,
+    LPARAM Param)
 {
     UINT        uDepth = 0;
     HTREEITEM   hItem, hItemTemp;
+
+    if (BFS)
+    {
+        return NULL;
+    }
+
     hItem = (HTREEITEM)SendMessage(TreeView, TVM_GETNEXTITEM, TVGN_ROOT, 0);
     do
     {
@@ -228,11 +240,17 @@ HTREEITEM NTAPI Ctl_EnumTreeViewItems(HWND TreeView, BOOL BFS, _In_ CTL_TREEVIEW
     return NULL;
 }
 
-LRESULT NTAPI Ctl_ComboBoxSetSelect(HWND ComboBox, INT ItemIndex)
+LRESULT NTAPI Ctl_ComboBoxSetSelection(_In_ HWND ComboBox, INT ItemIndex)
 {
-    LRESULT lResult = SendMessage(ComboBox, CB_SETCURSEL, ItemIndex, 0);
-    INT_PTR iID;
-    if (UI_GetWindowLong(ComboBox, FALSE, GWLP_ID, &iID))
-        SendMessage(GetParent(ComboBox), WM_COMMAND, MAKEWPARAM(iID, CBN_SELCHANGE), (LPARAM)ComboBox);
-    return lResult;
+    LRESULT Result;
+    INT_PTR ID;
+    HWND ParentWindow;
+
+    Result = SendMessageW(ComboBox, CB_SETCURSEL, ItemIndex, 0);
+    if ((ParentWindow = GetParent(ComboBox)) != NULL && UI_GetWindowLong(ComboBox, FALSE, GWLP_ID, &ID))
+    {
+        SendMessageW(ParentWindow, WM_COMMAND, MAKEWPARAM(ID, CBN_SELCHANGE), (LPARAM)ComboBox);
+    }
+
+    return Result;
 }

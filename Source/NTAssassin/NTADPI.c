@@ -46,8 +46,7 @@ static PFNGetDpiForMonitor pfnGetDpiForMonitor = NULL;
 
 BOOL NTAPI DPI_FromWindow(HWND Window, _Out_ PUINT DPIX, _Out_ PUINT DPIY)
 {
-    PCKUSER_SHARED_DATA pKUSD = SharedUserData;
-    if (pKUSD->NtMajorVersion > 6 || (pKUSD->NtMajorVersion == 6 && pKUSD->NtMinorVersion >= 3))
+    if (SharedUserData->NtMajorVersion > 6 || (SharedUserData->NtMajorVersion == 6 && SharedUserData->NtMinorVersion >= 3))
     {
         if (!pfnGetDpiForMonitor)
         {

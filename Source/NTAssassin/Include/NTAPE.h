@@ -2,6 +2,8 @@
 
 #include "NTAssassin_Base.h"
 
+#include <WinTrust.h>
+
 typedef struct _PE_STRUCT
 {
     PBYTE                           Image;

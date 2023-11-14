@@ -35,28 +35,32 @@ VOID NTAPI LPC_ServerUnregisterIfSpec(_In_ RPC_IF_HANDLE IfSpec)
 
 BOOL NTAPI LPC_ServerListen(BOOL DontWait)
 {
-    RPC_STATUS Status = RpcServerListen(1, RPC_C_LISTEN_MAX_CALLS_DEFAULT, DontWait);
-    if (Status == RPC_S_OK)
-    {
-        return TRUE;
-    } else
+    RPC_STATUS Status;
+    
+    Status = RpcServerListen(1, RPC_C_LISTEN_MAX_CALLS_DEFAULT, DontWait);
+    if (Status != RPC_S_OK)
     {
         WIE_SetLastError(Status);
         return FALSE;
     }
+
+    return TRUE;
 }
 
 DWORD NTAPI LPC_ServerGetClientPID(_In_ RPC_BINDING_HANDLE hBinding)
 {
     RPC_STATUS Status;
-    RPC_CALL_ATTRIBUTES_V2_W clientAttr = { 2, RPC_QUERY_CLIENT_PID };
+    RPC_CALL_ATTRIBUTES_V2_W clientAttr = {
+        .Version = 2,
+        .Flags = RPC_QUERY_CLIENT_PID
+    };
+    
     Status = RpcServerInqCallAttributesW(hBinding, &clientAttr);
-    if (Status == RPC_S_OK)
-    {
-        return (DWORD)(DWORD_PTR)clientAttr.ClientPID;
-    } else
+    if (Status != RPC_S_OK)
     {
         WIE_SetLastError(Status);
         return 0;
     }
+
+    return (DWORD)(DWORD_PTR)clientAttr.ClientPID;
 }
